@@ -21,7 +21,9 @@ export default function CategoryMenu() {
             <div className="w-12 h-12 flex items-center justify-center rounded-full 
                           bg-tosca-200
                           border border-tosca-100/20
-                          group-hover:bg-tosca-100 group-hover:shadow-sm
+                          group-hover:bg-tosca-100 group-hover:shadow-lg
+                          group-hover:translate-y-[-2px]
+                          drop-shadow-xl
                           transition-all duration-200">
               <div className="text-white group-hover:text-white transition-colors">
                 {category.icon}
