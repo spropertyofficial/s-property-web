@@ -48,7 +48,6 @@ export default function PropertyListing() {
         {newProperties.map((property) => (
           <PropertyCard key={property.id} {...property} />
         ))}
-        <PropertyCardtwo key={newProperties[0].id} {...newProperties[0]} />
       </div>
     </div>
   );
