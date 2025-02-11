@@ -19,11 +19,11 @@ export default function CategoryMenu() {
             className="flex flex-col items-center group"
           >
             <div className="w-12 h-12 flex items-center justify-center rounded-full 
-                          bg-gradient-to-b from-tosca-50 to-white
+                          bg-tosca-200
                           border border-tosca-100/20
                           group-hover:bg-tosca-100 group-hover:shadow-sm
                           transition-all duration-200">
-              <div className="text-tosca-200 group-hover:text-white transition-colors">
+              <div className="text-white group-hover:text-white transition-colors">
                 {category.icon}
               </div>
             </div>
