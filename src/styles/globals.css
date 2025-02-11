@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hide scrollbar but keep functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom styles */
+@layer components {
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-tosca-200 focus:ring-offset-2;
+  }
+}
+
+.bg-pattern {
+  background-image: radial-gradient(circle at 25px 25px, white 2%, transparent 0%),
+    radial-gradient(circle at 75px 75px, white 2%, transparent 0%);
+  background-size: 100px 100px;
+}
