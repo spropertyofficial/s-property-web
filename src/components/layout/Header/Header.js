@@ -16,6 +16,7 @@ export default function Header() {
               alt="S-Property"
               width={120}
               height={40}
+              className="w-auto h-auto"
               priority
             />
             <div className="w-8"></div>
