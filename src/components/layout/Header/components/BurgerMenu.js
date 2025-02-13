@@ -46,7 +46,7 @@ export default function BurgerMenu() {
               <Link 
                 key={index}
                 href={item.href}
-                className="block text-white hover:text-tosca-200 py-2 transition-colors"
+                className="block text-white hover:text-white/50 py-2 transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 {item.label}
