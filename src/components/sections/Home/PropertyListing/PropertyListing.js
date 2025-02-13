@@ -1,3 +1,5 @@
+import PropertyCard from "./components/PropertyCard";
+
 export default function PropertyListing() {
   // Nanti data ini akan diambil dari API/database
   const newProperties = [
