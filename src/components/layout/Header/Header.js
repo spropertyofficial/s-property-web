@@ -1,7 +1,5 @@
-import { Menu } from 'lucide-react'
 import Image from 'next/image'
-import SearchBar from '../../sections/Home/SearchSection/components/SearchBar'
-import TabNav from '../../sections/Home/SearchSection/components/TabNav'
+import BurgerMenu from './components/BurgerMenu'
 
 export default function Header() {
   return (
@@ -11,7 +9,7 @@ export default function Header() {
         <div className="px-6">
           <div className="flex items-center justify-between">
             <button className="text-tosca-200 hover:text-tosca-50 transition-colors">
-              <Menu size={30} />
+              <BurgerMenu />
             </button>
             <Image
               src="/images/logo.png"
