@@ -13,6 +13,7 @@ export default function Footer() {
         alt="S-Property"
         width={150}
         height={40}
+        className="w-auto h-auto"
         priority
         />
         </div>

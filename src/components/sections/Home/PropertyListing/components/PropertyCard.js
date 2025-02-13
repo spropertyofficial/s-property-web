@@ -23,7 +23,8 @@ export default function PropertyCard({
             alt="Watermark"
             width={200}
             height={30}
-            className="object-contain"
+            sizes="100vw"
+            className="object-contain w-auto h-auto"
           />
         </div>
         <div className="absolute top-3 left-3 bg-gray-800/80 text-white px-2 py-1 rounded text-sm">

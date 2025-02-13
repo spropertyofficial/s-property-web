@@ -89,7 +89,8 @@ export default function ExploreCities() {
                 src={city.imageUrl}
                 alt={city.name}
                 fill
-                className="object-cover transform group-hover:scale-105 transition-transform duration-300"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover transform group-hover:scale-105 transition-transform duration-300 w-auto h-auto"
               />
 
               {/* Content */}
