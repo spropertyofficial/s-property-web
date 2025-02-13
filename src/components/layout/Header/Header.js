@@ -3,7 +3,7 @@ import BurgerMenu from './components/BurgerMenu'
 
 export default function Header() {
   return (
-    <div className="w-full">
+    <div className="w-full sticky top-0 z-50">
       {/* Header section */}
       <div className="bg-white">
         <div className="px-6">
