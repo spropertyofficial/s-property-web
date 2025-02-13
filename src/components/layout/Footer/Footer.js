@@ -5,7 +5,7 @@ import LanguageSelector from './components/LanguageSelector'
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-400 text-white px-6 py-8">
+    <footer className="bg-gray-200 text-white px-6 py-8">
         {/* Logo */}
         <div className="flex justify-center">
         <Image 
