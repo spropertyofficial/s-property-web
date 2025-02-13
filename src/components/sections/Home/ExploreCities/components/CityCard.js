@@ -6,11 +6,12 @@ export default function CityCard({ name, propertyCount, imageUrl }) {
     <div className="relative rounded-lg overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
       {/* Background Image */}
       <div className="h-48 relative">
-        <Image
+      <Image
           src={imageUrl}
           alt={name}
           fill
-          className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className="object-cover group-hover:scale-105 transition-transform duration-300"
         />
         {/* Dark Overlay */}
         <div className="absolute inset-0 bg-black/30" />

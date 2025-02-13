@@ -12,7 +12,7 @@ export default function PropertyCard({
   exclusive,
   postedDate,
 }) {
-  return (
+  return ( 
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       <div className="relative h-48">
         <Image src={imageUrl} alt={title} fill className="object-cover" />
