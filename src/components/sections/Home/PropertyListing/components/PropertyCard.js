@@ -26,21 +26,19 @@ export default function PropertyCard({
             className="object-contain"
           />
         </div>
-        {/* Status - Menggunakan warna yang lebih gelap dengan opacity */}
         <div className="absolute top-3 left-3 bg-gray-800/80 text-white px-2 py-1 rounded text-sm">
           {status}
         </div>
-        {/* Eksklusif - Mempertahankan orange tapi dengan opacity */}
         {exclusive && (
           <div className="absolute top-3 right-3 bg-[#F5A624]/90 text-white px-2 py-1 rounded text-sm">
             Eksklusif
           </div>
         )}
-        {/* Harga - Menggunakan warna yang sama dengan status untuk konsistensi */}
         <div className="absolute bottom-3 left-3 bg-tosca-200 text-white font-bold text-lg px-3 rounded-md">
           Rp {price}
         </div>
       </div>
+
       <div className="p-4">
         <div className="grid grid-cols-10 gap-4">
           <div className="col-span-8">
