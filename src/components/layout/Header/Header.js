@@ -8,9 +8,7 @@ export default function Header() {
       <div className="bg-white">
         <div className="px-6">
           <div className="flex items-center justify-between">
-            <button className="text-tosca-200 hover:text-tosca-50 transition-colors">
-              <BurgerMenu />
-            </button>
+            <BurgerMenu />
             <Image
               src="/images/logo.png"
               alt="S-Property"
