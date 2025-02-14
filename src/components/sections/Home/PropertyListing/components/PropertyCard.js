@@ -22,9 +22,9 @@ export default function PropertyCard({
             src="/images/Watermark-SPRO.webp"
             alt="Watermark"
             width={200}
-            height={30}
+            height={20}
             sizes="100vw"
-            className="object-contain w-auto h-auto"
+            className="object-contain w-auto h-64"
           />
         </div>
         <div className="absolute top-3 left-3 bg-gray-800/80 text-white px-2 py-1 rounded text-sm">
