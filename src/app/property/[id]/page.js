@@ -3,6 +3,7 @@
 import AddressInfo from "@/components/sections/Property/AddressInfo";
 import Gallery from "@/components/sections/Property/Gallery";
 import Header from "@/components/sections/Property/Header";
+import PropertyDetail from "@/components/sections/Property/PropertyDetail";
 
 const PropertyDetailPage = () => {
   // Sample property data
@@ -10,8 +11,9 @@ const PropertyDetailPage = () => {
     id: 1,
     title: "Adora Luxe at Terravia",
     price: "Rp4.484.253.000",
-    type: "Dijual",
+    transaction: "Dijual",
     developer: "Sinarmas Land",
+    specs: { beds: 4, baths: 3, landSize: 112, buildingSize: 190, electricity: 200, type: "Apartemen" },
     images: [
       {
         src: "https://images.pexels.com/photos/2437286/pexels-photo-2437286.jpeg",
@@ -38,29 +40,14 @@ const PropertyDetailPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-        
-      <Gallery images={property.images} />
-      <Header 
-        title={property.title}
-        price={property.price}
-        type={property.type}
-        city={property.city}
-        country={property.country}
-        developer={property.developer}
-      />
-      <AddressInfo
-        address={property.address}
-        city={property.city}
-        area={property.area}
-        country={property.country}
-      />
-      <div className="mb-6">
-        <h2 className="text-xl font-bold mb-2">Description</h2>
-        <p className="text-sm">{property.description}</p>
-      </div>
-      {/* Add other sections */}
+      <Gallery {...property} />
+      <Header {...property} />
+      <AddressInfo {...property} />
+      <PropertyDetail {...property} />
     </div>
   );
 };
 
 export default PropertyDetailPage;
+
+function PropertyData() {}
