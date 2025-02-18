@@ -1,14 +1,9 @@
-/* Property Basic Info */
-import {
-  FaBed,
-  FaBath,
-  FaRulerCombined,
-  FaHome,
-  FaPlug,
-} from "react-icons/fa";
+// src/components/sections/Property/PropertyDetail/PropertyDetail.js
+
+import { FaBed, FaBath, FaRulerCombined, FaHome, FaPlug } from "react-icons/fa";
 import { SlSizeFullscreen } from "react-icons/sl";
 
-export default function PropertyDetail({ specs }) {
+export default function PropertyDetail({ specs = {} }) {
   return (
     <div className="my-2 bg-white rounded-lg shadow-md p-4 border-gray-400">
       <h2 className="text-xl font-semibold mb-3 text-green-500 mt-2">
@@ -18,42 +13,42 @@ export default function PropertyDetail({ specs }) {
         <PropertyDetailRow
           icon={<FaHome className="text-blue-500 text-2xl" />}
           label="Tipe Properti"
-          value={`${specs.type}`}
+          value={specs.type || "Tidak Tersedia"}
         />
       </div>
       <div className="bg-white p-4 ">
         <PropertyDetailRow
           icon={<FaBed className="text-blue-500 text-2xl" />}
           label="Kamar Tidur"
-          value={`${specs.beds}`}
+          value={`${specs.beds || 0}`}
         />
       </div>
       <div className="bg-white p-4 ">
         <PropertyDetailRow
           icon={<FaBath className="text-blue-500 text-2xl" />}
           label="Kamar Mandi"
-          value={`${specs.baths}`}
+          value={`${specs.baths || 0}`}
         />
       </div>
       <div className="bg-white p-4 ">
         <PropertyDetailRow
           icon={<FaRulerCombined className="text-green-500 text-2xl" />}
           label="Luas Tanah"
-          value={`${specs.landSize} m²`}
+          value={`${specs.landSize || 0} m²`}
         />
       </div>
       <div className="bg-white p-4 ">
         <PropertyDetailRow
           icon={<SlSizeFullscreen className="text-green-500 text-2xl" />}
           label="Luas Bangunan"
-          value={`${specs.buildingSize} m²`}
+          value={`${specs.buildingSize || 0} m²`}
         />
       </div>
       <div className="bg-white p-4 ">
         <PropertyDetailRow
           icon={<FaPlug className="text-green-500 text-2xl" />}
           label="Listrik"
-          value={`${specs.electricity} Watt`}
+          value={`${specs.electricity || 0} Watt`}
         />
       </div>
     </div>

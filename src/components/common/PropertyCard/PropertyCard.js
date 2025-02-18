@@ -1,6 +1,7 @@
 import { MapPin, Bed, Bath, Home } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function PropertyCard({
   type = "unit", // "unit", "cluster", "housing"
@@ -9,9 +10,9 @@ export default function PropertyCard({
   // Render berdasarkan tipe properti
   const renderContent = () => {
     switch (type) {
-      case "unit":
+      case "units":
         return renderUnitContent(data);
-      case "cluster":
+      case "clusters":
         return renderClusterContent(data);
       case "residentials":
         return renderHousingContent(data);
@@ -121,35 +122,42 @@ export default function PropertyCard({
           <MapPin size={14} className="mr-1" />
           <span>{location}</span>
         </div>
-        <div className="text-sm text-gray-500">
-          {unitTypes.join(" • ")}
-        </div>
+        <div className="text-sm text-gray-500">{unitTypes.join(" • ")}</div>
       </div>
     </>
   );
 
   // Render untuk perumahan
-  // Render untuk perumahan
-const renderHousingContent = ({
-  name,
-  location,
-  gallery,
-  clusters
-}) => (
-  <>
-    <div className="relative h-48">
-      <Image src={gallery[0].src} alt={name} fill className="object-cover" />
-    </div>
-    <div className="p-4">
-      <h3 className="font-medium text-gray-800 mb-2">{name}</h3>
-      <div className="flex items-center text-gray-500 text-sm mb-3">
-        <MapPin size={14} className="mr-1" />
-        <span>{location.region}, {location.city}, {location.area}</span>
+  const renderHousingContent = ({ name, location, gallery, id, price }) => (
+    <>
+      <div className="relative h-48">
+        <Image src={gallery[0].src} alt={name} fill className="object-cover" />
       </div>
-    </div>
-  </>
-);
-
+      <div className="p-4">
+        <h3 className="font-medium text-gray-800 mb-2">{name}</h3>
+        <div className="flex items-center text-gray-500 text-sm mb-2">
+          <MapPin size={14} className="mr-1" />
+          <span>
+            {location.region}, {location.city}, {location.area}
+          </span>
+        </div>
+        <div className="text-sm text-gray-500">
+          Start from {""}
+          <span className="font-semibold text-lg text-tosca-500">
+            Rp 14 Miliar
+          </span>
+        </div>
+      </div>
+      <div className="mt-4 px-4 pb-4">
+        <Link
+          href={`/properties/${type}/${id}`}
+          className="block w-full text-center bg-tosca-500 text-white py-2 px-4 rounded-md hover:bg-tosca-600 transition-colors"
+        >
+          View Details
+        </Link>
+      </div>
+    </>
+  );
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       {renderContent()}

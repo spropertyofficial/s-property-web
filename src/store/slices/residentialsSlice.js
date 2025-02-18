@@ -1,9 +1,9 @@
 // src/store/slices/residentialsSlice.js
 import { createSlice } from '@reduxjs/toolkit'
-import { residentials } from '@/data/residentials'
+import { residentialsData } from '@/data/residentials'
 
 const initialState = {
-  residentials: residentials,
+  residentials: residentialsData,
   filters: {
     region: null,
     city: null,

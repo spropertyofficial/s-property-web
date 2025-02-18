@@ -1,27 +1,26 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { residentials } from '@/data/residentials'
+import { residentialsData } from '@/data/residentials'
 
 export const residentialsApi = createApi({
-  reducerPath: 'propertyApi',
+  reducerPath: 'residentialsApi',
   baseQuery: fetchBaseQuery({ baseUrl: '/' }),
   endpoints: (builder) => ({
-    getProperties: builder.query({
+    getResidentials: builder.query({
       queryFn: () => {
         // Simulasi API call dengan mock data
-        return { data: residentials }
+        return { data: residentialsData }
       }
     }),
-    getPropertyById: builder.query({
+    getResidentialById: builder.query({
       queryFn: (id) => {
-        // Simulasi get single property
-        const property = residentials.find(p => p.id === parseInt(id))
-        return { data: property }
+        const residential = residentialsData.find(p => p.id === id)
+        return { data: residential }
       }
     })
   })
 })
 
 export const {
-  useGetPropertiesQuery,
-  useGetPropertyByIdQuery
+  useGetResidentialsQuery,
+  useGetResidentialByIdQuery,
 } = residentialsApi

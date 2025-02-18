@@ -1,17 +1,15 @@
-import { Familjen_Grotesk } from 'next/font/google';
-import React from 'react';
-import { FaMapMarkerAlt, FaMap  } from 'react-icons/fa';
+import { Familjen_Grotesk } from "next/font/google";
+import React from "react";
+import { FaMapMarkerAlt, FaMap } from "react-icons/fa";
 
-const addressData = {
-  address: 'Jalan Tukad Banyu Poh',
-  city: 'BSD City',
-  province: 'Banten',
-  area: 'Pagedangan',
-  country: 'Indonesia',
-  mapsLink: 'https://goo.gl/maps/example'
-};
-
-const AddressInfo = () => {
+const AddressInfo = ({
+  region,
+  city,
+  area,
+  address,
+  country,
+  mapsLink,
+}) => {
   return (
     <div className="bg-white p-4 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-4">
@@ -19,9 +17,9 @@ const AddressInfo = () => {
           <FaMapMarkerAlt className="mr-2 text-blue-500" />
           <h2 className="text-lg font-semibold text-gray-800">Address</h2>
         </div>
-        <a 
-          href={addressData.mapsLink} 
-          target="_blank" 
+        <a
+          href={mapsLink}
+          target="_blank"
           rel="noopener noreferrer"
           className="flex items-center text-green-600 hover:text-green-700 transition-colors"
         >
@@ -31,11 +29,11 @@ const AddressInfo = () => {
       </div>
 
       <div className="space-y-2">
-        <AddressRow label="Address" value={addressData.address} />
-        <AddressRow label="City" value={addressData.city} />
-        <AddressRow label="Province" value={addressData.province} />
-        <AddressRow label="Area" value={addressData.area} />
-        <AddressRow label="Country" value={addressData.country} />
+        <AddressRow label="Address" value={address} />
+        <AddressRow label="City" value={city} />
+        <AddressRow label="Province" value={region} />
+        <AddressRow label="Area" value={area} />
+        <AddressRow label="Country" value={country} />
       </div>
     </div>
   );
