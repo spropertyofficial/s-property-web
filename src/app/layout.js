@@ -7,10 +7,12 @@ import ReduxProvider from "@/components/providers/ReduxProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
+  icons: {
+    icon: "/favicon.ico"
+  },
   title: "S-Property",
   description: "Find your dream property",
 };
-
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
