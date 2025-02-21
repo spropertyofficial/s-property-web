@@ -29,7 +29,7 @@ const AddressInfo = ({
       </div>
 
       <div className="space-y-2">
-        <AddressRow label="Address" value={address} />
+        <AddressRow label="Address" value={address}/>
         <AddressRow label="City" value={city} />
         <AddressRow label="Province" value={region} />
         <AddressRow label="Area" value={area} />
@@ -41,8 +41,8 @@ const AddressInfo = ({
 
 const AddressRow = ({ label, value }) => (
   <div className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-    <span className="text-gray-600 font-medium">{label}</span>
-    <span className="text-gray-800 font-semibold">{value}</span>
+    <span className="text-gray-600 font-medium me-8">{label}</span>
+    <span className="text-gray-800 font-semibold text-base">{value}</span>
   </div>
 );
 
