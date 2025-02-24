@@ -3,6 +3,7 @@ import "@/styles/globals.css";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import ReduxProvider from "@/components/providers/ReduxProvider";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,7 +21,7 @@ export default function RootLayout({ children }) {
         <ReduxProvider>
           <Header />
           {children}
-          <injectSpeedInsights />
+          <SpeedInsights/>
           <Footer />
         </ReduxProvider>
       </body>
