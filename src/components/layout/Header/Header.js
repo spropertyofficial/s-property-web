@@ -10,7 +10,7 @@ export default function Header() {
           <div className="flex items-center justify-between">
             <BurgerMenu />
             <Image
-              src="/images/logo.png"
+              src="/images/logo.webp"
               alt="S-Property"
               width={120}
               height={40}
