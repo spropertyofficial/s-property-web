@@ -128,7 +128,7 @@ export default function PropertyCard({
   );
 
   // Render untuk perumahan
-  const renderHousingContent = ({ name, location, gallery, id, price }) => (
+  const renderHousingContent = ({ name, location, gallery, id, startPrice }) => (
     <>
       <div className="relative h-48">
         <Image src={gallery[0].src} alt={name} fill className="object-cover" />
@@ -144,7 +144,7 @@ export default function PropertyCard({
         <div className="text-sm text-gray-500">
           Start from {""}
           <span className="font-semibold text-lg text-tosca-500">
-            Rp 14 Miliar
+            Rp {(startPrice || 0).toLocaleString('id-ID')}
           </span>
         </div>
       </div>
