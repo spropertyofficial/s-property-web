@@ -1,9 +1,31 @@
+/*
+  This file contains data for 10 residential properties:
+  1. Terravia - BSD City, Tangerang Selatan
+  2. Citra Garden Serpong - Cisauk, Tangerang
+  3. Terranea Serpong - Pagedangan, Tangerang
+  4. Aksara Homes - Ciputat, Tangerang Selatan
+  5. Griya Harmoni Cibugel - Cisoka, Tangerang
+  6. Kota Podomoro Tenjo - Tenjo, Bogor
+  7. Telaga Legok - Legok, Tangerang
+  8. Grand Tenjo Residence - Tenjo, Bogor
+  9. Permata Mutiara Maja - Maja, Lebak
+
+  All project BSA Land (Legok, Parung Panjang)
+
+
+
+  Terrania
+  Aksara Homes
+  CitraGarden Bintaro
+*/
+
+
 // src/data/housing.js
 export const residentialsData = [
   {
     id: "terravia",
     name: "Terravia",
-    startPrice: 1000000000,
+    startPrice: 2168710000,
     location: {
       region: "Banten",
       city: "Tangerang Selatan",
@@ -84,7 +106,7 @@ export const residentialsData = [
   {
     id: "citra-garden-serpong",
     name: "Citra Garden Serpong",
-    startPrice: 800000000,
+    startPrice: 750000000,
     location: {
       region: "Banten",
       city: "Kabupaten Tangerang",
@@ -129,7 +151,7 @@ export const residentialsData = [
   {
     id: "terranea-serpong",
     name: "Terranea Serpong",
-    startPrice: 750000000,
+    startPrice: 500000000,
     location: {
       region: "Banten",
       city: "Kabupaten Tangerang",
@@ -166,7 +188,7 @@ export const residentialsData = [
   {
     id: "aksara-homes",
     name: "Aksara Homes",
-    startPrice: 900000000,
+    startPrice: 1500000000,
     location: {
       region: "Banten",
       city: "Kota Tangerang Selatan",
@@ -256,7 +278,7 @@ export const residentialsData = [
   {
     id: "griya-harmoni-cibugel",
     name: "Griya Harmoni Cibugel",
-    startPrice: 200000000,
+    startPrice: 1850000000,
     location: {
       region: "Banten",
       city: "Kabupaten Tangerang",
@@ -333,7 +355,7 @@ export const residentialsData = [
   {
     id: "kota-podomoro-tenjo",
     name: "Kota Podomoro Tenjo",
-    startPrice: 300000000,
+    startPrice: 2800000000,
     location: {
       region: "Jawa Barat",
       city: "Kabupaten Bogor",
@@ -393,6 +415,7 @@ export const residentialsData = [
   {
     id: "telaga-legok",
     name: "Telaga Legok",
+    startPrice: 400000000,
     location: {
       region: "Banten",
       city: "Kabupaten Tangerang",
@@ -441,7 +464,7 @@ export const residentialsData = [
   {
     id: "grand-tenjo-residence",
     name: "Grand Tenjo Residence",
-    startPrice: 200000000,
+    startPrice: 380000000,
     location: {
       region: "Jawa Barat",
       city: "Kabupaten Bogor",
@@ -527,7 +550,7 @@ export const residentialsData = [
   {
     id: "permata-mutiara-maja",
     name: "Permata Mutiara Maja",
-    startPrice: 200000000,
+    startPrice: 168000000,
     location: {
       region: "Banten",
       city: "Kabupaten Lebak",
