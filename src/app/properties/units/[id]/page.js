@@ -5,7 +5,7 @@ import AddressInfo from "@/components/sections/Property/AddressInfo";
 import Gallery from "@/components/sections/Property/Gallery";
 import Header from "@/components/sections/Property/Header";
 import PropertyDetail from "@/components/sections/Property/PropertyDetail";
-import { useGetPropertyByIdQuery } from "@/store/api/residentialsApi";
+import { useGetResidentialByIdQuery } from "@/store/api/residentialsApi";
 
 const PropertyDetailPage = ({ params }) => {
   const resolvedParams = use(params);
@@ -13,7 +13,7 @@ const PropertyDetailPage = ({ params }) => {
     data: property,
     isLoading,
     error,
-  } = useGetPropertyByIdQuery(resolvedParams.id);
+  } = useGetResidentialByIdQuery(resolvedParams.id);
 console.log(property);
   if (isLoading) {
     return <div className="container mx-auto px-4 py-6">Loading...</div>;
