@@ -2,7 +2,6 @@ import { Inter } from "next/font/google";
 import "@/styles/globals.css";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
-import { injectSpeedInsights } from "@vercel/speed-insights/*";
 import ReduxProvider from "@/components/providers/ReduxProvider";
 
 const inter = Inter({ subsets: ["latin"] });
