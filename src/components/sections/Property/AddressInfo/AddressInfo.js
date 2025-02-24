@@ -42,7 +42,7 @@ const AddressInfo = ({
 const AddressRow = ({ label, value }) => (
   <div className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
     <span className="text-gray-600 font-medium me-8">{label}</span>
-    <span className="text-gray-800 font-semibold text-base">{value}</span>
+    <span className="text-gray-800 font-semibold text-base text-right">{value}</span>
   </div>
 );
 
