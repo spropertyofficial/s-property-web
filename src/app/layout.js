@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   icons: {
-    icon: "/favicon.ico"
+    icon: "/favicon.ico",
   },
   title: "S-Property",
   description: "Find your dream property",
@@ -20,6 +20,7 @@ export default function RootLayout({ children }) {
         <ReduxProvider>
           <Header />
           {children}
+          <injectSpeedInsights />
           <Footer />
         </ReduxProvider>
       </body>
