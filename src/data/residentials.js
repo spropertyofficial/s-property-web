@@ -676,23 +676,59 @@ export const residentialsData = [
     ],
   },
   {
-    id: "kana-park-legok",
-    name: "Kana Park Legok",
+    id: "de-lora",
+    name: "de'LORA",
     startPrice: 600000000,
     developer: "BSA Land",
-    clusters: ["Maru", "Kano"],
+    clusters: ["Mora", "Dyera"],
     location: {
-      region: "Banten",
-      city: "Kabupaten Tangerang",
-      area: "Legok",
-      address: "Jl. Raya Rancaiyuh, Babat, Kec. Legok",
+      region: "Jawa Barat",
+      city: "Kabupaten Bogor",
+      area: "Parung Panjang",
+      address: "Jl. Raya Dago, Kabasiran, Kec. Parung Panjang",
       country: "Indonesia",
-      mapsLink: "https://maps.app.goo.gl/cWoSV6KkjCFWSZHt7",
+      mapsLink: "https://maps.app.goo.gl/uWfv2xt3sc2fkGUA7",
     },
     gallery: [
       {
-        src: "/images/Residentials/kana-park-legok/kana-park-gate.webp",
-        alt: "Permata Mutiara Maja 2 Main Overview",
+        src: "/images/Residentials/d-lora/delora-main-gate.webp",
+        alt: "Delora Main Gate",
+      },
+      {
+        src: "/images/Residentials/d-lora/delora-residential-gate.webp",
+        alt: "Delora Residential Gate",
+      },
+      {
+        src: "/images/Residentials/d-lora/delora-cluster-gate-park.webp",
+        alt: "Delora Cluster Gate and Park",
+      },
+      {
+        src: "/images/Residentials/d-lora/delora-clubhouse.webp",
+        alt: "Delora Club House",
+      },
+      {
+        src: "/images/Residentials/d-lora/delora-garden.webp",
+        alt: "Delora Garden",
+      },
+      {
+        src: "/images/Residentials/d-lora/delora-masterplan.webp",
+        alt: "Delora Master Plan",
+      },
+      {
+        src: "/images/Residentials/d-lora/delora-siteplan.webp",
+        alt: "Delora Site Plan",
+      },
+      {
+        src: "/images/Residentials/d-lora/delora-type-27.webp",
+        alt: "Delora Type 27",
+      },
+      {
+        src: "/images/Residentials/d-lora/delora-type-39.webp",
+        alt: "Delora Type 39",
+      },
+      {
+        src: "/images/Residentials/d-lora/delora-type-48.webp",
+        alt: "Delora Type 48",
       },
     ],
   },
