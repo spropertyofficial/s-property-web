@@ -355,7 +355,7 @@ export const residentialsData = [
   {
     id: "kota-podomoro-tenjo",
     name: "Kota Podomoro Tenjo",
-    startPrice: 2800000000,
+    startPrice: 280000000,
     location: {
       region: "Jawa Barat",
       city: "Kabupaten Bogor",
