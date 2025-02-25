@@ -1,25 +1,3 @@
-/*
-  This file contains data for 10 residential properties:
-  1. Terravia - BSD City, Tangerang Selatan
-  2. Citra Garden Serpong - Cisauk, Tangerang
-  3. Terranea Serpong - Pagedangan, Tangerang
-  4. Aksara Homes - Ciputat, Tangerang Selatan
-  5. Griya Harmoni Cibugel - Cisoka, Tangerang
-  6. Kota Podomoro Tenjo - Tenjo, Bogor
-  7. Telaga Legok - Legok, Tangerang
-  8. Grand Tenjo Residence - Tenjo, Bogor
-  9. Permata Mutiara Maja - Maja, Lebak
-
-  All project BSA Land (Legok, Parung Panjang)
-
-
-
-  Terrania
-  Aksara Homes
-  CitraGarden Bintaro
-*/
-
-
 // src/data/housing.js
 export const residentialsData = [
   {
@@ -278,7 +256,7 @@ export const residentialsData = [
   {
     id: "griya-harmoni-cibugel",
     name: "Griya Harmoni Cibugel",
-    startPrice: 1850000000,
+    startPrice: 185000000,
     location: {
       region: "Banten",
       city: "Kabupaten Tangerang",
@@ -615,5 +593,107 @@ export const residentialsData = [
     ],
     developer: "PT. Bukit Nusa Indah Perkasa",
     clusters: ["Montana", "Beryl", "Onyx", "Topaz", "Ruby", "Orion", "Saphire"],
+  },
+  {
+    id: "kana-park-legok",
+    name: "Kana Park Legok",
+    startPrice: 600000000,
+    developer: "BSA Land",
+    clusters: ["Maru", "Kano"],
+    location: {
+      region: "Banten",
+      city: "Kabupaten Tangerang",
+      area: "Legok",
+      address: "Jl. Raya Rancaiyuh, Babat, Kec. Legok",
+      country: "Indonesia",
+      mapsLink: "https://maps.app.goo.gl/cWoSV6KkjCFWSZHt7",
+    },
+    gallery: [
+      {
+        src: "/images/Residentials/kana-park-legok/kana-park-gate.webp",
+        alt: "Permata Mutiara Maja 2 Main Overview",
+      },
+      {
+        src: "/images/Residentials/kana-park-legok/kano/type-48-standard-front.webp",
+        alt: "Type 48 Standard Front View",
+      },
+      {
+        src: "/images/Residentials/kana-park-legok/kano/type-48-standard-back.webp",
+        alt: "Type 48 Standard Back View",
+      },
+      {
+        src: "/images/Residentials/kana-park-legok/kano/type-48-corner-front.webp",
+        alt: "Type 48 Corner Front View",
+      },
+      {
+        src: "/images/Residentials/kana-park-legok/kano/type-48-corner-back.webp",
+        alt: "Type 48 Corner Back View",
+      },
+      {
+        src: "/images/Residentials/kana-park-legok/maru/siteplan-maru-front.webp",
+        alt: "Siteplan Maru Front View",
+      },
+      {
+        src: "/images/Residentials/kana-park-legok/maru/siteplan-maru-back.webp",
+        alt: "Siteplan Maru Back View",
+      },
+      {
+        src: "/images/Residentials/kana-park-legok/maru/type-39-standard-front.webp",
+        alt: "Type 39 Standard Front View",
+      },
+      {
+        src: "/images/Residentials/kana-park-legok/maru/type-39-standard-back.webp",
+        alt: "Type 39 Standard Back View",
+      },
+      {
+        src: "/images/Residentials/kana-park-legok/maru/type-39-hook-front.webp",
+        alt: "Type 39 Hook Front View",
+      },
+      {
+        src: "/images/Residentials/kana-park-legok/maru/type-39-hook-back.webp",
+        alt: "Type 39 Hook Back View",
+      },
+      {
+        src: "/images/Residentials/kana-park-legok/maru/type-39-mezzanine-back.webp",
+        alt: "Type 39 Mezzanine Back View",
+      },
+      {
+        src: "/images/Residentials/kana-park-legok/maru/type-69-standard-front.webp",
+        alt: "Type 69 Standard Front View",
+      },
+      {
+        src: "/images/Residentials/kana-park-legok/maru/type-69-standard-back.webp",
+        alt: "Type 69 Standard Back View",
+      },
+      {
+        src: "/images/Residentials/kana-park-legok/maru/type-69-hook-front.webp",
+        alt: "Type 69 Hook Front View",
+      },
+      {
+        src: "/images/Residentials/kana-park-legok/maru/type-69-hook-back.webp",
+        alt: "Type 69 Hook Back View",
+      },
+    ],
+  },
+  {
+    id: "kana-park-legok",
+    name: "Kana Park Legok",
+    startPrice: 600000000,
+    developer: "BSA Land",
+    clusters: ["Maru", "Kano"],
+    location: {
+      region: "Banten",
+      city: "Kabupaten Tangerang",
+      area: "Legok",
+      address: "Jl. Raya Rancaiyuh, Babat, Kec. Legok",
+      country: "Indonesia",
+      mapsLink: "https://maps.app.goo.gl/cWoSV6KkjCFWSZHt7",
+    },
+    gallery: [
+      {
+        src: "/images/Residentials/kana-park-legok/kana-park-gate.webp",
+        alt: "Permata Mutiara Maja 2 Main Overview",
+      },
+    ],
   },
 ];
