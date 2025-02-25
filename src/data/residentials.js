@@ -4,6 +4,8 @@ export const residentialsData = [
     id: "terravia",
     name: "Terravia",
     startPrice: 2168710000,
+    developer: "Sinarmas Land",
+    clusters: ["adora", "belova"],
     location: {
       region: "Banten",
       city: "Tangerang Selatan",
@@ -78,13 +80,13 @@ export const residentialsData = [
         alt: "Terravia Overview 15",
       },
     ],
-    developer: "Sinarmas Land",
-    clusters: ["adora", "belova"],
   },
   {
     id: "citra-garden-serpong",
     name: "Citra Garden Serpong",
     startPrice: 750000000,
+    developer: "Ciputra Development",
+    clusters: ["aeris", "belle-fleur", "chloe", "diandre", "elaia"],
     location: {
       region: "Banten",
       city: "Kabupaten Tangerang",
@@ -123,13 +125,13 @@ export const residentialsData = [
         alt: "Siteplan",
       },
     ],
-    developer: "Ciputra Development",
-    clusters: ["aeris", "belle-fleur", "chloe", "diandre", "elaia"],
   },
   {
     id: "terranea-serpong",
     name: "Terranea Serpong",
     startPrice: 500000000,
+    developer: "Goldland Group",
+    clusters: ["aralia", "arbora", "azalea", "verda"],
     location: {
       region: "Banten",
       city: "Kabupaten Tangerang",
@@ -160,13 +162,13 @@ export const residentialsData = [
         alt: "Terranea Serpong Verda Unit",
       },
     ],
-    developer: "Goldland Group",
-    clusters: ["aralia", "arbora", "azalea", "verda"],
   },
   {
     id: "aksara-homes",
     name: "Aksara Homes",
     startPrice: 1500000000,
+    developer: "Synthesis Development",
+    clusters: [],
     location: {
       region: "Banten",
       city: "Kota Tangerang Selatan",
@@ -250,13 +252,13 @@ export const residentialsData = [
       },
     ],
 
-    developer: "Synthesis Development",
-    clusters: [],
   },
   {
     id: "griya-harmoni-cibugel",
     name: "Griya Harmoni Cibugel",
     startPrice: 185000000,
+    developer: "PT. Panen Berkah Bersama",
+    clusters: [],
     location: {
       region: "Banten",
       city: "Kabupaten Tangerang",
@@ -327,14 +329,16 @@ export const residentialsData = [
         alt: "Reservoir View",
       },
     ],
-    developer: "PT. Panen Berkah Bersama",
-    clusters: [],
   },
   {
     id: "kota-podomoro-tenjo",
     name: "Kota Podomoro Tenjo",
     startPrice: 280000000,
-    location: {
+    developer: "Podomoro Land",
+    clusters: {
+      premium_cluster: ["angsana", "burgundy", "citrus", "damar", "edelweiss"],
+      deluxe_cluster: ["kalamenta", "kaliandra", "kana", "kenanga", "magnolia"],
+    },    location: {
       region: "Jawa Barat",
       city: "Kabupaten Bogor",
       area: "Tenjo",
@@ -384,16 +388,13 @@ export const residentialsData = [
         alt: "Kota Podomoro Tenjo Overview 10",
       },
     ],
-    developer: "Podomoro Land",
-    clusters: {
-      premium_cluster: ["Angsana", "Burgundy", "Citrus", "Damar", "Edelweiss"],
-      deluxe_cluster: ["Kalamenta", "Kaliandra", "Kana", "Kenanga", "Magnolia"],
-    },
   },
   {
     id: "telaga-legok",
     name: "Telaga Legok",
     startPrice: 400000000,
+    developer: "BSA Land",
+    clusters: ["toba", "tondano", "maninjau"],
     location: {
       region: "Banten",
       city: "Kabupaten Tangerang",
@@ -436,13 +437,13 @@ export const residentialsData = [
         alt: "Telaga Legok Park View",
       },
     ],
-    developer: "BSA Land",
-    clusters: ["toba", "tondano", "maninjau"],
   },
   {
     id: "grand-tenjo-residence",
     name: "Grand Tenjo Residence",
     startPrice: 380000000,
+    developer: "DwiCitra Land",
+    clusters: [],
     location: {
       region: "Jawa Barat",
       city: "Kabupaten Bogor",
@@ -521,14 +522,13 @@ export const residentialsData = [
         alt: "Grand Tenjo House Overview 16",
       },
     ],
-
-    developer: "DwiCitra Land",
-    clusters: [],
   },
   {
     id: "permata-mutiara-maja",
     name: "Permata Mutiara Maja",
     startPrice: 168000000,
+    developer: "PT. Bukit Nusa Indah Perkasa",
+    clusters: ["montana", "beryl", "onyx", "topaz", "ruby", "orion", "saphire"],
     location: {
       region: "Banten",
       city: "Kabupaten Lebak",
@@ -591,15 +591,13 @@ export const residentialsData = [
         alt: "Type Azalea Overview",
       },
     ],
-    developer: "PT. Bukit Nusa Indah Perkasa",
-    clusters: ["Montana", "Beryl", "Onyx", "Topaz", "Ruby", "Orion", "Saphire"],
   },
   {
     id: "kana-park-legok",
     name: "Kana Park Legok",
     startPrice: 600000000,
     developer: "BSA Land",
-    clusters: ["Maru", "Kano"],
+    clusters: ["maru", "kano"],
     location: {
       region: "Banten",
       city: "Kabupaten Tangerang",
@@ -680,7 +678,7 @@ export const residentialsData = [
     name: "de'LORA",
     startPrice: 600000000,
     developer: "BSA Land",
-    clusters: ["Mora", "Dyera"],
+    clusters: ["mora", "dyera"],
     location: {
       region: "Jawa Barat",
       city: "Kabupaten Bogor",
@@ -736,8 +734,8 @@ export const residentialsData = [
     id: "citra-garden-bintaro",
     name: "Citra Garden Bintaro",
     startPrice: 1500000000,
-    developer: "Ciputra Development",
-    clusters: ["Mora", "Dyera"],
+    developer: "Ciputra Land",
+    clusters: ["alstonia", "bischofia", "calamus"],
     location: {
       region: "Banten",
       city: "Kota Tangerang Selatan",
