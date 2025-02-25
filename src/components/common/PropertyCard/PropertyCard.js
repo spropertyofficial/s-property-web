@@ -2,6 +2,7 @@ import { MapPin, Bed, Bath, Home } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
+import { formatToShortRupiah } from "@/utils/formatCurrency";
 
 export default function PropertyCard({
   type = "unit", // "unit", "cluster", "housing"
@@ -128,7 +129,13 @@ export default function PropertyCard({
   );
 
   // Render untuk perumahan
-  const renderHousingContent = ({ name, location, gallery, id, startPrice }) => (
+  const renderHousingContent = ({
+    name,
+    location,
+    gallery,
+    id,
+    startPrice,
+  }) => (
     <>
       <div className="relative h-48">
         <Image src={gallery[0].src} alt={name} fill className="object-cover" />
@@ -144,7 +151,7 @@ export default function PropertyCard({
         <div className="text-sm text-gray-500">
           Start from {""}
           <span className="font-semibold text-lg text-tosca-500">
-            Rp {(startPrice || 0).toLocaleString('id-ID')}
+            {formatToShortRupiah(startPrice)}
           </span>
         </div>
       </div>
