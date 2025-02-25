@@ -691,44 +691,184 @@ export const residentialsData = [
     },
     gallery: [
       {
-        src: "/images/Residentials/d-lora/delora-main-gate.webp",
+        src: "/images/Residentials/de-lora/delora-main-gate.webp",
         alt: "Delora Main Gate",
       },
       {
-        src: "/images/Residentials/d-lora/delora-residential-gate.webp",
+        src: "/images/Residentials/de-lora/delora-residential-gate.webp",
         alt: "Delora Residential Gate",
       },
       {
-        src: "/images/Residentials/d-lora/delora-cluster-gate-park.webp",
+        src: "/images/Residentials/de-lora/delora-cluster-gate-park.webp",
         alt: "Delora Cluster Gate and Park",
       },
       {
-        src: "/images/Residentials/d-lora/delora-clubhouse.webp",
+        src: "/images/Residentials/de-lora/delora-clubhouse.webp",
         alt: "Delora Club House",
       },
       {
-        src: "/images/Residentials/d-lora/delora-garden.webp",
+        src: "/images/Residentials/de-lora/delora-garden.webp",
         alt: "Delora Garden",
       },
       {
-        src: "/images/Residentials/d-lora/delora-masterplan.webp",
+        src: "/images/Residentials/de-lora/delora-masterplan.webp",
         alt: "Delora Master Plan",
       },
       {
-        src: "/images/Residentials/d-lora/delora-siteplan.webp",
+        src: "/images/Residentials/de-lora/delora-siteplan.webp",
         alt: "Delora Site Plan",
       },
       {
-        src: "/images/Residentials/d-lora/delora-type-27.webp",
+        src: "/images/Residentials/de-lora/delora-type-27.webp",
         alt: "Delora Type 27",
       },
       {
-        src: "/images/Residentials/d-lora/delora-type-39.webp",
+        src: "/images/Residentials/de-lora/delora-type-39.webp",
         alt: "Delora Type 39",
       },
       {
-        src: "/images/Residentials/d-lora/delora-type-48.webp",
+        src: "/images/Residentials/de-lora/delora-type-48.webp",
         alt: "Delora Type 48",
+      },
+    ],
+  },
+  {
+    id: "citra-garden-bintaro",
+    name: "Citra Garden Bintaro",
+    startPrice: 1500000000,
+    developer: "Ciputra Development",
+    clusters: ["Mora", "Dyera"],
+    location: {
+      region: "Banten",
+      city: "Kota Tangerang Selatan",
+      area: "Ciputat",
+      address:
+        "Jl. Boulevard CitraGarden Bintaro No.1 blok D6, Sawah Lama, Kec. Ciputat",
+      country: "Indonesia",
+      mapsLink: "https://maps.app.goo.gl/Ruxayu6hSbzn3CS66",
+    },
+    gallery: [
+      // Location Section
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-gate.webp",
+        alt: "Citra Garden Bintaro Location Title",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-title-location.webp",
+        alt: "Citra Garden Bintaro Location Title",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-location.webp",
+        alt: "Citra Garden Bintaro Location Map",
+      },
+      // Access Section
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-access-01.webp",
+        alt: "Citra Garden Bintaro Access Point 1",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-access-02.webp",
+        alt: "Citra Garden Bintaro Access Point 2",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-access-03.webp",
+        alt: "Citra Garden Bintaro Access Point 3",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-access-04.webp",
+        alt: "Citra Garden Bintaro Access Point 4",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-access-05.webp",
+        alt: "Citra Garden Bintaro Access Point 5",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-access-06.webp",
+        alt: "Citra Garden Bintaro Access Point 6",
+      },
+      // Development Section
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-title-development.webp",
+        alt: "Citra Garden Bintaro Development Title",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-development-01.webp",
+        alt: "Citra Garden Bintaro Development Progress 1",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-development-02.webp",
+        alt: "Citra Garden Bintaro Development Progress 2",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-development-03.webp",
+        alt: "Citra Garden Bintaro Development Progress 3",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-development-04.webp",
+        alt: "Citra Garden Bintaro Development Progress 4",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-development-05.webp",
+        alt: "Citra Garden Bintaro Development Progress 5",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-development-06.webp",
+        alt: "Citra Garden Bintaro Development Progress 6",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-development-07.webp",
+        alt: "Citra Garden Bintaro Development Progress 7",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-development-08.webp",
+        alt: "Citra Garden Bintaro Development Progress 8",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-development-09.webp",
+        alt: "Citra Garden Bintaro Development Progress 9",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-development-10.webp",
+        alt: "Citra Garden Bintaro Development Progress 10",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-development-11.webp",
+        alt: "Citra Garden Bintaro Development Progress 11",
+      },
+      // New Phase Section
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-title-new-phase.webp",
+        alt: "Citra Garden Bintaro New Phase Title",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-phase-01.webp",
+        alt: "Citra Garden Bintaro Phase 1",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-phase-02.webp",
+        alt: "Citra Garden Bintaro Phase 2",
+      },
+      // Clusters
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-cluster-clivia.webp",
+        alt: "Citra Garden Bintaro Clivia Cluster",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-type-clivia-sketch.webp",
+        alt: "Citra Garden Bintaro Clivia Type Sketch",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-cluster-magnolia.webp",
+        alt: "Citra Garden Bintaro Magnolia Cluster",
+      },
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-type-magnolia-sketch.webp",
+        alt: "Citra Garden Bintaro Magnolia Type Sketch",
+      },
+      // Specifications
+      {
+        src: "/images/Residentials/citra-garden-bintaro/cgb-specifications.webp",
+        alt: "Citra Garden Bintaro Specifications",
       },
     ],
   },
