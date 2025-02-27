@@ -1,67 +1,39 @@
 import Image from "next/image";
 import Link from "next/link";
+import { residentialsData } from "@/data/residentials";
 
 export default function ExploreCities() {
+  // Get unique cities and count properties
+  const cityCounts = residentialsData.reduce((acc, property) => {
+    const city = property.location.city;
+    acc[city] = (acc[city] || 0) + 1;
+    return acc;
+  }, {});
+
   const cities = [
     {
-      name: "Jakarta Barat",
-      propertyCount: 1,
-      imageUrl:
-        "https://images.pexels.com/photos/2437286/pexels-photo-2437286.jpeg",
-    },
-    {
-      name: "Jakarta Selatan",
-      propertyCount: 0,
-      imageUrl:
-        "https://images.pexels.com/photos/4513940/pexels-photo-4513940.jpeg",
-    },
-    {
-      name: "Jakarta Timur",
-      propertyCount: 0,
-      imageUrl:
-        "https://images.pexels.com/photos/2893670/pexels-photo-2893670.jpeg",
-    },
-    {
-      name: "Jakarta Pusat",
-      propertyCount: 0,
-      imageUrl:
-        "https://images.pexels.com/photos/4509131/pexels-photo-4509131.jpeg",
-    },
-    {
-      name: "Jakarta Utara",
-      propertyCount: 0,
-      imageUrl:
-        "https://images.pexels.com/photos/4509072/pexels-photo-4509072.jpeg",
-    },
-    {
-      name: "Kab. Bogor",
-      propertyCount: 3,
-      imageUrl:
-        "https://images.pexels.com/photos/2104742/pexels-photo-2104742.jpeg",
-    },
-    {
-      name: "Kab. Tangerang",
-      propertyCount: 3,
-      imageUrl:
-        "https://images.pexels.com/photos/2104742/pexels-photo-2104742.jpeg",
-    },
-    {
-      name: "BSD City",
-      propertyCount: 3,
-      imageUrl:
-        "https://images.pexels.com/photos/2404843/pexels-photo-2404843.jpeg",
-    },
-    {
-      name: "Sidoarjo",
-      propertyCount: 1,
-      imageUrl:
-        "https://images.pexels.com/photos/4509061/pexels-photo-4509061.jpeg",
-    },
-    {
       name: "Tangerang Selatan",
-      propertyCount: 1,
       imageUrl:
-        "https://images.pexels.com/photos/4509133/pexels-photo-4509133.jpeg",
+        "/images/cities/tangerang-selatan.webp",
+      propertyCount: cityCounts["Tangerang Selatan"] || 0,
+    },
+    {
+      name: "Kabupaten Tangerang",
+      imageUrl:
+        "/images/cities/kabupaten-tangerang.webp",
+      propertyCount: cityCounts["Kabupaten Tangerang"] || 0,
+    },
+    {
+      name: "Kabupaten Bogor",
+      imageUrl:
+        "/images/cities/kabupaten-bogor.webp",
+      propertyCount: cityCounts["Kabupaten Bogor"] || 0,
+    },
+    {
+      name: "Kabupaten Lebak",
+      imageUrl:
+        "/images/cities/kabupaten-lebak.webp",
+      propertyCount: cityCounts["Kabupaten Lebak"] || 0,
     },
   ];
 
@@ -107,8 +79,8 @@ export default function ExploreCities() {
                     {city.name}
                   </h3>
                   <p className="text-xs md:text-sm opacity-90">
-                    {city.propertyCount}{" "}
-                    {city.propertyCount === 1 ? "Property" : "Properties"}
+                    {city.propertyCount}
+                    {city.propertyCount === 1 ? " Property" : " Properties"}
                   </p>
                 </div>
 

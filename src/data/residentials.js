@@ -6,6 +6,7 @@ export const residentialsData = [
     startPrice: 2168710000,
     developer: "Sinarmas Land",
     clusters: ["adora", "belova"],
+    propertyStatus: "SALE",
     location: {
       region: "Banten",
       city: "Tangerang Selatan",
@@ -86,6 +87,7 @@ export const residentialsData = [
     name: "Citra Garden Serpong",
     startPrice: 750000000,
     developer: "Ciputra Development",
+    propertyStatus: "SALE",
     clusters: ["aeris", "belle-fleur", "chloe", "diandre", "elaia"],
     location: {
       region: "Banten",
@@ -131,6 +133,7 @@ export const residentialsData = [
     name: "Terranea Serpong",
     startPrice: 500000000,
     developer: "Goldland Group",
+    propertyStatus: "SALE",
     clusters: ["aralia", "arbora", "azalea", "verda"],
     location: {
       region: "Banten",
@@ -168,10 +171,11 @@ export const residentialsData = [
     name: "Aksara Homes",
     startPrice: 1500000000,
     developer: "Synthesis Development",
+    propertyStatus: "SALE",
     clusters: [],
     location: {
       region: "Banten",
-      city: "Kota Tangerang Selatan",
+      city: "Tangerang Selatan",
       area: "Ciputat",
       address: "Jl Inhutani I Kel Cipayung, RT.07/RW.01",
       country: "Indonesia",
@@ -258,6 +262,7 @@ export const residentialsData = [
     name: "Griya Harmoni Cibugel",
     startPrice: 185000000,
     developer: "PT. Panen Berkah Bersama",
+    propertyStatus: "SALE",
     clusters: [],
     location: {
       region: "Banten",
@@ -335,6 +340,7 @@ export const residentialsData = [
     name: "Kota Podomoro Tenjo",
     startPrice: 280000000,
     developer: "Podomoro Land",
+    propertyStatus: "SALE",
     clusters: {
       premium_cluster: ["angsana", "burgundy", "citrus", "damar", "edelweiss"],
       deluxe_cluster: ["kalamenta", "kaliandra", "kana", "kenanga", "magnolia"],
@@ -394,6 +400,7 @@ export const residentialsData = [
     name: "Telaga Legok",
     startPrice: 400000000,
     developer: "BSA Land",
+    propertyStatus: "SALE",
     clusters: ["toba", "tondano", "maninjau"],
     location: {
       region: "Banten",
@@ -443,6 +450,7 @@ export const residentialsData = [
     name: "Grand Tenjo Residence",
     startPrice: 380000000,
     developer: "DwiCitra Land",
+    propertyStatus: "SALE",
     clusters: [],
     location: {
       region: "Jawa Barat",
@@ -528,6 +536,7 @@ export const residentialsData = [
     name: "Permata Mutiara Maja",
     startPrice: 168000000,
     developer: "PT. Bukit Nusa Indah Perkasa",
+    propertyStatus: "SALE",
     clusters: ["montana", "beryl", "onyx", "topaz", "ruby", "orion", "saphire"],
     location: {
       region: "Banten",
@@ -597,6 +606,7 @@ export const residentialsData = [
     name: "Kana Park Legok",
     startPrice: 600000000,
     developer: "BSA Land",
+    propertyStatus: "SALE",
     clusters: ["maru", "kano"],
     location: {
       region: "Banten",
@@ -678,6 +688,7 @@ export const residentialsData = [
     name: "de'LORA",
     startPrice: 600000000,
     developer: "BSA Land",
+    propertyStatus: "SALE",
     clusters: ["mora", "dyera"],
     location: {
       region: "Jawa Barat",
@@ -735,10 +746,11 @@ export const residentialsData = [
     name: "Citra Garden Bintaro",
     startPrice: 1500000000,
     developer: "Ciputra Land",
+    propertyStatus: "SALE",
     clusters: ["alstonia", "bischofia", "calamus"],
     location: {
       region: "Banten",
-      city: "Kota Tangerang Selatan",
+      city: "Tangerang Selatan",
       area: "Ciputat",
       address:
         "Jl. Boulevard CitraGarden Bintaro No.1 blok D6, Sawah Lama, Kec. Ciputat",
