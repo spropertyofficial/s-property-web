@@ -19,7 +19,7 @@ export default function SearchBar({ onSearch, searchResults }) {
         <Search className="w-5 h-5 text-gray-400 ml-3" />
         <input
           type="text"
-          placeholder="Cari berdasarkan lokasi, area, atau nama properti"
+          placeholder="Cari berdasarkan lokasi, developer, atau nama properti"
           className="w-full py-3 px-3 rounded-lg focus:outline-none"
           value={query}
           onChange={handleChange}

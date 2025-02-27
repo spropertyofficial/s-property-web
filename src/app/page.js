@@ -12,7 +12,6 @@ import { useGetResidentialsQuery } from "@/store/api/residentialsApi";
 
 export default function Home() {
   const {data: properties} = useGetResidentialsQuery();
-  console.log(properties);
   return (
     <main>
       <SearchSection />

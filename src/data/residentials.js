@@ -175,7 +175,7 @@ export const residentialsData = [
     clusters: [],
     location: {
       region: "Banten",
-      city: "Kota Tangerang Selatan",
+      city: "Tangerang Selatan",
       area: "Ciputat",
       address: "Jl Inhutani I Kel Cipayung, RT.07/RW.01",
       country: "Indonesia",
@@ -750,7 +750,7 @@ export const residentialsData = [
     clusters: ["alstonia", "bischofia", "calamus"],
     location: {
       region: "Banten",
-      city: "Kota Tangerang Selatan",
+      city: "Tangerang Selatan",
       area: "Ciputat",
       address:
         "Jl. Boulevard CitraGarden Bintaro No.1 blok D6, Sawah Lama, Kec. Ciputat",
