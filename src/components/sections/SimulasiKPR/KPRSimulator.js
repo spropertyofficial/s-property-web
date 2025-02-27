@@ -118,7 +118,7 @@ export default function KPRSimulator() {
   }, [totalPembayaran, jumlahPinjaman]);
 
   return (
-    <div className="w-full bg-tosca-50 py-8 px-4 md:px-8">
+    <div className="w-full bg-tosca-50 py-8 px-4 md:px-8 rounded-xl my-5">
       <div className="max-w-6xl mx-auto">
         {/* Hero Section */}
         <div
