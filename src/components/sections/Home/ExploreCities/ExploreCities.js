@@ -10,29 +10,29 @@ export default function ExploreCities() {
     return acc;
   }, {});
 
-  const cities = [
+  const cities = [ 
     {
       name: "Tangerang Selatan",
       imageUrl:
-        "/images/cities/tangerang-selatan.webp",
+        "/images/Cities/tangerang-selatan.webp",
       propertyCount: cityCounts["Tangerang Selatan"] || 0,
     },
     {
       name: "Kabupaten Tangerang",
       imageUrl:
-        "/images/cities/kabupaten-tangerang.webp",
+        "/images/Cities/kabupaten-tangerang.webp",
       propertyCount: cityCounts["Kabupaten Tangerang"] || 0,
     },
     {
       name: "Kabupaten Bogor",
       imageUrl:
-        "/images/cities/kabupaten-bogor.webp",
+        "/images/Cities/kabupaten-bogor.webp",
       propertyCount: cityCounts["Kabupaten Bogor"] || 0,
     },
     {
       name: "Kabupaten Lebak",
       imageUrl:
-        "/images/cities/kabupaten-lebak.webp",
+        "/images/Cities/kabupaten-lebak.webp",
       propertyCount: cityCounts["Kabupaten Lebak"] || 0,
     },
   ];
