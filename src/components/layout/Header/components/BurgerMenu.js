@@ -10,8 +10,8 @@ export default function BurgerMenu() {
 
   const menuItems = [
     { label: 'Home', href: '/' },
-    { label: 'Properti', href: '/properties' },
-    { label: 'Join S-Pro', href: '/join' },
+    { label: 'Properti', href: '/properties/residentials' },
+    { label: 'Join S-Pro', href: '/join-s-pro' },
     { label: 'Simulasi KPR', href: '/simulasi-kpr' },
     { label: 'Tentang Kami', href: '/about' },
     { label: 'Kontak', href: '/contact' },
