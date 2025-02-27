@@ -1,26 +1,31 @@
-import { Search, Filter } from 'lucide-react'
+'use client'
 
-export default function SearchBar() {
+import { Search } from "lucide-react";
+import SearchResults from "./SearchResults";
+import { useState } from "react";
+
+export default function SearchBar({ onSearch, searchResults }) {
+  const [query, setQuery] = useState('');
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setQuery(value);
+    onSearch(value);
+  };
+
   return (
-    <div className="space-y-3">
-      <div className="flex-1 bg-white rounded-lg flex items-center px-4 py-3 shadow-lg">
-        <Search size={20} className="text-gray-300 min-w-[20px]" />
-        <input 
+    <div className="relative">
+      <div className="relative flex items-center bg-white rounded-lg">
+        <Search className="w-5 h-5 text-gray-400 ml-3" />
+        <input
           type="text"
-          placeholder="Lokasi, kata kunci, area, proyek..."
-          className="flex-1 ml-3 outline-none text-sm text-gray-600 placeholder:text-gray-300"
+          placeholder="Cari berdasarkan lokasi, area, atau nama properti"
+          className="w-full py-3 px-3 rounded-lg focus:outline-none"
+          value={query}
+          onChange={handleChange}
         />
-        <button className="hover:text-tosca-200 transition-colors">
-          <Filter size={20} className="text-gray-300" />
-        </button>
       </div>
-      <button className="w-full bg-tosca-100 text-white py-3 rounded-lg font-medium 
-                       hover:bg-tosca-300 active:bg-tosca-400 
-                       transition-colors focus:outline-none focus:ring-2 
-                       focus:ring-offset-2 focus:ring-tosca-200
-                       shadow-lg">
-        Cari
-      </button>
+      <SearchResults results={searchResults} />
     </div>
-  )
+  );
 }
