@@ -113,6 +113,16 @@ export default function PropertyCard({
     <>
       <div className="relative h-48">
         <Image src={thumbnail} alt={name} fill className="object-cover" />
+        <div className="absolute w-full h-full flex items-center justify-center">
+          <Image
+            src="/images/Watermark-SPRO.webp"
+            alt="Watermark"
+            width={200}
+            height={20}
+            sizes="100vw"
+            className="object-contain w-auto h-64"
+          />
+        </div>
         <div className="absolute bottom-3 left-3 bg-tosca-200 text-white px-3 py-1 rounded-md">
           Start from Rp {priceStart}
         </div>
@@ -139,7 +149,17 @@ export default function PropertyCard({
     <>
       <div className="relative h-48">
         <Image src={gallery[0].src} alt={name} fill className="object-cover" />
-      </div>
+        <div className="absolute w-full h-full flex items-center justify-center">
+          <Image
+            src="/images/Watermark-SPRO.webp"
+            alt="Watermark"
+            width={200}
+            height={20}
+            sizes="100vw"
+            className="object-contain w-auto h-80 opacity-50"
+          />
+        </div>
+      </div>{" "}
       <div className="p-4">
         <h3 className="font-medium text-gray-800 mb-2">{name}</h3>
         <div className="flex items-center text-gray-500 text-sm mb-2">
