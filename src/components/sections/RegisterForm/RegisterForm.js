@@ -1,6 +1,6 @@
 // src/components/sections/RegisterForm/RegisterForm.js
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import {
   User,
@@ -78,6 +78,7 @@ export default function RegisterForm() {
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const notyf = new Notyf({
