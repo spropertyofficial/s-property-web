@@ -1,3 +1,4 @@
+// src/components/sections/RegisterForm/RegisterForm.js
 "use client";
 import { useState } from "react";
 import Swal from "sweetalert2";
@@ -10,8 +11,6 @@ import {
   FileText,
   CreditCard,
   Wallet,
-  Eye,
-  EyeOff,
 } from "lucide-react";
 import Link from "next/link";
 import { Notyf } from "notyf";
