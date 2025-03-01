@@ -1,6 +1,6 @@
 // src/components/sections/RegisterForm/RegisterForm.js
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import {
   User,
@@ -29,9 +29,11 @@ export default function RegisterForm() {
     npwpFile: null,
     bankBookFile: null,
   });
-  const Swal = dynamic(() => import("sweetalert2"), {
+  const Swal = dynamic(() => import("sweetalert2"), { ssr: false });
+  const Notyf = dynamic(() => import("notyf").then((mod) => mod.Notyf), {
     ssr: false,
   });
+  const DatePicker = dynamic(() => import("react-datepicker"), { ssr: false });
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -77,43 +79,48 @@ export default function RegisterForm() {
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
-  const notyf = new Notyf({
-    duration: 3000,
-    dismissible: true,
-    position: {
-      x: "center",
-      y: "top",
-    },
-    types: [
-      {
-        type: "success",
-        background: "#22c55e",
-        icon: {
-          className: "text-white",
-          tagName: "i",
-          innerHTML: "check_circle",
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const notyf = new Notyf({
+        duration: 3000,
+        dismissible: true,
+        position: {
+          x: "center",
+          y: "top",
         },
-      },
-      {
-        type: "error",
-        background: "#ef4444",
-        icon: {
-          className: "text-white",
-          tagName: "i",
-          innerHTML: "error",
-        },
-      },
-      {
-        type: "warning",
-        background: "#f59e0b",
-        icon: {
-          className: "text-white",
-          tagName: "i",
-          innerHTML: "warning",
-        },
-      },
-    ],
-  });
+        types: [
+          {
+            type: "success",
+            background: "#22c55e",
+            icon: {
+              className: "text-white",
+              tagName: "i",
+              innerHTML: "check_circle",
+            },
+          },
+          {
+            type: "error",
+            background: "#ef4444",
+            icon: {
+              className: "text-white",
+              tagName: "i",
+              innerHTML: "error",
+            },
+          },
+          {
+            type: "warning",
+            background: "#f59e0b",
+            icon: {
+              className: "text-white",
+              tagName: "i",
+              innerHTML: "warning",
+            },
+          },
+        ],
+      });
+      setNotyf(notyf);
+    }
+  }, [Notyf]);
   const validateStep = (currentStep) => {
     switch (currentStep) {
       case 1:
@@ -251,7 +258,7 @@ export default function RegisterForm() {
   if (!isBrowser) {
     return null;
   }
-  
+
   return (
     <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
       <h1 className="text-2xl font-bold text-center mb-6 text-green-200">
