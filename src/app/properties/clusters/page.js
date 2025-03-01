@@ -14,7 +14,6 @@ const PropertyDetailPage = ({ params }) => {
     isLoading,
     error,
   } = useGetResidentialByIdQuery(resolvedParams.id);
-console.log(property);
   if (isLoading) {
     return <div className="container mx-auto px-4 py-6">Loading...</div>;
   }
