@@ -17,11 +17,11 @@ import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
 import dynamic from "next/dynamic";
 
-
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
 
 export default function RegisterForm() {
+  const [isBrowser, setIsBrowser] = useState(false);
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [files, setFiles] = useState({
@@ -244,6 +244,14 @@ export default function RegisterForm() {
     }
   };
 
+  useEffect(() => {
+    setIsBrowser(true);
+  }, []);
+
+  if (!isBrowser) {
+    return null;
+  }
+  
   return (
     <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
       <h1 className="text-2xl font-bold text-center mb-6 text-green-200">
