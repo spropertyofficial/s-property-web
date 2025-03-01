@@ -1,6 +1,7 @@
 import RegisterForm from "@/components/sections/RegisterForm";
 
 
+
 const JoinSProPage = () => {
   return (
     <div>
