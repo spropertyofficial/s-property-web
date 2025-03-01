@@ -35,7 +35,7 @@ import {
     { 
       icon: Users, 
       label: 'Join S-Pro', 
-      href: '/join',
+      href: '/join-s-pro',
       ariaLabel: 'Bergabung dengan S-Pro' 
     },
     { 

@@ -3,6 +3,26 @@
 @tailwind utilities;
 
 /* Hide scrollbar but keep functionality */
+.custom-calendar {
+  background-color: white !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+  border: 1px solid #4BD487 !important;
+}
+
+.custom-calendar .react-datepicker__day--selected {
+  background-color: #4BD487 !important;
+  color: white !important;
+}
+
+.custom-calendar .react-datepicker__day:hover {
+  background-color: #4BD487 !important;
+  color: white !important;
+}
+
+.custom-popper {
+  z-index: 50 !important;
+}
 .hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -24,3 +44,4 @@
     radial-gradient(circle at 75px 75px, white 2%, transparent 0%);
   background-size: 100px 100px;
 }
+
