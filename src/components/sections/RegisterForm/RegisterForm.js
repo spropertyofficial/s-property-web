@@ -21,6 +21,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
 
 export default function RegisterForm() {
+  const [notyf, setNotyf] = useState(null);
   const [isBrowser, setIsBrowser] = useState(false);
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
