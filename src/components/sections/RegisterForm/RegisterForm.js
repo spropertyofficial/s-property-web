@@ -1,6 +1,6 @@
 // src/components/sections/RegisterForm/RegisterForm.js
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Swal from "sweetalert2";
 import {
   User,
@@ -78,49 +78,43 @@ export default function RegisterForm() {
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const notyf = new Notyf({
-        duration: 3000,
-        dismissible: true,
-        position: {
-          x: "center",
-          y: "top",
+  const notyf = new Notyf({
+    duration: 3000,
+    dismissible: true,
+    position: {
+      x: "center",
+      y: "top",
+    },
+    types: [
+      {
+        type: "success",
+        background: "#22c55e",
+        icon: {
+          className: "text-white",
+          tagName: "i",
+          innerHTML: "check_circle",
         },
-        types: [
-          {
-            type: "success",
-            background: "#22c55e",
-            icon: {
-              className: "text-white",
-              tagName: "i",
-              innerHTML: "check_circle",
-            },
-          },
-          {
-            type: "error",
-            background: "#ef4444",
-            icon: {
-              className: "text-white",
-              tagName: "i",
-              innerHTML: "error",
-            },
-          },
-          {
-            type: "warning",
-            background: "#f59e0b",
-            icon: {
-              className: "text-white",
-              tagName: "i",
-              innerHTML: "warning",
-            },
-          },
-        ],
-      });
-      setNotyf(notyf);
-    }
-  }, [Notyf]);
+      },
+      {
+        type: "error",
+        background: "#ef4444",
+        icon: {
+          className: "text-white",
+          tagName: "i",
+          innerHTML: "error",
+        },
+      },
+      {
+        type: "warning",
+        background: "#f59e0b",
+        icon: {
+          className: "text-white",
+          tagName: "i",
+          innerHTML: "warning",
+        },
+      },
+    ],
+  });
   const validateStep = (currentStep) => {
     switch (currentStep) {
       case 1:
