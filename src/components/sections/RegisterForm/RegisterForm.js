@@ -1,6 +1,6 @@
+// src/components/sections/RegisterForm/RegisterForm.js
 "use client";
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import {
   User,
@@ -11,17 +11,18 @@ import {
   FileText,
   CreditCard,
   Wallet,
-  Eye,
-  EyeOff,
 } from "lucide-react";
 import Link from "next/link";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css";
+import dynamic from "next/dynamic";
 
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
 
 export default function RegisterForm() {
+  const [notyf, setNotyf] = useState(null);
+  const [isBrowser, setIsBrowser] = useState(false);
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [files, setFiles] = useState({
@@ -29,6 +30,11 @@ export default function RegisterForm() {
     npwpFile: null,
     bankBookFile: null,
   });
+  const Swal = dynamic(() => import("sweetalert2"), { ssr: false });
+  const Notyf = dynamic(() => import("notyf").then((mod) => mod.Notyf), {
+    ssr: false,
+  });
+  const DatePicker = dynamic(() => import("react-datepicker"), { ssr: false });
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -74,43 +80,48 @@ export default function RegisterForm() {
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
-  const notyf = new Notyf({
-    duration: 3000,
-    dismissible: true,
-    position: {
-      x: "center",
-      y: "top",
-    },
-    types: [
-      {
-        type: "success",
-        background: "#22c55e",
-        icon: {
-          className: "text-white",
-          tagName: "i",
-          innerHTML: "check_circle",
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const notyf = new Notyf({
+        duration: 3000,
+        dismissible: true,
+        position: {
+          x: "center",
+          y: "top",
         },
-      },
-      {
-        type: "error",
-        background: "#ef4444",
-        icon: {
-          className: "text-white",
-          tagName: "i",
-          innerHTML: "error",
-        },
-      },
-      {
-        type: "warning",
-        background: "#f59e0b",
-        icon: {
-          className: "text-white",
-          tagName: "i",
-          innerHTML: "warning",
-        },
-      },
-    ],
-  });
+        types: [
+          {
+            type: "success",
+            background: "#22c55e",
+            icon: {
+              className: "text-white",
+              tagName: "i",
+              innerHTML: "check_circle",
+            },
+          },
+          {
+            type: "error",
+            background: "#ef4444",
+            icon: {
+              className: "text-white",
+              tagName: "i",
+              innerHTML: "error",
+            },
+          },
+          {
+            type: "warning",
+            background: "#f59e0b",
+            icon: {
+              className: "text-white",
+              tagName: "i",
+              innerHTML: "warning",
+            },
+          },
+        ],
+      });
+      setNotyf(notyf);
+    }
+  }, [Notyf]);
   const validateStep = (currentStep) => {
     switch (currentStep) {
       case 1:
@@ -174,70 +185,79 @@ export default function RegisterForm() {
   const handleSubmit = async () => {
     if (!validateStep(3)) return;
 
-    // Show loading sweet alert
-    Swal.fire({
-      title: "Sedang Mendaftar",
-      text: "Mohon tunggu sebentar...",
-      icon: "info",
-      showConfirmButton: false,
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
-    });
-
-    try {
-      // Data payload
-      const formPayload = {
-        ...formData,
-        ktpFile: files.ktpFile,
-        npwpFile: files.npwpFile,
-        bankBookFile: files.bankBookFile,
-      };
-
-      // Kirim ke API lokal
-      const response = await fetch("/api/submit-form", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    if (typeof Swal !== "undefined") {
+      Swal.fire({
+        title: "Sedang Mendaftar",
+        text: "Mohon tunggu sebentar...",
+        icon: "info",
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
         },
-        body: JSON.stringify(formPayload),
       });
 
-      const result = await response.json();
+      try {
+        // Data payload
+        const formPayload = {
+          ...formData,
+          ktpFile: files.ktpFile,
+          npwpFile: files.npwpFile,
+          bankBookFile: files.bankBookFile,
+        };
 
-      if (!response.ok) {
+        // Kirim ke API lokal
+        const response = await fetch("/api/submit-form", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formPayload),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          // Error handling with SweetAlert
+          Swal.fire({
+            icon: "error",
+            title: "Pendaftaran Gagal",
+            text:
+              result.message ||
+              "Terjadi kesalahan saat mengirim data. Silakan coba lagi.",
+          });
+          return;
+        }
+
+        // Sukses
+        Swal.fire({
+          icon: "success",
+          title: "Pendaftaran Berhasil",
+          text: "Data Anda telah berhasil dikirim dan sedang diproses.",
+          confirmButtonText: "Lanjutkan",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            nextStep(); // Pindah ke halaman sukses
+          }
+        });
+      } catch (error) {
         // Error handling with SweetAlert
         Swal.fire({
           icon: "error",
           title: "Pendaftaran Gagal",
-          text:
-            result.message ||
-            "Terjadi kesalahan saat mengirim data. Silakan coba lagi.",
+          text: `Terjadi kesalahan: ${error.message}. Silakan coba lagi.`,
         });
-        return;
       }
-
-      // Sukses
-      Swal.fire({
-        icon: "success",
-        title: "Pendaftaran Berhasil",
-        text: "Data Anda telah berhasil dikirim dan sedang diproses.",
-        confirmButtonText: "Lanjutkan",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          nextStep(); // Pindah ke halaman sukses
-        }
-      });
-    } catch (error) {
-      // Error handling with SweetAlert
-      Swal.fire({
-        icon: "error",
-        title: "Pendaftaran Gagal",
-        text: `Terjadi kesalahan: ${error.message}. Silakan coba lagi.`,
-      });
     }
   };
+
+  useEffect(() => {
+    setIsBrowser(true);
+  }, []);
+
+  if (!isBrowser) {
+    return null;
+  }
 
   return (
     <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
