@@ -3,6 +3,7 @@ import { FaWhatsapp } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
 import { formatToShortRupiah } from "@/utils/formatCurrency";
+import Watermark from "@/components/sections/Property/Gallery/components/Watermark";
 
 export default function PropertyCard({
   type = "unit", // "unit", "cluster", "housing"
@@ -16,7 +17,7 @@ export default function PropertyCard({
       case "clusters":
         return renderClusterContent(data);
       case "residentials":
-        return renderHousingContent(data);
+        return renderResidentialContent(data);
       default:
         return null;
     }
@@ -36,16 +37,7 @@ export default function PropertyCard({
     <>
       <div className="relative h-48">
         <Image src={imageUrl} alt={title} fill className="object-cover" />
-        <div className="absolute w-full h-full flex items-center justify-center">
-          <Image
-            src="/images/Watermark-SPRO.webp"
-            alt="Watermark"
-            width={200}
-            height={20}
-            sizes="100vw"
-            className="object-contain w-auto h-64"
-          />
-        </div>
+        <Watermark/>
         <div className="absolute top-3 left-3 bg-gray-800/80 text-white px-2 py-1 rounded text-sm">
           {status}
         </div>
@@ -113,16 +105,7 @@ export default function PropertyCard({
     <>
       <div className="relative h-48">
         <Image src={thumbnail} alt={name} fill className="object-cover" />
-        <div className="absolute w-full h-full flex items-center justify-center">
-          <Image
-            src="/images/Watermark-SPRO.webp"
-            alt="Watermark"
-            width={200}
-            height={20}
-            sizes="100vw"
-            className="object-contain w-auto h-64"
-          />
-        </div>
+        <Watermark/>
         <div className="absolute bottom-3 left-3 bg-tosca-200 text-white px-3 py-1 rounded-md">
           Start from Rp {priceStart}
         </div>
@@ -139,7 +122,7 @@ export default function PropertyCard({
   );
 
   // Render untuk perumahan
-  const renderHousingContent = ({
+  const renderResidentialContent = ({
     name,
     location,
     gallery,
@@ -149,17 +132,8 @@ export default function PropertyCard({
     <>
       <div className="relative h-48">
         <Image src={gallery[0].src} alt={name} fill className="object-cover" />
-        <div className="absolute w-full h-full flex items-center justify-center">
-          <Image
-            src="/images/Watermark-SPRO.webp"
-            alt="Watermark"
-            width={200}
-            height={20}
-            sizes="100vw"
-            className="object-contain w-auto h-80 opacity-50"
-          />
-        </div>
-      </div>{" "}
+        <Watermark />
+      </div>
       <div className="p-4">
         <h3 className="font-medium text-gray-800 mb-2">{name}</h3>
         <div className="flex items-center text-gray-500 text-sm mb-2">

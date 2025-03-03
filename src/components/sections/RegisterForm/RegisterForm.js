@@ -171,7 +171,6 @@ export default function RegisterForm() {
     }
   };
 
-  // Modify the handleSubmit function
   const handleSubmit = async () => {
     if (!validateStep(3)) return;
 

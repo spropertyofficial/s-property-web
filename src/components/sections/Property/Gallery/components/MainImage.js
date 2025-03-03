@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Watermark from "./Watermark";
 
 const MainImage = ({ src, alt, images }) => {
   const [isOverviewOpen, setIsOverviewOpen] = useState(false);
@@ -54,6 +55,7 @@ const MainImage = ({ src, alt, images }) => {
               height={600}
               className="object-contain max-w-full max-h-full"
             />
+            <Watermark/>
 
             <button 
               onClick={handleNext}
@@ -77,6 +79,7 @@ const MainImage = ({ src, alt, images }) => {
           style={{ objectFit: "cover" }}
           quality={100}
         />
+        <Watermark/>
       </div>
     </>
   );
