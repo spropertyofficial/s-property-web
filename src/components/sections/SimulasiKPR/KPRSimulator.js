@@ -2,7 +2,14 @@
 "use client";
 
 import { formatToShortRupiah } from "@/utils/formatCurrency";
+import Image from "next/image";
+import { FaCheckCircle } from "react-icons/fa";
 import { useState, useEffect, useMemo } from "react";
+import BankLogos from "../../../../public/images/BankLogos";
+import {
+  additionalDocumentRequirements,
+  documentRequirements,
+} from "./data/documentRequirements";
 
 export default function KPRSimulator() {
   // State with more descriptive variable names and better initial values
@@ -10,28 +17,30 @@ export default function KPRSimulator() {
   const [uangMuka, setUangMuka] = useState("");
   const [jangkaWaktu, setJangkaWaktu] = useState("");
   const [sukuBunga, setSukuBunga] = useState("");
-  
+  const [uangMukaPercentage, setUangMukaPercentage] = useState("");
+
   // Derived states using useMemo for better performance
-  const hargaPropertiNum = useMemo(() => 
-    parseFloat(hargaProperti.replace(/\D/g, "")) || 0
-  , [hargaProperti]);
-  
-  const uangMukaNum = useMemo(() => 
-    parseFloat(uangMuka.replace(/\D/g, "")) || 0
-  , [uangMuka]);
-  
+  const hargaPropertiNum = useMemo(
+    () => parseFloat(hargaProperti.replace(/\D/g, "")) || 0,
+    [hargaProperti]
+  );
+
+  const uangMukaNum = useMemo(
+    () => parseFloat(uangMuka.replace(/\D/g, "")) || 0,
+    [uangMuka]
+  );
+
   const jumlahPinjaman = useMemo(() => {
     const pinjaman = hargaPropertiNum - uangMukaNum;
     return pinjaman > 0 ? pinjaman : 0;
   }, [hargaPropertiNum, uangMukaNum]);
-  
-  const jangkaWaktuNum = useMemo(() => 
-    parseFloat(jangkaWaktu) || 0
-  , [jangkaWaktu]);
-  
-  const sukuBungaNum = useMemo(() => 
-    parseFloat(sukuBunga) || 0
-  , [sukuBunga]);
+
+  const jangkaWaktuNum = useMemo(
+    () => parseFloat(jangkaWaktu) || 0,
+    [jangkaWaktu]
+  );
+
+  const sukuBungaNum = useMemo(() => parseFloat(sukuBunga) || 0, [sukuBunga]);
 
   // Calculate monthly payment using useMemo instead of useEffect + state
   const angsuranBulanan = useMemo(() => {
@@ -46,7 +55,8 @@ export default function KPRSimulator() {
 
     // Monthly payment formula: P * r * (1+r)^n / ((1+r)^n - 1)
     // P = loan amount, r = monthly interest rate, n = term in months
-    const pembilang = bungaBulanan * Math.pow(1 + bungaBulanan, jangkaWaktuBulan);
+    const pembilang =
+      bungaBulanan * Math.pow(1 + bungaBulanan, jangkaWaktuBulan);
     const penyebut = Math.pow(1 + bungaBulanan, jangkaWaktuBulan) - 1;
     const angsuran = jumlahPinjaman * (pembilang / penyebut);
 
@@ -65,12 +75,31 @@ export default function KPRSimulator() {
     setHargaProperti(value);
   };
 
+  const handleUangMukaPercentageChange = (e) => {
+    const value = e.target.value.replace(/[^\d.]/g, "");
+    setUangMukaPercentage(value);
+
+    if (value === "") {
+      setUangMuka("");
+      return;
+    }
+
+    if (parseFloat(value) <= 100) {
+      const calculatedUangMuka = Math.round(
+        (parseFloat(value) / 100) * hargaPropertiNum
+      );
+      setUangMuka(calculatedUangMuka.toString());
+    }
+  };
+
   const handleUangMukaChange = (e) => {
     const value = e.target.value.replace(/\D/g, "");
-    // Ensure uang muka doesn't exceed harga properti
     const uangMukaValue = parseFloat(value) || 0;
     if (uangMukaValue <= hargaPropertiNum) {
       setUangMuka(value);
+      // Update percentage when nominal changes
+      const percentage = (uangMukaValue / hargaPropertiNum) * 100;
+      setUangMukaPercentage(percentage.toFixed(2));
     }
   };
 
@@ -90,10 +119,10 @@ export default function KPRSimulator() {
     const decimalCount = (value.match(/\./g) || []).length;
     if (decimalCount <= 1) {
       // Limit to two decimal places
-      const parts = value.split('.');
+      const parts = value.split(".");
       if (parts.length > 1 && parts[1].length > 2) {
         parts[1] = parts[1].substring(0, 2);
-        setSukuBunga(parts.join('.'));
+        setSukuBunga(parts.join("."));
       } else {
         setSukuBunga(value);
       }
@@ -151,11 +180,16 @@ export default function KPRSimulator() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-tosca-400 mb-2" htmlFor="hargaProperti">
+                <label
+                  className="block text-tosca-400 mb-2"
+                  htmlFor="hargaProperti"
+                >
                   Harga Properti (Rp)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                    Rp
+                  </span>
                   <input
                     id="hargaProperti"
                     type="text"
@@ -170,31 +204,47 @@ export default function KPRSimulator() {
 
               <div>
                 <label className="block text-tosca-400 mb-2" htmlFor="uangMuka">
-                  Uang Muka (Rp)
+                  Uang Muka
                 </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
-                  <input
-                    id="uangMuka"
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="Masukkan uang muka"
-                    className="w-full px-4 py-3 pl-10 rounded-lg border border-tosca-100 focus:ring-2 focus:ring-tosca-200"
-                    value={formatRupiah(uangMukaNum)}
-                    onChange={handleUangMukaChange}
-                  />
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="relative col-span-2">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      Rp
+                    </span>
+                    <input
+                      id="uangMuka"
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="Masukkan nominal uang muka"
+                      className="w-full px-4 py-3 pl-10 rounded-lg border border-tosca-100 focus:ring-2 focus:ring-tosca-200"
+                      value={formatRupiah(uangMukaNum)}
+                      onChange={handleUangMukaChange}
+                    />
+                  </div>
+                  <div className="relative">
+                    <input
+                      id="uangMukaPercentage"
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="Persentase"
+                      className="w-full px-4 py-3 rounded-lg border border-tosca-100 focus:ring-2 focus:ring-tosca-200"
+                      value={uangMukaPercentage}
+                      onChange={handleUangMukaPercentageChange}
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                      %
+                    </span>
+                  </div>
                 </div>
-                {hargaPropertiNum > 0 && uangMukaNum > 0 && (
-                  <p className="text-sm text-gray-600 mt-1">
-                    {persentaseUangMuka}% dari harga properti
-                  </p>
-                )}
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-tosca-400 mb-2" htmlFor="jangkaWaktu">
+                <label
+                  className="block text-tosca-400 mb-2"
+                  htmlFor="jangkaWaktu"
+                >
                   Jangka Waktu (Tahun)
                 </label>
                 <input
@@ -209,7 +259,10 @@ export default function KPRSimulator() {
               </div>
 
               <div>
-                <label className="block text-tosca-400 mb-2" htmlFor="sukuBunga">
+                <label
+                  className="block text-tosca-400 mb-2"
+                  htmlFor="sukuBunga"
+                >
                   Suku Bunga (% per Tahun)
                 </label>
                 <div className="relative">
@@ -222,7 +275,9 @@ export default function KPRSimulator() {
                     value={sukuBunga}
                     onChange={handleSukuBungaChange}
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">%</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                    %
+                  </span>
                 </div>
               </div>
             </div>
@@ -232,7 +287,9 @@ export default function KPRSimulator() {
                 Jumlah Pinjaman (Rp)
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                  Rp
+                </span>
                 <input
                   type="text"
                   readOnly
@@ -269,10 +326,94 @@ export default function KPRSimulator() {
               <p className="font-semibold mb-2">Catatan Penting:</p>
               <ul className="list-disc pl-5 space-y-1">
                 <li>Hasil simulasi ini bersifat perkiraan.</li>
-                <li>Biaya proses KPR dan biaya tambahan lainnya tidak termasuk dalam simulasi.</li>
-                <li>Untuk ilustrasi angsuran pasti, silakan konsultasikan dengan pihak bank.</li>
+                <li>
+                  Biaya proses KPR dan biaya tambahan lainnya tidak termasuk
+                  dalam simulasi.
+                </li>
+                <li>
+                  Untuk ilustrasi angsuran pasti, silakan konsultasikan dengan
+                  pihak bank.
+                </li>
               </ul>
             </div>
+          </div>
+        </div>
+
+        <div className="mt-10 bg-white/90 rounded-lg shadow-md p-6">
+          <div className="mt-8 sm:mt-12 bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-tosca-400 text-center">
+              Dokumen yang dibutuhkan untuk mengajukan KPR
+            </h2>
+            <div className="space-y-4 sm:space-y-6">
+              {documentRequirements.map((section, idx) => (
+                <div key={idx}>
+                  <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-4 text-tosca-300">
+                    {section.category}
+                  </h3>
+                  <ul
+                    className={`grid gap-2 ${
+                      section.items.length > 4
+                        ? "md:grid-cols-2"
+                        : "grid-cols-1"
+                    }`}
+                  >
+                    {section.items.map((item, index) => (
+                      <li
+                        key={index}
+                        className="flex items-start text-xs sm:text-sm text-gray-700"
+                      >
+                        <FaCheckCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-500 flex-shrink-0 mt-0.5 sm:mt-0" />
+                        <span className="flex-1">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="mt-8 sm:mt-12 bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-tosca-400 text-center">
+              Dokumen Tambahan
+            </h2>
+            <div className="space-y-4 sm:space-y-6">
+              {additionalDocumentRequirements.map((section, idx) => (
+                <div key={idx}>
+                  <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-4 text-tosca-300">
+                    {section.category}
+                  </h3>
+                  <ul className="grid gap-2 md:grid-cols-2">
+                    {section.items.map((item, index) => (
+                      <li
+                        key={index}
+                        className="flex items-start sm:items-center text-xs sm:text-sm text-gray-700"
+                      >
+                        <FaCheckCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-500 flex-shrink-0 mt-0.5 sm:mt-0" />
+                        <span className="flex-1">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Bank yang Bekerjasama */}
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-4 text-center text-tosca-100">
+              Bank Rekanan Kami
+            </h3>
+          </div>
+          <div className="flex flex-wrap justify-center items-center gap-4">
+            {BankLogos.map((bank) => (
+              <Image
+                key={bank.name}
+                src={bank.logo}
+                alt={bank.name}
+                width={80}
+                height={100}
+                className="w-auto h-7 object-contain"
+                loading="lazy"
+              />
+            ))}
           </div>
         </div>
       </div>
