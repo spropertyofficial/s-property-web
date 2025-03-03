@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import axios from 'axios';
 
 // URL Google Apps Script web app Anda
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxN9tpGxZR-ucpFpisoIWBh7EkWBxH3RgAANdqhdwVB55JbsXHm5WrOMeJSfOb-ou0FvQ/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyAd49A4A4IlpZkRopzgCN9iX_brhzTczeyYst91_2aRcgdQW40KvCOwAk_DJQGowDDAA/exec';
 
 export async function POST(request) {
   try {
