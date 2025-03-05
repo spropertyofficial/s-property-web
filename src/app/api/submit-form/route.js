@@ -18,46 +18,54 @@ export async function POST(request) {
       headers: {
         "Content-Type": "application/json",
       },
-      validateStatus: false, // Untuk mendapatkan response meskipun error
     });
 
     // Log response untuk debugging
     console.log("Google Apps Script response status:", response.status);
-    if (response.data) {
-      console.log("Google Apps Script response:", response.data);
-    }
+    console.log("Google Apps Script response data:", response.data);
 
-    // Jika response sukses
-    if (
-      response.status === 200 &&
-      response.data &&
-      response.data.result === "success"
-    ) {
-      return NextResponse.json({
-        success: true,
-        message: "Data berhasil disimpan",
-      });
-    }
+    // Pastikan respons selalu dalam format JSON
+    return NextResponse.json({
+      success: response.status === 200,
+      message: response.data?.message || "Proses selesai",
+      details: response.data,
+    }, { 
+      status: response.status 
+    });
 
-    // Jika error dari Google Apps Script
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Error dari Google Apps Script",
-        details: response.data || "No response data",
-      },
-      { status: 500 }
-    );
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error detail:", error);
 
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Error saat mengirim data",
-        details: error.message,
-      },
-      { status: 500 }
-    );
+    // Tangani berbagai jenis error
+    if (error.response) {
+      // Error response dari server
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Error dari server eksternal",
+          details: error.response.data,
+        },
+        { status: error.response.status || 500 }
+      );
+    } else if (error.request) {
+      // Request terkirim tapi tidak ada respons
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Tidak ada respons dari server",
+        },
+        { status: 500 }
+      );
+    } else {
+      // Error lainnya
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Error saat mengirim data",
+          details: error.message,
+        },
+        { status: 500 }
+      );
+    }
   }
 }

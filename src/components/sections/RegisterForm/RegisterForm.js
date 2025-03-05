@@ -54,9 +54,9 @@ export default function RegisterForm() {
     // Validasi ukuran file (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       Swal.fire({
-        icon: 'error',
-        title: 'Ukuran File Terlalu Besar',
-        text: 'Maksimal ukuran file adalah 5MB.',
+        icon: "error",
+        title: "Ukuran File Terlalu Besar",
+        text: "Maksimal ukuran file adalah 5MB.",
       });
       return;
     }
@@ -86,18 +86,18 @@ export default function RegisterForm() {
           !formData.email
         ) {
           Swal.fire({
-            icon: 'error',
-            title: 'Data Tidak Lengkap',
-            text: 'Silakan lengkapi semua data yang wajib diisi',
+            icon: "error",
+            title: "Data Tidak Lengkap",
+            text: "Silakan lengkapi semua data yang wajib diisi",
           });
           return false;
         }
         // Validasi format email
         if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
           Swal.fire({
-            icon: 'error',
-            title: 'Format Email Salah',
-            text: 'Format email tidak valid',
+            icon: "error",
+            title: "Format Email Salah",
+            text: "Format email tidak valid",
           });
           return false;
         }
@@ -112,9 +112,9 @@ export default function RegisterForm() {
           !files.npwpFile
         ) {
           Swal.fire({
-            icon: 'error',
-            title: 'Data Tidak Lengkap',
-            text: 'Silakan lengkapi semua data yang wajib diisi dan upload KTP juga NPWP Anda',
+            icon: "error",
+            title: "Data Tidak Lengkap",
+            text: "Silakan lengkapi semua data yang wajib diisi dan upload KTP juga NPWP Anda",
           });
           return false;
         }
@@ -128,9 +128,9 @@ export default function RegisterForm() {
           !files.bankBookFile
         ) {
           Swal.fire({
-            icon: 'error',
-            title: 'Data Tidak Lengkap',
-            text: 'Silakan lengkapi semua data rekening yang wajib diisi dan upload foto buku tabungan',
+            icon: "error",
+            title: "Data Tidak Lengkap",
+            text: "Silakan lengkapi semua data rekening yang wajib diisi dan upload foto buku tabungan",
           });
           return false;
         }
@@ -148,7 +148,11 @@ export default function RegisterForm() {
   };
 
   const handleSubmit = async () => {
+    // Validasi step
     if (!validateStep(3)) return;
+
+    // Aktifkan loading state
+    setIsLoading(true);
 
     Swal.fire({
       title: "Sedang Mendaftar",
@@ -162,7 +166,6 @@ export default function RegisterForm() {
     });
 
     try {
-      // Data payload
       const formPayload = {
         ...formData,
         ktpFile: files.ktpFile,
@@ -170,7 +173,6 @@ export default function RegisterForm() {
         bankBookFile: files.bankBookFile,
       };
 
-      // Kirim ke API lokal
       const response = await fetch("/api/submit-form", {
         method: "POST",
         headers: {
@@ -181,8 +183,23 @@ export default function RegisterForm() {
 
       const result = await response.json();
 
-      if (!response.ok) {
-        // Error handling with SweetAlert
+      // Nonaktifkan loading state
+      setIsLoading(false);
+
+      if (result.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Pendaftaran Berhasil",
+          text:
+            result.message ||
+            "Data Anda telah berhasil dikirim dan sedang diproses.",
+          confirmButtonText: "Lanjutkan",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            nextStep(); // Pindah ke halaman sukses
+          }
+        });
+      } else {
         Swal.fire({
           icon: "error",
           title: "Pendaftaran Gagal",
@@ -190,22 +207,11 @@ export default function RegisterForm() {
             result.message ||
             "Terjadi kesalahan saat mengirim data. Silakan coba lagi.",
         });
-        return;
       }
-
-      // Sukses
-      Swal.fire({
-        icon: "success",
-        title: "Pendaftaran Berhasil",
-        text: "Data Anda telah berhasil dikirim dan sedang diproses.",
-        confirmButtonText: "Lanjutkan",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          nextStep(); // Pindah ke halaman sukses
-        }
-      });
     } catch (error) {
-      // Error handling with SweetAlert
+      // Nonaktifkan loading state
+      setIsLoading(false);
+
       Swal.fire({
         icon: "error",
         title: "Pendaftaran Gagal",
@@ -213,7 +219,6 @@ export default function RegisterForm() {
       });
     }
   };
-
   return (
     <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
       <h1 className="text-2xl font-bold text-center mb-6 text-green-200">
