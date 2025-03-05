@@ -415,6 +415,21 @@ export default function KPRSimulator() {
               />
             ))}
           </div>
+
+          <div className="mt-12 text-center">
+            <h3 className="text-xl sm:text-2xl font-bold text-tosca-400 mb-4">
+              Informasi Lebih Lanjut? Hubungi Kami!
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Tim kami siap membantu Anda dengan proses KPR Anda
+            </p>
+            <a
+              href="https://wa.me/6285123123891"
+              className="inline-block bg-tosca-200 text-white px-8 py-3 rounded-lg font-semibold hover:bg-tosca-400 transition duration-300"
+            >
+              Hubungi Kami
+            </a>
+          </div>
         </div>
       </div>
     </div>

@@ -121,7 +121,7 @@ export default function RegisterForm() {
       });
       setNotyf(notyf);
     }
-  }, [Notyf]);
+  }, []);
   const validateStep = (currentStep) => {
     switch (currentStep) {
       case 1:
