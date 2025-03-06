@@ -4,7 +4,9 @@ import axios from "axios";
 
 // Gunakan environment variable dengan fallback
 const GOOGLE_SCRIPT_URL = 
-  process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+  process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL || 
+  "https://script.google.com/macros/s/AKfycby0t3tR-2V-QnD7x__p12zDWT66i9L2lrtILSObJb8S37IfHiqlQRDUby2SZL7_J7ZPrg/exec";
+
 // CORS Headers
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
