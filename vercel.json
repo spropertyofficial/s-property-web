@@ -1,0 +1,15 @@
+{
+    "headers": [
+      {
+        "source": "/api/submit-form",
+        "headers": [
+          { "key": "Access-Control-Allow-Origin", "value": "*" },
+          { "key": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
+          { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+        ]
+      }
+    ],
+    "env": {
+      "GOOGLE_SCRIPT_URL": "https://script.google.com/macros/s/AKfycby0t3tR-2V-QnD7x__p12zDWT66i9L2lrtILSObJb8S37IfHiqlQRDUby2SZL7_J7ZPrg/exec"
+    }
+  }
