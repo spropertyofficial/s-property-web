@@ -1,15 +1,20 @@
 {
-    "headers": [
-      {
-        "source": "/api/submit-form",
-        "headers": [
-          { "key": "Access-Control-Allow-Origin", "value": "*" },
-          { "key": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
-          { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
-        ]
-      }
-    ],
+  "headers": [
+    {
+      "source": "/api/submit-form",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+      ]
+    }
+  ],
+  "env": {
+    "NEXT_PUBLIC_GOOGLE_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbz9kATRtho_rf8FThLTC8VBSgWp4_ROMFBULIGBkvEcmgrQpfI5mUPnwuzoHDKCS8-7dA/exec"
+  },
+  "build": {
     "env": {
-      "GOOGLE_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbymsVxTqIq1WLT46DTEwce5-ZUo9hTsJNWBP-tOvvl8xO9LEA2du79RvJ7CztV7BorT-g/exec"
+      "NEXT_PUBLIC_GOOGLE_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbz9kATRtho_rf8FThLTC8VBSgWp4_ROMFBULIGBkvEcmgrQpfI5mUPnwuzoHDKCS8-7dA/exec"
     }
   }
+}
