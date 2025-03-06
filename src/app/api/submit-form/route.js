@@ -4,7 +4,7 @@ import axios from "axios";
 
 // URL Google Apps Script web app Anda
 const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbzkBQDK9E_D5gjUymH7p8tpLcZb9_twWlszmGr3pDrS-RLLwOnPmfxG2oWLEj55J9LJqA/exec";
+  "https://script.google.com/macros/s/AKfycby0t3tR-2V-QnD7x__p12zDWT66i9L2lrtILSObJb8S37IfHiqlQRDUby2SZL7_J7ZPrg/exec";
 
 export async function POST(request) {
   try {
@@ -12,6 +12,7 @@ export async function POST(request) {
     const formData = await request.json();
 
     console.log("Submitting data to Google Apps Script...");
+    console.log("Payload:", JSON.stringify(formData, null, 2));
 
     // Kirim data ke Google Apps Script
     const response = await axios.post(GOOGLE_SCRIPT_URL, formData, {
@@ -25,16 +26,21 @@ export async function POST(request) {
     console.log("Google Apps Script response data:", response.data);
 
     // Pastikan respons selalu dalam format JSON
-    return NextResponse.json({
-      success: response.status === 200,
-      message: response.data?.message || "Proses selesai",
-      details: response.data,
-    }, { 
-      status: response.status 
-    });
-
+    return NextResponse.json(
+      {
+        success: response.status === 200,
+        message: response.data?.message || "Proses selesai",
+        details: response.data,
+      },
+      {
+        status: response.status,
+      }
+    );
   } catch (error) {
-    console.error("Error detail:", error);
+    // Log error detail
+    console.error("Submission error:", error);
+    console.error("Error response:", error.response?.data);
+    console.error("Error status:", error.response?.status);
 
     // Tangani berbagai jenis error
     if (error.response) {
