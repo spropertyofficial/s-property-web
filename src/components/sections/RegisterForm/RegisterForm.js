@@ -13,11 +13,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Swal from "sweetalert2";
-import dynamic from "next/dynamic";
-
 import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from "react-datepicker";
 
 export default function RegisterForm() {
+  const [notyf, setNotyf] = useState(null);
+  const [isBrowser, setIsBrowser] = useState(false);
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [files, setFiles] = useState({
@@ -25,7 +26,6 @@ export default function RegisterForm() {
     npwpFile: null,
     bankBookFile: null,
   });
-  const DatePicker = dynamic(() => import("react-datepicker"), { ssr: false });
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -75,6 +75,7 @@ export default function RegisterForm() {
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
+  
   const validateStep = (currentStep) => {
     switch (currentStep) {
       case 1:
@@ -179,16 +180,14 @@ export default function RegisterForm() {
         body: JSON.stringify(formPayload),
       });
 
-      const result = await response.json();
+        const result = await response.json();
 
       if (!response.ok) {
         // Error handling with SweetAlert
         Swal.fire({
           icon: "error",
           title: "Pendaftaran Gagal",
-          text:
-            result.message ||
-            "Terjadi kesalahan saat mengirim data. Silakan coba lagi.",
+          text: `Terjadi kesalahan: ${error.message}. Silakan coba lagi.`,
         });
         return;
       }
