@@ -1,13 +1,11 @@
 // app/api/submit-form/route.js
 import { NextResponse } from "next/server";
-import axios from "axios";
 
-// Gunakan environment variable dengan fallback
+// Hapus axios, gunakan fetch native
 const GOOGLE_SCRIPT_URL = 
   process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL || 
-  "https://script.google.com/macros/s/AKfycby0t3tR-2V-QnD7x__p12zDWT66i9L2lrtILSObJb8S37IfHiqlQRDUby2SZL7_J7ZPrg/exec";
+  "https://script.google.com/macros/s/AKfycbymsVxTqIq1WLT46DTEwce5-ZUo9hTsJNWBP-tOvvl8xO9LEA2du79RvJ7CztV7BorT-g/exec";
 
-// CORS Headers
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -22,71 +20,81 @@ export async function OPTIONS() {
 }
 
 export async function POST(request) {
-  // Log request details
   console.log('Incoming request URL:', GOOGLE_SCRIPT_URL);
   console.log('Request method:', request.method);
 
   try {
-    // Parse request body
     const formData = await request.json();
     console.log('Parsed form data:', JSON.stringify(formData, null, 2));
 
-    // Axios configuration
-    const axiosConfig = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...CORS_HEADERS
-      },
-      timeout: 10000 // 10 second timeout
-    };
+    // Gunakan fetch dengan timeout manual
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 detik
 
-    // Send data to Google Apps Script
-    const response = await axios.post(GOOGLE_SCRIPT_URL, formData, axiosConfig);
+    try {
+      const response = await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...CORS_HEADERS
+        },
+        body: JSON.stringify(formData),
+        signal: controller.signal
+      });
 
-    console.log('Google Script response status:', response.status);
-    console.log('Google Script response data:', response.data);
+      clearTimeout(timeoutId);
 
-    // Return response with CORS headers
-    return NextResponse.json(
-      {
-        success: response.status === 200,
-        message: response.data?.message || "Proses selesai",
-        details: response.data
-      }, 
-      { 
-        status: response.status,
-        headers: CORS_HEADERS 
-      }
-    );
+      console.log('Google Script response status:', response.status);
+      
+      const result = await response.json();
+      console.log('Google Script response data:', result);
+
+      return NextResponse.json(
+        {
+          success: response.ok,
+          message: result?.message || "Proses selesai",
+          details: result
+        }, 
+        { 
+          status: response.status,
+          headers: CORS_HEADERS 
+        }
+      );
+
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      console.error('Fetch Error:', fetchError);
+
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Gagal terhubung ke server",
+          details: {
+            errorName: fetchError.name,
+            errorMessage: fetchError.message
+          }
+        },
+        { 
+          status: 500,
+          headers: CORS_HEADERS 
+        }
+      );
+    }
 
   } catch (error) {
-    // Detailed error logging
-    console.error('Submission Error:');
-    console.error('Error Name:', error.name);
-    console.error('Error Message:', error.message);
-    
-    if (error.response) {
-      console.error('Response Status:', error.response.status);
-      console.error('Response Data:', error.response.data);
-    }
-
-    if (error.request) {
-      console.error('Request Details:', error.request);
-    }
+    console.error('Submission Error:', error);
 
     return NextResponse.json(
       {
         success: false,
-        message: error.response?.data?.message || "Terjadi kesalahan saat mengirim data",
+        message: "Terjadi kesalahan saat memproses data",
         details: {
           errorName: error.name,
-          errorMessage: error.message,
-          responseStatus: error.response?.status,
-          responseData: error.response?.data
+          errorMessage: error.message
         }
       },
       { 
-        status: error.response?.status || 500,
+        status: 500,
         headers: CORS_HEADERS 
       }
     );
