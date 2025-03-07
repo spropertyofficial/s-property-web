@@ -1,7 +1,8 @@
 {
   "functions": {
-    "app/api/submit-form.js": {
-      "maxDuration": 30
+    "app/api/submit-form/route.js": {
+      "maxDuration": 30,
+      "memory": 1024
     }
   },
   "headers": [
@@ -21,5 +22,5 @@
     "env": {
       "NEXT_PUBLIC_GOOGLE_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbz9kATRtho_rf8FThLTC8VBSgWp4_ROMFBULIGBkvEcmgrQpfI5mUPnwuzoHDKCS8-7dA/exec"
     }
-  } 
+  }
 }
