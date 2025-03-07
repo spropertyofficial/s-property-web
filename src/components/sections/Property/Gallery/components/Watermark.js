@@ -9,7 +9,7 @@ export default function Watermark() {
         width={50}
         height={30}
         sizes="100vw"
-        className="object-cover w-auto h-64 opacity-80"
+        className="object-cover w-auto h-36 opacity-80"
       />
     </div>
   );
