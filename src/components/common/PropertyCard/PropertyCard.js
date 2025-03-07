@@ -36,8 +36,14 @@ export default function PropertyCard({
   }) => (
     <>
       <div className="relative h-48">
-        <Image src={imageUrl} alt={title} fill className="object-cover" />
-        <Watermark/>
+        <Image
+          src={imageUrl}
+          alt={title}
+          fill
+          sizes="(max-width: 768px) 100vw"
+          className="object-cover"
+        />
+        <Watermark />
         <div className="absolute top-3 left-3 bg-gray-800/80 text-white px-2 py-1 rounded text-sm">
           {status}
         </div>
@@ -105,7 +111,7 @@ export default function PropertyCard({
     <>
       <div className="relative h-48">
         <Image src={thumbnail} alt={name} fill className="object-cover" />
-        <Watermark/>
+        <Watermark />
         <div className="absolute bottom-3 left-3 bg-tosca-200 text-white px-3 py-1 rounded-md">
           Start from Rp {priceStart}
         </div>
@@ -131,7 +137,13 @@ export default function PropertyCard({
   }) => (
     <>
       <div className="relative h-48">
-        <Image src={gallery[0].src} alt={name} fill className="object-cover" />
+        <Image
+          src={gallery[0].src}
+          alt={name}
+          fill
+          sizes=""
+          className="object-cover"
+        />
         <Watermark />
       </div>
       <div className="p-4">

@@ -43,10 +43,10 @@ const Thumbnails = ({ images, onSelect, activeImage }) => {
                 <Image
                   src="/images/Watermark-SPRO.webp"
                   alt="Watermark"
-                  width={80}
+                  width={50}
                   height={30}
                   sizes="100vw"
-                  className="object-cover w-auto h-auto"
+                  className="object-cover w-auto h-20"
                 />
               </div>
             </div>
