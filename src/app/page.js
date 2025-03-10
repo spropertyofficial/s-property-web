@@ -13,7 +13,7 @@ export default function Home() {
       <div>
         <SearchSection />
       </div>
-      <div className="px-20">
+      <div className="lg:px-20">
         <CategoryMenu />
         <ExploreCities />
         <PropertyListing
