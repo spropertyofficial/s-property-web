@@ -342,7 +342,7 @@ export default function KPRSimulator() {
         <div className="mt-10 bg-white/90 rounded-lg shadow-md p-6">
           <div className="mt-8 sm:mt-12 bg-white rounded-lg shadow-md p-4 sm:p-6">
             <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-tosca-400 text-center">
-              Dokumen yang dibutuhkan untuk mengajukan KPR
+              Dokumen Pengajuan KPR
             </h2>
             <div className="space-y-4 sm:space-y-6">
               {documentRequirements.map((section, idx) => (
@@ -399,7 +399,7 @@ export default function KPRSimulator() {
           {/* Bank yang Bekerjasama */}
           <div className="mt-8">
             <h3 className="text-lg font-semibold mb-4 text-center text-tosca-100">
-              Bank Rekanan Kami
+              Bank Rekanan
             </h3>
           </div>
           <div className="flex flex-wrap justify-center items-center gap-4">
