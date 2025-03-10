@@ -148,7 +148,7 @@ export default function PropertyCard({
       </div>
       <div className="p-4">
         <h3 className="font-medium text-gray-800 mb-2">{name}</h3>
-        <div className="flex items-center text-gray-500 text-sm mb-2">
+        <div className="flex items-start text-gray-500 text-xs mb-2">
           <MapPin size={14} className="mr-1" />
           <span>
             {location.region}, {location.city}, {location.area}

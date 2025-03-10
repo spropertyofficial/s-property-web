@@ -34,7 +34,7 @@ export default function SearchSection() {
   };
 
   return (
-    <div className="relative">
+    <div className="relative lg:px-20">
       <div className="absolute inset-0 bg-tosca-200"></div>
       <div className="relative px-6 pb-8 pt-6">
         <h1 className="text-white text-xl font-medium mb-4">
