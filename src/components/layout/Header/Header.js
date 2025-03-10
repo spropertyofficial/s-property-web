@@ -1,15 +1,20 @@
 import Image from 'next/image'
 import BurgerMenu from './components/BurgerMenu'
 import Link from 'next/link'
+import Navigation from './components/Navigation'
 
 export default function Header() {
   return (
-    <div className="w-full sticky top-0 z-50">
-      {/* Header section */}
+    <div className="w-full sticky top-0 z-50 lg:px-12">
       <div className="bg-white">
         <div className="px-6">
           <div className="flex items-center justify-between">
-            <BurgerMenu />
+            {/* Mobile Menu */}
+            <div className="block lg:hidden">
+              <BurgerMenu />
+            </div>
+            
+            {/* Logo */}
             <Link href="/">
               <Image
                 src="/images/logo.webp"
@@ -20,7 +25,14 @@ export default function Header() {
                 priority
               />
             </Link>
-            <div className="w-8"></div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden lg:block">
+              <Navigation />
+            </div>
+
+            {/* Spacer for mobile */}
+            <div className="w-8 lg:hidden"></div>
           </div>
         </div>
       </div>

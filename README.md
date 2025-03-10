@@ -1,36 +1,173 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# S-Property Web Documentation
 
-## Getting Started
+## Setup & Requirements
+- Node.js 18.17 or later
+- npm v9.6.7 or later
 
-First, run the development server:
+## Tech Stack
+- Next.js 14
+- Tailwind CSS
+- Lucide Icons
+- HeadlessUI
 
+## Installation Steps
 ```bash
+git clone https://github.com/dvpms/s-property_web
+cd s-property_web
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Project Structure
+```
+s-property-web/
+  ├── src/
+  │   ├── app/         # Next.js pages
+  │   ├── components/  # Reusable components
+  │   └── styles/      # Global styles
+  └── public/          # Static files
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Property URL Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Listing Pages
+- `/properties` - Landing properti
+- `/properties/residentials` - Listing residential
+- `/properties/clusters` - Listing cluster
+- `/properties/units` - Listing unit
 
-## Learn More
+### Detail Pages  
+- `/properties/residential/[id]` - Detail residential
+- `/properties/[residential-id]/[cluster-id]` - Detail cluster
+- `/properties/[residential-id]/[cluster-id]/[unit-id]` - Detail unit
 
-To learn more about Next.js, take a look at the following resources:
+## Components Structure
+```
+src/components/
+├── common/
+│   ├── PropertyCard/
+│   │   └── PropertyCard.js
+│   └── PropertyListing/
+│       └── PropertyListing.js
+└── sections/
+    ├── ResidentialDetail/
+    │   └── ResidentialDetail.js
+    ├── ClusterDetail/
+    │   └── ClusterDetail.js
+    └── UnitDetail/
+        └── UnitDetail.js
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Struktur Folder Properti
+app/properties/
+│
+├── page.tsx                    # Landing page properti utama
+│
+├── layout.tsx                  # Layout khusus properti
+│
+├── residentials/
+│   └── page.tsx                # Listing semua residential
+│
+├── clusters/
+│   └── page.tsx                # Listing semua cluster
+│
+├── units/
+│   └── page.tsx                # Listing semua unit
+│
+├── residential/
+│   └── [id]/
+│       └── page.tsx            # Detail residential
+│
+├── [residential-id]/
+│   └── [cluster-id]/
+│       └── page.tsx            # Detail cluster
+│
+└── [residential-id]/
+└── [cluster-id]/
+└── [unit-id]/
+└── page.tsx        # Detail unit
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Color Palette
 
-## Deploy on Vercel
+### Tosca Colors
+Primary brand colors:
+- `tosca-50`: #7BFCF3 (Lightest) - Highlights and accents
+- `tosca-100`: #4BD3CB - Secondary elements  
+- `tosca-200`: #3AA9A2 (Primary) - Main brand color
+- `tosca-300`: #2A817B - Hover states
+- `tosca-400`: #1B5857 - Text on light backgrounds
+- `tosca-500`: #0D3735 (Darkest) - Deep backgrounds
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Blue Colors  
+Secondary colors:
+- `blue-50`: #DAE8FA (Lightest) - Light backgrounds
+- `blue-100`: #95C3F2 - Subtle highlights
+- `blue-200`: #4E9EDD (Primary) - Interactive elements
+- `blue-300`: #3A78A9 - Hover states
+- `blue-400`: #275478 - Text contrast
+- `blue-500`: #051420 (Darkest) - Dark mode
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Green Colors
+Success states:
+- `green-50`: #85FBB3 (Lightest) - Success states
+- `green-100`: #4BD487 - Positive indicators
+- `green-200`: #3AA96B (Primary) - CTAs
+- `green-300`: #2A8050 - Hover states
+- `green-400`: #1B5936 - Text on light
+- `green-500`: #031409 (Darkest) - Dark accents
+
+### Gray Colors
+Neutral colors:
+- `gray-50`: #E3E9E9 (Lightest) - Backgrounds
+- `gray-100`: #BCC1C1 - Borders
+- `gray-200`: #969A9A (Primary) - Secondary text
+- `gray-300`: #727575 - Placeholder text
+- `gray-400`: #505252 - Primary text
+- `gray-500`: #131414 (Darkest) - Headings
+
+
+## Development Guidelines
+
+### Mobile First Approach
+We follow mobile-first responsive design using Tailwind breakpoints:
+- sm: 640px
+- md: 768px  
+- lg: 1024px
+- xl: 1280px
+
+### Component Best Practices
+- Use LoadingWrapper for consistent loading states
+- Follow atomic design principles
+- Keep components small and focused
+- Use TypeScript for type safety
+- Document component props
+
+### State Management
+- Use Redux Toolkit for global state
+- RTK Query for data fetching
+- Local state for UI-only concerns
+
+### Code Style
+- ESLint for code quality
+- Prettier for formatting
+- Conventional commits
+- Component-based CSS with Tailwind
+
+### Performance
+- Optimize images with next/image
+- Lazy load components when possible
+- Use proper caching strategies
+- Monitor bundle size
+
+## Contributing
+1. Fork the repository
+2. Create feature branch
+3. Commit changes
+4. Push to branch
+5. Open pull request
+
+## License
+MIT License - see LICENSE.md
+
+## Contact
+For questions or support, please contact the development team.
