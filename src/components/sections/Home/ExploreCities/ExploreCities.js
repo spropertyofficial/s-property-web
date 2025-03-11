@@ -15,7 +15,13 @@ export default function ExploreCities() {
       name: "Tangerang Selatan",
       imageUrl:
         "/images/Cities/tangerang-selatan.webp",
-      propertyCount: cityCounts["Tangerang Selatan"] || 0,
+      propertyCount: cityCounts["Tangerang Selatan"] || 0, 
+    },
+    {
+      name: "Kabupaten Sidoarjo",
+      imageUrl:
+        "/images/Cities/tangerang-selatan.webp",
+      propertyCount: cityCounts["Kabupaten Sidoarjo"] || 0, 
     },
     {
       name: "Kabupaten Tangerang",
@@ -57,42 +63,44 @@ export default function ExploreCities() {
       {/* Updated Grid Section with Links */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {cities.map((city, index) => (
-          <Link
-            href={`/properties/residentials?city=${encodeURIComponent(
-              city.name
-            )}`}
-            key={index}
-          >
-            <div className="group cursor-pointer">
-              <div className="relative h-[160px] md:h-[200px] rounded-lg overflow-hidden">
-                <Image
-                  src={city.imageUrl}
-                  alt={city.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="object-cover transform group-hover:scale-105 transition-transform duration-300 w-auto h-auto"
-                />
+          city.propertyCount > 0 && (
+            <Link
+              href={`/properties/residentials?city=${encodeURIComponent(
+                city.name
+              )}`}
+              key={index}
+            >
+              <div className="group cursor-pointer">
+                <div className="relative h-[160px] md:h-[200px] rounded-lg overflow-hidden">
+                  <Image
+                    src={city.imageUrl}
+                    alt={city.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover transform group-hover:scale-105 transition-transform duration-300 w-auto h-auto"
+                  />
 
-                {/* Content */}
-                <div className="absolute bottom-4 left-4 text-white">
-                  <h3 className="text-base md:text-lg font-medium mb-1">
-                    {city.name}
-                  </h3>
-                  <p className="text-xs md:text-sm opacity-90">
-                    {city.propertyCount}
-                    {city.propertyCount === 1 ? " Property" : " Properties"}
-                  </p>
-                </div>
+                  {/* Content */}
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <h3 className="text-base md:text-lg font-medium mb-1">
+                      {city.name}
+                    </h3>
+                    <p className="text-xs md:text-sm opacity-90">
+                      {city.propertyCount}
+                      {city.propertyCount === 1 ? " Property" : " Properties"}
+                    </p>
+                  </div>
 
-                {/* More Details Button */}
-                <div className="absolute bottom-4 right-4 hidden md:block">
-                  <span className="text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:underline">
-                    MORE DETAILS
-                  </span>
+                  {/* More Details Button */}
+                  <div className="absolute bottom-4 right-4 hidden md:block">
+                    <span className="text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:underline">
+                      MORE DETAILS
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+          )
         ))}
       </div>
     </div>

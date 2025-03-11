@@ -1,4 +1,5 @@
-// src/data/housing.js
+// src/data/housing.
+const generalMaps = "https://maps.app.goo.gl/J3Xt7YEVAjbWeu5S6";
 export const residentialsData = [
   {
     id: "terravia",
@@ -13,7 +14,7 @@ export const residentialsData = [
       area: "BSD City",
       address: "Cijantra, Kec. Pagedangan, BSD City, Banten 15336",
       country: "Indonesia",
-      mapsLink: "https://maps.app.goo.gl/KnjB39FhecyGgywk7",
+      mapsLink: generalMaps,
     },
     gallery: [
       {
@@ -95,7 +96,7 @@ export const residentialsData = [
       area: "Cisauk",
       address: "Jl. Raya Cisauk Lapan",
       country: "Indonesia",
-      mapsLink: "https://maps.app.goo.gl/sWQHPLL8Z55635Jr5",
+      mapsLink: generalMaps,
     },
     gallery: [
       {
@@ -141,7 +142,7 @@ export const residentialsData = [
       area: "Pagedangan",
       address: "Jl. Kp. Kandang, Jatake",
       country: "Indonesia",
-      mapsLink: "https://maps.app.goo.gl/DD9xo58vn1bLttXA6",
+      mapsLink: generalMaps,
     },
     gallery: [
       {
@@ -179,7 +180,7 @@ export const residentialsData = [
       area: "Ciputat",
       address: "Jl Inhutani I Kel Cipayung, RT.07/RW.01",
       country: "Indonesia",
-      mapsLink: "https://maps.app.goo.gl/5XqMRYnVU92EhuwT6",
+      mapsLink: generalMaps,
     },
     gallery: [
       {
@@ -255,7 +256,6 @@ export const residentialsData = [
         alt: "Surrounding Medical Facilities",
       },
     ],
-
   },
   {
     id: "griya-harmoni-cibugel",
@@ -270,7 +270,7 @@ export const residentialsData = [
       area: "Cisoka",
       address: "PCX8+R36, Bojongloa",
       country: "Indonesia",
-      mapsLink: "https://maps.app.goo.gl/kHAgfwag7XeTip7U6",
+      mapsLink: generalMaps,
     },
     gallery: [
       {
@@ -344,13 +344,14 @@ export const residentialsData = [
     clusters: {
       premium_cluster: ["angsana", "burgundy", "citrus", "damar", "edelweiss"],
       deluxe_cluster: ["kalamenta", "kaliandra", "kana", "kenanga", "magnolia"],
-    },    location: {
+    },
+    location: {
       region: "Jawa Barat",
       city: "Kabupaten Bogor",
       area: "Tenjo",
       address: "Jl. Raya Jasinga Tenjo No.9, Singabraja",
       country: "Indonesia",
-      mapsLink: "https://maps.app.goo.gl/LtkfVZ1CJse9KT568",
+      mapsLink: generalMaps,
     },
     gallery: [
       {
@@ -408,7 +409,7 @@ export const residentialsData = [
       area: "Legok",
       address: "Jl. Raya Rancaiyuh, Babat",
       country: "Indonesia",
-      mapsLink: "https://maps.app.goo.gl/1T19TieuEgTpM1g99",
+      mapsLink: generalMaps,
     },
     gallery: [
       {
@@ -458,7 +459,7 @@ export const residentialsData = [
       area: "Tenjo",
       address: "Jl. Raya Cilaku, Cilaku",
       country: "Indonesia",
-      mapsLink: "https://maps.app.goo.gl/47gwVUTk6ZZ9DP7T7",
+      mapsLink: generalMaps,
     },
     gallery: [
       {
@@ -544,7 +545,7 @@ export const residentialsData = [
       area: "Maja",
       address: "Jl. Boulevard Permata Mutiara, Maja, Kec. Maja",
       country: "Indonesia",
-      mapsLink: "hhttps://maps.app.goo.gl/DiuDDNMcaD7avbWG8",
+      mapsLink: generalMaps,
     },
     gallery: [
       {
@@ -614,7 +615,7 @@ export const residentialsData = [
       area: "Legok",
       address: "Jl. Raya Rancaiyuh, Babat, Kec. Legok",
       country: "Indonesia",
-      mapsLink: "https://maps.app.goo.gl/cWoSV6KkjCFWSZHt7",
+      mapsLink: generalMaps,
     },
     gallery: [
       {
@@ -696,7 +697,7 @@ export const residentialsData = [
       area: "Parung Panjang",
       address: "Jl. Raya Dago, Kabasiran, Kec. Parung Panjang",
       country: "Indonesia",
-      mapsLink: "https://maps.app.goo.gl/uWfv2xt3sc2fkGUA7",
+      mapsLink: generalMaps,
     },
     gallery: [
       {
@@ -755,7 +756,7 @@ export const residentialsData = [
       address:
         "Jl. Boulevard CitraGarden Bintaro No.1 blok D6, Sawah Lama, Kec. Ciputat",
       country: "Indonesia",
-      mapsLink: "https://maps.app.goo.gl/Ruxayu6hSbzn3CS66",
+      mapsLink: generalMaps,
     },
     gallery: [
       // Location Section
@@ -879,6 +880,308 @@ export const residentialsData = [
       {
         src: "/images/Residentials/citra-garden-bintaro/cgb-specifications.webp",
         alt: "Citra Garden Bintaro Specifications",
+      },
+    ],
+  },
+  {
+    id: "kraton-superblock",
+    name: "Kraton Superblock",
+    startPrice: 5000000000,
+    propertyStatus: "SALE",
+    developer: "PT. Ready Indah",
+    clusters: ["freesia", "yaspis"],
+    location: {
+      region: "Jawa Timur",
+      city: "Kabupaten Sidoarjo",
+      area: "Krian",
+      address: "Jl. Bypass Krian No.KM 30, Sidotemo, Sidomulyo",
+      country: "Indonesia",
+      mapsLink: generalMaps,
+    },
+    gallery: [
+      {
+        src: "/images/Residentials/grand-tenjo-residence/grand-tenjo-gate.webp",
+        alt: "Grand Tenjo Residence Gate",
+      },
+    ],
+  },
+  {
+    id: "taman-cisoka-indah",
+    name: "Taman Cisoka Indah",
+    startPrice: 185000000,
+    propertyStatus: "SALE",
+    developer: "PT. Ready Indah",
+    clusters: [],
+    location: {
+      region: "Banten",
+      city: "Kabupaten Tangerang",
+      area: "Cisoka",
+      address: "Cisoka, Tangerang Regency, Banten 15730",
+      country: "Indonesia",
+      mapsLink: generalMaps,
+    },
+    gallery: [
+      {
+        src: "/images/Residentials/taman-cisoka-indah/anthena.webp",
+        alt: "Anthena Type Overview",
+      },
+      {
+        src: "/images/Residentials/taman-cisoka-indah/location.webp",
+        alt: "Taman Cisoka Indah Location",
+      },
+      {
+        src: "/images/Residentials/taman-cisoka-indah/floorplan-anthena.webp",
+        alt: "Anthena Type Floor Plan",
+      },
+      {
+        src: "/images/Residentials/taman-cisoka-indah/floorplan-caluera.webp",
+        alt: "Caluera Type Floor Plan",
+      },
+    ],
+  },
+  {
+    id: "tenjo-city-metropolis",
+    name: "Tenjo City Metropolis",
+    startPrice: 200000000,
+    location: {
+      region: "West Java",
+      city: "Kabupaten Bogor",
+      area: "Tenjo",
+      address: "Tenjo, Bogor Regency, West Java 16370",
+      country: "Indonesia",
+      mapsLink: generalMaps,
+    },
+    developer: "Sentra Property Development",
+    clusters: [],
+    gallery: [
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/main-overview.webp",
+        alt: "Tenjo City Metropolis Main Overview",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/masterplan-project.webp",
+        alt: "Tenjo City Metropolis Master Plan",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/location-site.webp",
+        alt: "Tenjo City Metropolis Location",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/facilities-overview.webp",
+        alt: "Tenjo City Metropolis Facilities",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/lily-type-22-overview.webp",
+        alt: "Lily Type 22 Overview",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/floorplan-lily-type-22.webp",
+        alt: "Lily Type 22 Floor Plan",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/orchid-type-22-overview.webp",
+        alt: "Orchid Type 22 Overview",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/floorplan-orchid-type-22.webp",
+        alt: "Orchid Type 22 Floor Plan",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/jasmine-type-27-overview.webp",
+        alt: "Jasmine Type 27 Overview",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/floorplan-jasmine-type-27.webp",
+        alt: "Jasmine Type 27 Floor Plan",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/lavender-type-27.webp",
+        alt: "Lavender Type 27 Overview",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/floorplan-lavender-type-27.webp",
+        alt: "Lavender Type 27 Floor Plan",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/tulip-type-36-overview.webp",
+        alt: "Tulip Type 36 Overview",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/floorplan-tulip-type-36.webp",
+        alt: "Tulip Type 36 Floor Plan",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/the-pendant-type-36-overview.webp",
+        alt: "The Pendant Type 36 Overview",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/floorplan-the-pendant-type-36.webp",
+        alt: "The Pendant Type 36 Floor Plan",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/floorplan-platinum-type-36.webp",
+        alt: "Platinum Type 36 Floor Plan",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/floorplan-titanium-type-52.webp",
+        alt: "Titanium Type 52 Floor Plan",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/amaryllis-type-82.webp",
+        alt: "Amaryllis Type 82 Overview",
+      },
+      {
+        src: "/images/Residentials/tenjo-city-metropolis/floorplan-amaryllis-type-82.webp",
+        alt: "Amaryllis Type 82 Floor Plan",
+      },
+    ],
+  },
+  {
+    id: "daru-metropolis",
+    name: "Daru Metropolis",
+    startPrice: 250000000,
+    propertyStatus: "SALE",
+    developer: "Sentra Property Development",
+    clusters: [],
+    location: {
+      region: "Banten",
+      city: "Kabupaten Tangerang",
+      area: "Jambe",
+      address: "Mekarsari, Jambe, Tangerang Regency, Banten 15614",
+      country: "Indonesia",
+      mapsLink: generalMaps,
+    },
+    gallery: [
+      {
+        src: "/images/Residentials/daru-metropolis/main-overview.webp",
+        alt: "Daru Metropolis Main View",
+      },
+      {
+        src: "/images/Residentials/daru-metropolis/masterplan-daru.webp",
+        alt: "Daru Metropolis Master Plan",
+      },
+      {
+        src: "/images/Residentials/daru-metropolis/location-daru.webp",
+        alt: "Daru Metropolis Location",
+      },
+      {
+        src: "/images/Residentials/daru-metropolis/access-tol-daru.webp",
+        alt: "Daru Metropolis Toll Access",
+      },
+      {
+        src: "/images/Residentials/daru-metropolis/facilities-daru.webp",
+        alt: "Daru Metropolis Facilities",
+      },
+      {
+        src: "/images/Residentials/daru-metropolis/build-specs-daru.webp",
+        alt: "Daru Metropolis Building Specifications",
+      },
+      {
+        src: "/images/Residentials/daru-metropolis/type-22-daru.webp",
+        alt: "Type 22 Overview",
+      },
+      {
+        src: "/images/Residentials/daru-metropolis/type-27-daru.webp",
+        alt: "Type 27 Overview",
+      },
+      {
+        src: "/images/Residentials/daru-metropolis/type-36-daru.webp",
+        alt: "Type 36 Overview",
+      },
+      {
+        src: "/images/Residentials/daru-metropolis/type-52-daru.webp",
+        alt: "Type 52 Overview",
+      },
+      {
+        src: "/images/Residentials/daru-metropolis/kavling-daru.webp",
+        alt: "Kavling Overview",
+      },
+      {
+        src: "/images/Residentials/daru-metropolis/type-kavling-daru.webp",
+        alt: "Kavling Type Details",
+      },
+    ],
+  },
+  {
+    id: "daru-capital",
+    name: "Daru Capital",
+    startPrice: 250000000,
+    propertyStatus: "SALE",
+    developer: "Sentra Property Development",
+    clusters: [],
+    location: {
+      region: "Banten",
+      city: "Kabupaten Tangerang",
+      area: "Jambe",
+      address:
+        "Jl. Mekarsari Timur, Mekarsari, Kec. Jambe, Kabupaten Tangerang, Banten",
+      country: "Indonesia",
+      mapsLink: generalMaps,
+    },
+    gallery: [
+      {
+        src: "/images/Residentials/daru-capital/main-overview.webp",
+        alt: "Daru Capital Main Overview",
+      },
+      {
+        src: "/images/Residentials/daru-capital/entrance-gate.webp",
+        alt: "Daru Capital Entrance Gate",
+      },
+      {
+        src: "/images/Residentials/daru-capital/masterplan-project.webp",
+        alt: "Daru Capital Master Plan",
+      },
+      {
+        src: "/images/Residentials/daru-capital/facilities-overview.webp",
+        alt: "Daru Capital Facilities",
+      },
+      {
+        src: "/images/Residentials/daru-capital/access-toll-route.webp",
+        alt: "Toll Access Route",
+      },
+      {
+        src: "/images/Residentials/daru-capital/access-train-route-01.webp",
+        alt: "Train Access Route 1",
+      },
+      {
+        src: "/images/Residentials/daru-capital/access-train-route-02.webp",
+        alt: "Train Access Route 2",
+      },
+      {
+        src: "/images/Residentials/daru-capital/commercial-specs-overview.webp",
+        alt: "Commercial Specifications",
+      },
+      {
+        src: "/images/Residentials/daru-capital/commercial-title.webp",
+        alt: "Commercial Area Title",
+      },
+      {
+        src: "/images/Residentials/daru-capital/subsidies-specs-overview.webp",
+        alt: "Subsidies Specifications",
+      },
+      {
+        src: "/images/Residentials/daru-capital/subsidies-title.webp",
+        alt: "Subsidies Title",
+      },
+      {
+        src: "/images/Residentials/daru-capital/floorplan-type-22.webp",
+        alt: "Type 22 Floor Plan",
+      },
+      {
+        src: "/images/Residentials/daru-capital/floorplan-type-27-01.webp",
+        alt: "Type 27 Floor Plan 1",
+      },
+      {
+        src: "/images/Residentials/daru-capital/floorplan-type-27-02.webp",
+        alt: "Type 27 Floor Plan 2",
+      },
+      {
+        src: "/images/Residentials/daru-capital/floorplan-type-27-03.webp",
+        alt: "Type 27 Floor Plan 3",
+      },
+      {
+        src: "/images/Residentials/daru-capital/floorplan-type-36.webp",
+        alt: "Type 36 Floor Plan",
       },
     ],
   },
