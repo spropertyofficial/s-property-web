@@ -136,38 +136,40 @@ export default function PropertyCard({
     startPrice,
   }) => (
     <>
-      <div className="relative h-48">
-        <Image
-          src={gallery[0].src}
-          alt={name}
-          fill
-          sizes=""
-          className="object-cover"
-        />
-        <Watermark />
-      </div>
-      <div className="p-4">
-        <h3 className="font-medium text-gray-800 mb-2">{name}</h3>
-        <div className="flex items-start text-gray-500 text-xs mb-2">
-          <MapPin size={14} className="mr-1" />
-          <span>
-            {location.region}, {location.city}, {location.area}
-          </span>
+      <div className="flex flex-col h-full overflow-hidden shadow-md">
+        <div className="relative h-48">
+          <Image
+            src={gallery[0].src}
+            alt={name}
+            fill
+            sizes=""
+            className="object-cover"
+          />
+          <Watermark />
         </div>
-        <div className="text-sm text-gray-500">
-          Start from {""}
-          <span className="font-semibold text-lg text-tosca-500">
-            {formatToShortRupiah(startPrice)}
-          </span>
+        <div className="flex flex-col flex-grow p-4">
+          <h3 className="font-medium text-gray-800 mb-2">{name}</h3>
+          <div className="flex items-start text-gray-500 text-xs mb-2 flex-grow">
+            <MapPin size={14} className="mr-1 flex-shrink-0" />
+            <span className="leading-tight">
+              {location.region}, {location.city}, {location.area}
+            </span>
+          </div>
+          <div className="text-sm text-gray-500 mt-auto">
+            Start from {""}
+            <span className="font-semibold text-lg text-tosca-500">
+              {formatToShortRupiah(startPrice)}
+            </span>
+          </div>
         </div>
-      </div>
-      <div className="mt-4 px-4 pb-4">
-        <Link
-          href={`/properties/${type}/${id}`}
-          className="block w-full text-center bg-tosca-500 text-white py-2 px-4 rounded-md hover:bg-tosca-600 transition-colors"
-        >
-          View Details
-        </Link>
+        <div className="px-4 pb-4">
+          <Link
+            href={`/properties/${type}/${id}`}
+            className="block w-full text-center bg-tosca-500 text-white py-2 px-4 rounded-md hover:bg-tosca-600 transition-colors"
+          >
+            View Details
+          </Link>
+        </div>
       </div>
     </>
   );
