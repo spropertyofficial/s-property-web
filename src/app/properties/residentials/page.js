@@ -6,8 +6,8 @@
   
     const filteredResidentials = city 
       ? residentialsData.filter(residential => 
-          residential.location.city === city || 
-          residential.location.area === city
+          residential.location.city.toLowerCase().includes(city.toLowerCase()) || 
+          residential.location.area.toLowerCase().includes(city.toLowerCase())
         )
       : residentialsData;
 

@@ -347,7 +347,7 @@ export const residentialsData = [
     },
     location: {
       region: "Jawa Barat",
-      city: "Kabupaten Bogor",
+      city: "Kabupaten Bogor Barat",
       area: "Tenjo",
       address: "Jl. Raya Jasinga Tenjo No.9, Singabraja",
       country: "Indonesia",
@@ -455,7 +455,7 @@ export const residentialsData = [
     clusters: [],
     location: {
       region: "Jawa Barat",
-      city: "Kabupaten Bogor",
+      city: "Kabupaten Bogor Barat",
       area: "Tenjo",
       address: "Jl. Raya Cilaku, Cilaku",
       country: "Indonesia",
@@ -693,7 +693,7 @@ export const residentialsData = [
     clusters: ["mora", "dyera"],
     location: {
       region: "Jawa Barat",
-      city: "Kabupaten Bogor",
+      city: "Kabupaten Bogor Barat",
       area: "Parung Panjang",
       address: "Jl. Raya Dago, Kabasiran, Kec. Parung Panjang",
       country: "Indonesia",
@@ -1013,7 +1013,7 @@ export const residentialsData = [
     startPrice: 200000000,
     location: {
       region: "West Java",
-      city: "Kabupaten Bogor",
+      city: "Kabupaten Bogor Barat",
       area: "Tenjo",
       address: "Tenjo, Bogor Regency, West Java 16370",
       country: "Indonesia",
