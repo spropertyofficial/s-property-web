@@ -900,8 +900,76 @@ export const residentialsData = [
     },
     gallery: [
       {
-        src: "/images/Residentials/grand-tenjo-residence/grand-tenjo-gate.webp",
-        alt: "Grand Tenjo Residence Gate",
+        src: "/images/Residentials/kraton-superblock/entrance-gate-01.webp",
+        alt: "Kraton Superblock Main Gate",
+      },
+      {
+        src: "/images/Residentials/kraton-superblock/entrance-gate-02.webp",
+        alt: "Kraton Superblock Secondary Gate",
+      },
+      {
+        src: "/images/Residentials/kraton-superblock/facilities-park.webp",
+        alt: "Kraton Superblock Park Facilities",
+      },
+      {
+        src: "/images/Residentials/kraton-superblock/facilities-badminton.webp",
+        alt: "Kraton Superblock Badminton Court",
+      },
+      {
+        src: "/images/Residentials/kraton-superblock/floorplan-badminton.webp",
+        alt: "Badminton Court Floor Plan",
+      },
+      {
+        src: "/images/Residentials/kraton-superblock/floorplan-park.webp",
+        alt: "Park Layout Plan",
+      },
+      {
+        src: "/images/Residentials/kraton-superblock/type-heliotrope-01.webp",
+        alt: "Heliotrope Type View 1",
+      },
+      {
+        src: "/images/Residentials/kraton-superblock/type-heliotrope-02.webp",
+        alt: "Heliotrope Type View 2",
+      },
+      {
+        src: "/images/Residentials/kraton-superblock/type-heliotrope-03.webp",
+        alt: "Heliotrope Type View 3",
+      },
+      {
+        src: "/images/Residentials/kraton-superblock/type-heliotrope-04.webp",
+        alt: "Heliotrope Type View 4",
+      },
+      {
+        src: "/images/Residentials/kraton-superblock/type-heliotrope-fence-01.webp",
+        alt: "Heliotrope Type Fenced View 1",
+      },
+      {
+        src: "/images/Residentials/kraton-superblock/type-heliotrope-fence-02.webp",
+        alt: "Heliotrope Type Fenced View 2",
+      },
+      {
+        src: "/images/Residentials/kraton-superblock/type-heliotrope-fence-03.webp",
+        alt: "Heliotrope Type Fenced View 3",
+      },
+      {
+        src: "/images/Residentials/kraton-superblock/type-heliotrope-fence-04.webp",
+        alt: "Heliotrope Type Fenced View 4",
+      },
+      {
+        src: "/images/Residentials/kraton-superblock/type-lobelia-01.webp",
+        alt: "Lobelia Type View 1",
+      },
+      {
+        src: "/images/Residentials/kraton-superblock/type-lobelia-02.webp",
+        alt: "Lobelia Type View 2",
+      },
+      {
+        src: "/images/Residentials/kraton-superblock/type-lobelia-03.webp",
+        alt: "Lobelia Type View 3",
+      },
+      {
+        src: "/images/Residentials/kraton-superblock/type-primroses-fence.webp",
+        alt: "Primroses Type Fenced View",
       },
     ],
   },
