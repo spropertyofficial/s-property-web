@@ -5,9 +5,9 @@ import Navigation from './components/Navigation'
 
 export default function Header() {
   return (
-    <div className="w-full sticky top-0 z-50 lg:px-12">
+    <div className="w-full sticky top-0 z-50">
       <div className="bg-white">
-        <div className="px-6">
+        <div className="px-20">
           <div className="flex items-center justify-between">
             {/* Mobile Menu */}
             <div className="block lg:hidden">

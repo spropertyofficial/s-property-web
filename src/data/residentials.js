@@ -886,7 +886,7 @@ export const residentialsData = [
   {
     id: "kraton-superblock",
     name: "Kraton Superblock",
-    startPrice: 5000000000,
+    startPrice: 500000000,
     propertyStatus: "SALE",
     developer: "PT. Ready Indah",
     clusters: ["freesia", "yaspis"],
