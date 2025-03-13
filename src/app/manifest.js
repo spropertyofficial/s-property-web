@@ -3,8 +3,8 @@ export default function manifest() {
     name: "S-Property",
     short_name: "S-Pro",
     description: "Website S-Property",
-    theme_color: "#63c3c5",
-    background_color: "#60bec0",
+    theme_color: "#ffffff",
+    background_color: "#ffffff",
     display: "standalone",
     orientation: "any",
     scope: "/",
@@ -29,6 +29,18 @@ export default function manifest() {
         type: "image/png",
         purpose: "maskable",
       },
+      {
+        "src": "/web-app-manifest-192x192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "maskable"
+      },
+      {
+        "src": "/web-app-manifest-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
+      }
     ],
     screenshots: [
       {
