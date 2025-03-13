@@ -18,6 +18,7 @@ const nextConfig = {
   },
 
   webpack: (config) => {
+    config.optimization.splitChunks = false;
     config.resolve.fallback = {
       fs: false,
       net: false,
