@@ -22,5 +22,26 @@
     "env": {
       "NEXT_PUBLIC_GOOGLE_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbz9kATRtho_rf8FThLTC8VBSgWp4_ROMFBULIGBkvEcmgrQpfI5mUPnwuzoHDKCS8-7dA/exec"
     }
-  }
+  },
+  "routes": [
+    {
+      "src": "/sw.js",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "src": "/custom-sw.js",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "src": "/manifest.webmanifest",
+      "headers": {
+        "content-type": "application/manifest+json",
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    }
+  ]
 }

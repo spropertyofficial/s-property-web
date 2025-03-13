@@ -1,3 +1,14 @@
+// next.config.mjs
+import createNextPWA from "next-pwa";
+
+const withPWA = createNextPWA({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+  sw: "/serviceWorker.js",
+  disable: process.env.NODE_ENV === "development",
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -18,4 +29,4 @@ const nextConfig = {
   transpilePackages: ["sweetalert2", "notyf", "react-datepicker"],
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);
