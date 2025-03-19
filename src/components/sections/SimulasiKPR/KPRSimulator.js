@@ -10,6 +10,7 @@ import {
   additionalDocumentRequirements,
   documentRequirements,
 } from "./data/documentRequirements";
+import Link from "next/link";
 
 export default function KPRSimulator() {
   // State with more descriptive variable names and better initial values
@@ -332,7 +333,15 @@ export default function KPRSimulator() {
                 </li>
                 <li>
                   Untuk ilustrasi angsuran pasti, silakan konsultasikan dengan
-                  pihak bank.
+                  pihak bank atau{" "}
+                  <Link
+                    href="https://wa.me/6285123123891"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className=" bg-tosca-400 text-white hover:text-tosca-300 hover:bg-white border rounded-lg py-[1px] px-2 font-medium transition-colors duration-200"
+                  >
+                    Hubungi Kami
+                  </Link>
                 </li>
               </ul>
             </div>
