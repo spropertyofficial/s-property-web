@@ -7,7 +7,7 @@ export default function Testimonials() {
         "Inovasi serta visi misi yang sangat milenial dan menghargai setiap Agent untuk dapat berkembang. Dengan komisi yang super wow, yakni pembagian komisi 90:10. S-Property diburu karena mutu, teratas karena kualitas.",
       name: "Andre",
       role: "Agent S-Property",
-      image: "/images/main-logo.webp",
+      image: "/images/AboutPage/andre.jpg",
     },
     {
       quote:
@@ -21,7 +21,7 @@ export default function Testimonials() {
         "Pelayanan agent baik dan memuaskan. Projek yang di kerjakan cukup banyak jadi memudahkan saya dalam memilih rumah yang saya inginkan.",
       name: "Sri Rahayu",
       role: "Customer",
-      image: "/images/main-logo.webp",
+      image: "/images/AboutPage/sri-rahayu.jpg",
     },
   ];
 
