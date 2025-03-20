@@ -7,8 +7,8 @@ export default function Header() {
   return (
     <div className="w-full sticky top-0 z-50">
       <div className="bg-white">
-        <div className="px-6 lg:px-20">
-          <div className="flex flex-row-reverse md:flex-row items-center justify-between py-4">
+        <div className="lg:px-20">
+          <div className="flex flex-row-reverse md:flex-row items-center justify-between px-6">
             {/* Mobile Menu */}
             <div className="block lg:hidden">
               <BurgerMenu />
