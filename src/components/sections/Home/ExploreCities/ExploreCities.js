@@ -41,7 +41,7 @@ export default function ExploreCities() {
     },
     {
       name: "Kabupaten Sidoarjo",
-      imageUrl: "/images/Cities/tangerang-selatan.webp",
+      imageUrl: "/images/Cities/kabupaten-sidoarjo.webp",
       propertyCount: cityCounts["Kabupaten Sidoarjo"] || 0,
     },
     {
