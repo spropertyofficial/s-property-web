@@ -18,6 +18,10 @@ export const residentialsData = [
     },
     gallery: [
       {
+        src: "/images/Residentials/terravia-bsd-city/terravia-overview-21.webp",
+        alt: "Terravia Overview 4",
+      },
+      {
         src: "/images/Residentials/terravia-bsd-city/terravia-entrance-gate.webp",
         alt: "Terravia Entrance Gate",
       },
@@ -32,10 +36,6 @@ export const residentialsData = [
       {
         src: "/images/Residentials/terravia-bsd-city/terravia-overview-20.webp",
         alt: "Terravia Overview 3",
-      },
-      {
-        src: "/images/Residentials/terravia-bsd-city/terravia-overview-21.webp",
-        alt: "Terravia Overview 4",
       },
       {
         src: "/images/Residentials/terravia-bsd-city/terravia-overview-22.webp",
@@ -183,6 +183,10 @@ export const residentialsData = [
       mapsLink: generalMaps,
     },
     gallery: [
+      {
+        src: "/images/Residentials/aksara-homes/aruna-unit.webp",
+        alt: "Aruna Unit Type",
+      },
       {
         src: "/images/Residentials/aksara-homes/aksara-main.webp",
         alt: "Aksara Homes Main View",
@@ -413,6 +417,10 @@ export const residentialsData = [
     },
     gallery: [
       {
+        src: "/images/Residentials/telaga-legok/house-overview-2.webp",
+        alt: "Telaga Legok House View 2",
+      },
+      {
         src: "/images/Residentials/telaga-legok/telaga-lego-gate.webp",
         alt: "Telaga Legok Gate",
       },
@@ -462,6 +470,10 @@ export const residentialsData = [
       mapsLink: generalMaps,
     },
     gallery: [
+      {
+        src: "/images/Residentials/grand-tenjo-residence/house-overview-11.webp",
+        alt: "Grand Tenjo House Overview 11",
+      },
       {
         src: "/images/Residentials/grand-tenjo-residence/grand-tenjo-gate.webp",
         alt: "Grand Tenjo Residence Gate",
