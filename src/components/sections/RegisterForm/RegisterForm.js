@@ -1,4 +1,3 @@
-// src/components/sections/RegisterForm/RegisterForm.js
 "use client";
 import { useEffect, useState } from "react";
 import {
@@ -26,6 +25,27 @@ export default function RegisterForm() {
     npwpFile: null,
     bankBookFile: null,
   });
+  
+  // State untuk progress upload
+  const [uploadProgress, setUploadProgress] = useState({
+    ktpFile: 0,
+    npwpFile: 0,
+    bankBookFile: 0,
+  });
+  
+  // State untuk status upload
+  const [uploadStatus, setUploadStatus] = useState({
+    ktpFile: false,
+    npwpFile: false,
+    bankBookFile: false,
+  });
+  
+  // State untuk menandai sedang proses upload
+  const [isUploading, setIsUploading] = useState({
+    ktpFile: false,
+    npwpFile: false,
+    bankBookFile: false,
+  });
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -46,7 +66,8 @@ export default function RegisterForm() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
+  
+  // Fungsi untuk memproses file dengan progress visual dan validasi
   const handleFileChange = (e, fileType) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -60,21 +81,83 @@ export default function RegisterForm() {
       });
       return;
     }
-  
-    // Gunakan kompresi gambar
+    
+    // Validasi tipe file
+    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    if (!validTypes.includes(file.type)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Format File Tidak Didukung',
+        text: 'Hanya file JPG, PNG, dan PDF yang didukung.'
+      });
+      return;
+    }
+    
+    // Reset progress dan status
+    setUploadProgress(prev => ({ ...prev, [fileType]: 0 }));
+    setUploadStatus(prev => ({ ...prev, [fileType]: false }));
+    setIsUploading(prev => ({ ...prev, [fileType]: true }));
+    
+    // Baca file dengan FileReader
     const reader = new FileReader();
-    reader.onloadend = () => {
-      // Kompres gambar
+    
+    // Simulasi progress saat membaca file
+    let lastProgress = 0;
+    const progressSimulation = setInterval(() => {
+      // Tingkatkan progress secara bertahap hingga 50%
+      // Setengah pertama simulasi membaca file
+      if (lastProgress < 50) {
+        lastProgress += 5;
+        setUploadProgress(prev => ({ ...prev, [fileType]: lastProgress }));
+      } else {
+        clearInterval(progressSimulation);
+      }
+    }, 100);
+    
+    reader.onload = (event) => {
+      clearInterval(progressSimulation);
+      setUploadProgress(prev => ({ ...prev, [fileType]: 50 }));
+      
+      // Cek jika file adalah PDF
+      if (file.type === 'application/pdf') {
+        // Untuk PDF, kita tidak perlu kompresi, langsung gunakan base64
+        setUploadProgress(prev => ({ ...prev, [fileType]: 100 }));
+        
+        // Simpan hasil ke state
+        setTimeout(() => {
+          setFiles(prev => ({
+            ...prev,
+            [fileType]: event.target.result
+          }));
+          
+          // Set status upload selesai
+          setUploadStatus(prev => ({ ...prev, [fileType]: true }));
+          setIsUploading(prev => ({ ...prev, [fileType]: false }));
+        }, 300);
+        return;
+      }
+      
+      // Fase kedua - kompresi gambar
       const img = new Image();
-      img.src = reader.result;
       img.onload = () => {
+        // Simulasi progress saat memproses gambar
+        let processProgress = 50;
+        const processingSimulation = setInterval(() => {
+          if (processProgress < 90) {
+            processProgress += 5;
+            setUploadProgress(prev => ({ ...prev, [fileType]: processProgress }));
+          } else {
+            clearInterval(processingSimulation);
+          }
+        }, 100);
+        
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         const maxWidth = 800;
         const maxHeight = 600;
         let width = img.width;
         let height = img.height;
-  
+
         // Resize
         if (width > height) {
           if (width > maxWidth) {
@@ -87,26 +170,82 @@ export default function RegisterForm() {
             height = maxHeight;
           }
         }
-  
+
         canvas.width = width;
         canvas.height = height;
         ctx.drawImage(img, 0, 0, width, height);
-  
+
         // Kompresi dengan kualitas lebih rendah
         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-  
-        setFiles((prev) => ({
-          ...prev,
-          [fileType]: compressedBase64
-        }));
+        
+        // Validasi ukuran base64 setelah kompresi
+        const base64Size = compressedBase64.length * 0.75; // Perkiraan ukuran dalam bytes
+        const maxSizeAfterCompression = 900 * 1024; // 900KB (hampir 1MB)
+        
+        if (base64Size > maxSizeAfterCompression) {
+          // Jika masih terlalu besar setelah kompresi pertama, kompres lagi dengan kualitas lebih rendah
+          const moreCompressedBase64 = canvas.toDataURL('image/jpeg', 0.5);
+          
+          // Simulasi finalisasi dan selesai
+          clearInterval(processingSimulation);
+          setUploadProgress(prev => ({ ...prev, [fileType]: 100 }));
+          
+          setTimeout(() => {
+            setFiles(prev => ({
+              ...prev,
+              [fileType]: moreCompressedBase64
+            }));
+            
+            // Set status upload selesai
+            setUploadStatus(prev => ({ ...prev, [fileType]: true }));
+            setIsUploading(prev => ({ ...prev, [fileType]: false }));
+          }, 300);
+        } else {
+          // Simulasi finalisasi dan selesai
+          clearInterval(processingSimulation);
+          setUploadProgress(prev => ({ ...prev, [fileType]: 100 }));
+          
+          setTimeout(() => {
+            setFiles(prev => ({
+              ...prev,
+              [fileType]: compressedBase64
+            }));
+            
+            // Set status upload selesai
+            setUploadStatus(prev => ({ ...prev, [fileType]: true }));
+            setIsUploading(prev => ({ ...prev, [fileType]: false }));
+          }, 300);
+        }
       };
+      
+      img.onerror = () => {
+        clearInterval(progressSimulation);
+        Swal.fire({
+          icon: 'error',
+          title: 'Proses Gambar Gagal',
+          text: 'Tidak dapat memproses gambar ini. Silakan coba file lain.'
+        });
+        setIsUploading(prev => ({ ...prev, [fileType]: false }));
+      };
+      
+      img.src = event.target.result;
     };
+    
+    reader.onerror = () => {
+      clearInterval(progressSimulation);
+      Swal.fire({
+        icon: 'error',
+        title: 'Proses File Gagal',
+        text: 'Terjadi kesalahan saat memproses file. Silakan coba lagi.'
+      });
+      setIsUploading(prev => ({ ...prev, [fileType]: false }));
+    };
+    
     reader.readAsDataURL(file);
   };
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
-
   
   const validateStep = (currentStep) => {
     switch (currentStep) {
@@ -137,12 +276,15 @@ export default function RegisterForm() {
         return true;
 
       case 2:
+        // Periksa juga apakah file sudah diupload dan statusnya selesai
         if (
           !formData.city ||
           !formData.idNumber ||
           !files.ktpFile ||
+          !uploadStatus.ktpFile ||
           !formData.npwpNumber ||
-          !files.npwpFile
+          !files.npwpFile ||
+          !uploadStatus.npwpFile
         ) {
           Swal.fire({
             icon: "error",
@@ -154,11 +296,13 @@ export default function RegisterForm() {
         return true;
 
       case 3:
+        // Periksa juga apakah file sudah diupload dan statusnya selesai
         if (
           !formData.accountNumber ||
           !formData.bankName ||
           !formData.accountHolder ||
-          !files.bankBookFile
+          !files.bankBookFile ||
+          !uploadStatus.bankBookFile
         ) {
           Swal.fire({
             icon: "error",
@@ -187,9 +331,10 @@ export default function RegisterForm() {
     // Aktifkan loading state
     setIsLoading(true);
 
-    Swal.fire({
+    // Tampilkan loading indicator dengan progress
+    const submitToast = Swal.fire({
       title: "Sedang Mendaftar",
-      text: "Mohon tunggu sebentar...",
+      html: "Mempersiapkan data...",
       icon: "info",
       showConfirmButton: false,
       allowOutsideClick: false,
@@ -199,6 +344,7 @@ export default function RegisterForm() {
     });
 
     try {
+      // Persiapkan payload
       const formPayload = {
         ...formData,
         ktpFile: files.ktpFile,
@@ -206,6 +352,20 @@ export default function RegisterForm() {
         bankBookFile: files.bankBookFile,
       };
 
+      // Hitung perkiraan ukuran payload
+      const payloadSize = JSON.stringify(formPayload).length;
+      const maxPayloadSize = 5 * 1024 * 1024; // 5MB (batas di API Anda)
+      
+      if (payloadSize > maxPayloadSize) {
+        throw new Error("Ukuran data terlalu besar. Silakan kompres file gambar dengan ukuran lebih kecil.");
+      }
+
+      // Update status loading
+      submitToast.update({
+        html: "Mengirim data ke server..."
+      });
+
+      // Kirim data
       const response = await fetch("/api/submit-form", {
         method: "POST",
         headers: {
@@ -214,7 +374,7 @@ export default function RegisterForm() {
         body: JSON.stringify(formPayload),
       });
 
-        const result = await response.json();
+      const result = await response.json();
 
       // Nonaktifkan loading state
       setIsLoading(false);
@@ -236,7 +396,7 @@ export default function RegisterForm() {
         Swal.fire({
           icon: "error",
           title: "Pendaftaran Gagal",
-          text: `Terjadi kesalahan: ${error.message}. Silakan coba lagi.`,
+          text: `Terjadi kesalahan: ${result.message || "Error tidak diketahui"}. Silakan coba lagi.`,
         });
       }
     } catch (error) {
@@ -250,6 +410,17 @@ export default function RegisterForm() {
       });
     }
   };
+  
+  // Helper untuk memeriksa apakah sedang ada upload yang berlangsung pada step tertentu
+  const isUploadingInStep = (stepNum) => {
+    if (stepNum === 2) {
+      return isUploading.ktpFile || isUploading.npwpFile;
+    } else if (stepNum === 3) {
+      return isUploading.bankBookFile;
+    }
+    return false;
+  };
+  
   return (
     <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
       <h1 className="text-2xl font-bold text-center mb-6 text-green-200">
@@ -426,10 +597,28 @@ export default function RegisterForm() {
                 accept="image/*,.pdf"
                 onChange={(e) => handleFileChange(e, "ktpFile")}
                 className="w-full"
+                disabled={isUploading.ktpFile}
               />
-              {files.ktpFile && (
+              
+              {/* Progress bar untuk KTP */}
+              {isUploading.ktpFile && (
+                <div className="mt-2">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span>Uploading...</span>
+                    <span>{uploadProgress.ktpFile}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${uploadProgress.ktpFile}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+              
+              {files.ktpFile && uploadStatus.ktpFile && (
                 <div className="mt-2 text-sm text-green-600">
-                  ✓ File KTP siap diupload
+                  ✓ File KTP berhasil diupload
                 </div>
               )}
             </div>
@@ -460,10 +649,28 @@ export default function RegisterForm() {
                 accept="image/*,.pdf"
                 onChange={(e) => handleFileChange(e, "npwpFile")}
                 className="w-full"
+                disabled={isUploading.npwpFile}
               />
-              {files.npwpFile && (
+              
+              {/* Progress bar untuk NPWP */}
+              {isUploading.npwpFile && (
+                <div className="mt-2">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span>Uploading...</span>
+                    <span>{uploadProgress.npwpFile}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${uploadProgress.npwpFile}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+              
+              {files.npwpFile && uploadStatus.npwpFile && (
                 <div className="mt-2 text-sm text-green-600">
-                  ✓ File NPWP siap diupload
+                  ✓ File NPWP berhasil diupload
                 </div>
               )}
             </div>
@@ -472,15 +679,16 @@ export default function RegisterForm() {
           <div className="flex gap-4">
             <button
               onClick={prevStep}
-              className="w-1/2 text-gray-400 border-gray-200 border-2  p-2 rounded hover:bg-gray-300 hover:text-white"
+              className="w-1/2 text-gray-400 border-gray-200 border-2 p-2 rounded hover:bg-gray-300 hover:text-white"
             >
               Kembali
             </button>
             <button
               onClick={handleNext}
-              className="w-full bg-green-200 text-white p-2 rounded hover:bg-green-400"
+              disabled={isUploadingInStep(2)}
+              className={`w-full ${isUploadingInStep(2) ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-200 hover:bg-green-400'} text-white p-2 rounded`}
             >
-              Selanjutnya
+              {isUploadingInStep(2) ? "Menunggu Upload..." : "Selanjutnya"}
             </button>
           </div>
         </div>
@@ -550,10 +758,28 @@ export default function RegisterForm() {
                 accept="image/*,.pdf"
                 onChange={(e) => handleFileChange(e, "bankBookFile")}
                 className="w-full"
+                disabled={isUploading.bankBookFile}
               />
-              {files.bankBookFile && (
+              
+              {/* Progress bar untuk Buku Tabungan */}
+              {isUploading.bankBookFile && (
+                <div className="mt-2">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span>Uploading...</span>
+                    <span>{uploadProgress.bankBookFile}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${uploadProgress.bankBookFile}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+              
+              {files.bankBookFile && uploadStatus.bankBookFile && (
                 <div className="mt-2 text-sm text-green-600">
-                  ✓ File Buku Tabungan siap diupload
+                  ✓ File Buku Tabungan berhasil diupload
                 </div>
               )}
             </div>
@@ -562,16 +788,16 @@ export default function RegisterForm() {
           <div className="flex gap-4">
             <button
               onClick={prevStep}
-              className="w-1/2 text-gray-400 border-gray-200 border-2  p-2 rounded hover:bg-gray-300 hover:text-white"
+              className="w-1/2 text-gray-400 border-gray-200 border-2 p-2 rounded hover:bg-gray-300 hover:text-white"
             >
               Kembali
             </button>
             <button
               onClick={handleSubmit}
-              disabled={isLoading}
-              className="w-full bg-green-200 text-white p-2 rounded hover:bg-green-400"
+              disabled={isLoading || isUploadingInStep(3)}
+              className={`w-full ${(isLoading || isUploadingInStep(3)) ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-200 hover:bg-green-400'} text-white p-2 rounded`}
             >
-              {isLoading ? "Mendaftar..." : "Daftar"}
+              {isLoading ? "Mendaftar..." : isUploadingInStep(3) ? "Menunggu Upload..." : "Daftar"}
             </button>
           </div>
         </div>
