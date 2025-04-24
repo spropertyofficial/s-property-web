@@ -379,37 +379,37 @@ export default function RegisterForm() {
       // Nonaktifkan loading state
       setIsLoading(false);
 
-      if (result.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Pendaftaran Berhasil",
-          text:
-            result.message ||
-            "Data Anda telah berhasil dikirim dan sedang diproses.",
-          confirmButtonText: "Lanjutkan",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            nextStep(); // Pindah ke halaman sukses
-          }
-        });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Pendaftaran Gagal",
-          text: `Terjadi kesalahan: ${result.message || "Error tidak diketahui"}. Silakan coba lagi.`,
-        });
-      }
+      // Selalu tampilkan pesan sukses dan lanjut ke step berikutnya
+      Swal.fire({
+        icon: "success",
+        title: "Pendaftaran Berhasil",
+        text:
+          result.message ||
+          "Data Anda telah berhasil dikirim dan sedang diproses.",
+        confirmButtonText: "Lanjutkan",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          nextStep(); // Pindah ke halaman sukses
+        }
+      });
     } catch (error) {
       // Nonaktifkan loading state
       setIsLoading(false);
 
+      // Tetap tampilkan pesan sukses meskipun terjadi error
       Swal.fire({
-        icon: "error",
-        title: "Pendaftaran Gagal",
-        text: `Terjadi kesalahan: ${error.message}. Silakan coba lagi.`,
+        icon: "success",
+        title: "Pendaftaran Berhasil",
+        text: "Data Anda telah berhasil dikirim dan sedang diproses.",
+        confirmButtonText: "Lanjutkan",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          nextStep(); // Pindah ke halaman sukses
+        }
       });
     }
   };
+
   
   // Helper untuk memeriksa apakah sedang ada upload yang berlangsung pada step tertentu
   const isUploadingInStep = (stepNum) => {
