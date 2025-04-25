@@ -1341,7 +1341,7 @@ export const residentialsData = [
     name: "Elyon by BSD",
     startPrice: 5000000000,
     propertyStatus: "SALE",
-    developer: "Sentra Property Development",
+    developer: "Sinarmas Land",
     clusters: [],
     location: {
       region: "Banten",
