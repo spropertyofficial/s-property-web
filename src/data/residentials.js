@@ -1265,4 +1265,182 @@ export const residentialsData = [
       },
     ],
   },
+  {
+    id: "citra-raya-city",
+    name: "Citra Raya City",
+    startPrice: 600000000,
+    propertyStatus: "SALE",
+    developer: "Ciputra Land",
+    clusters: [],
+    location: {
+      region: "Jambi",
+      city: "Kabupaten Muaro Jambi",
+      area: "Mendalo Darat",
+      address:
+        "Jl. Raya Boulevard CitraRaya Jambi Blok A.23 No.1, Mendalo Darat, Kec. Jambi Luar Kota, Kabupaten Muaro Jambi, Jambi 36361",
+      country: "Indonesia",
+      mapsLink: generalMaps,
+    },
+    gallery: [
+      {
+        src: "/images/Residentials/citra-raya-jambi/type-astrantia.webp",
+        alt: "Citra Raya Jambi Type Astrantia",
+      },
+      {
+        src: "/images/Residentials/citra-raya-jambi/type-azalea.webp",
+        alt: "Citra Raya Jambi Type Azalea",
+      },
+      {
+        src: "/images/Residentials/citra-raya-jambi/overview-1.webp",
+        alt: "Citra Raya Jambi Overview 1",
+      },
+      {
+        src: "/images/Residentials/citra-raya-jambi/overview-2.webp",
+        alt: "Citra Raya Jambi Overview 2",
+      },
+      {
+        src: "/images/Residentials/citra-raya-jambi/overview-3.webp",
+        alt: "Citra Raya Jambi Overview 3",
+      },
+      {
+        src: "/images/Residentials/citra-raya-jambi/overview-4.webp",
+        alt: "Citra Raya Jambi Overview 4",
+      },
+      {
+        src: "/images/Residentials/citra-raya-jambi/overview-5.webp",
+        alt: "Citra Raya Jambi Overview 5",
+      },
+      {
+        src: "/images/Residentials/citra-raya-jambi/overview-6.webp",
+        alt: "Citra Raya Jambi Overview 6",
+      },
+      {
+        src: "/images/Residentials/citra-raya-jambi/overview-7.webp",
+        alt: "Citra Raya Jambi Overview 7",
+      },
+      {
+        src: "/images/Residentials/citra-raya-jambi/overview-8.webp",
+        alt: "Citra Raya Jambi Overview 8",
+      },
+      {
+        src: "/images/Residentials/citra-raya-jambi/PARK AVENUE-14.webp",
+        alt: "Citra Raya Jambi Park Avenue",
+      },
+      {
+        src: "/images/Residentials/citra-raya-jambi/siteplan-overview.webp",
+        alt: "Citra Raya Jambi Siteplan Overview",
+      },
+      {
+        src: "/images/Residentials/citra-raya-jambi/access-overview.webp",
+        alt: "Citra Raya Jambi Access Overview",
+      },
+    ],
+  },
+  {
+    id: "elyon-bsd",
+    name: "Elyon by BSD",
+    startPrice: 5000000000,
+    propertyStatus: "SALE",
+    developer: "Sentra Property Development",
+    clusters: [],
+    location: {
+      region: "Banten",
+      city: "Kota Tangerang Selatan",
+      area: "BSD",
+      address:
+        "Jl. Saparua No.3 Blok NB, BSD, Kec. Serpong, Kota Tangerang Selatan, Banten 15310",
+      country: "Indonesia",
+      mapsLink: generalMaps,
+    },
+    gallery: [
+      {
+        src: "/images/Residentials/elyon-bsd/elyon-8-overview.webp",
+        alt: "Elyon 8 Overview",
+      },
+      {
+        src: "/images/Residentials/elyon-bsd/entrance-gate.webp",
+        alt: "Elyon BSD Entrance Gate",
+      },
+      {
+        src: "/images/Residentials/elyon-bsd/elyon-8-groundfloor.webp",
+        alt: "Elyon 8 Ground Floor",
+      },
+      {
+        src: "/images/Residentials/elyon-bsd/elyon-8-firstfloor.webp",
+        alt: "Elyon 8 First Floor",
+      },
+      {
+        src: "/images/Residentials/elyon-bsd/elyon-8-secondfloor.webp",
+        alt: "Elyon 8 Second Floor",
+      },
+      {
+        src: "/images/Residentials/elyon-bsd/elyon-9 overview.webp",
+        alt: "Elyon 9 Overview",
+      },
+      {
+        src: "/images/Residentials/elyon-bsd/elyon-9-groundfloor.webp",
+        alt: "Elyon 9 Ground Floor",
+      },
+      {
+        src: "/images/Residentials/elyon-bsd/elyon-9-firstfloor.webp",
+        alt: "Elyon 9 First Floor",
+      },
+      {
+        src: "/images/Residentials/elyon-bsd/elyon-9-secondflor.webp",
+        alt: "Elyon 9 Second Floor",
+      },
+    ],
+  },
+  {
+    id: "lacovia",
+    name: "Lacovia by Citra Garden Serpong",
+    startPrice: 3000000000,
+    propertyStatus: "SALE",
+    developer: "Ciputra Land",
+    clusters: [],
+    location: {
+      region: "Banten",
+      city: "Kabupaten Tangerang",
+      area: "Cisauk",
+      address:
+        "Cisauk, Kec. Cisauk, Kabupaten Tangerang, Banten",
+      country: "Indonesia",
+      mapsLink: generalMaps,
+    },
+    gallery: [
+      {
+        src: "/images/Residentials/lacovia/fontis-8-overview.webp",
+        alt: "Fontis 8 Overview",
+      },
+      {
+        src: "/images/Residentials/lacovia/fontis-10-overview.webp",
+        alt: "Fontis 10 Overview",
+      },
+      {
+        src: "/images/Residentials/lacovia/fontis-12-overview.webp",
+        alt: "Fontis 12 Overview",
+      },
+      {
+        src: "/images/Residentials/lacovia/lacovia-overview-1.webp",
+        alt: "Lacovia Overview 1",
+      },
+      {
+        src: "/images/Residentials/lacovia/lacovia-overview-2.webp",
+        alt: "Lacovia Overview 2",
+      },
+      {
+        src: "/images/Residentials/lacovia/lacovia-overview-3.webp",
+        alt: "Lacovia Overview 3",
+      },
+      {
+        src: "/images/Residentials/lacovia/lacovia-overview-4.webp",
+        alt: "Lacovia Overview 4",
+      },
+      {
+        src: "/images/Residentials/lacovia/lacovia-overview-5.webp",
+        alt: "Lacovia Overview 5",
+      },
+    ],
+
+  },
 ];
