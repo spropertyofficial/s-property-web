@@ -207,7 +207,7 @@ export default function KPRSimulator() {
                 <label className="block text-tosca-400 mb-2" htmlFor="uangMuka">
                   Uang Muka
                 </label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   <div className="relative col-span-2">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
                       Rp
@@ -223,22 +223,21 @@ export default function KPRSimulator() {
                       disabled={!hargaPropertiNum}
                     />
                   </div>
-                  <div className="relative col-span-2">
+                  <div className="relative">
                     <input
                       id="uangMukaPercentage"
                       type="text"
                       inputMode="decimal"
                       placeholder="Persen"
-                      className="w-full px-4 py-3 rounded-lg border border-tosca-100 focus:ring-2 focus:ring-tosca-200"
+                      className="w-full px-2 py-3 pr-8 rounded-lg border border-tosca-100 focus:ring-2 focus:ring-tosca-200"
                       value={uangMukaPercentage}
                       onChange={handleUangMukaPercentageChange}
                       disabled={!hargaPropertiNum}
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 bg-white px-1">
                       %
-                    </span>
-                  </div>
-                </div>
+                    </div>
+                  </div>                </div>
               </div>
             </div>
 
