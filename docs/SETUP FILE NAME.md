@@ -39,7 +39,7 @@
 
 #### 4. Unit Types
 - **Deskripsi**: Tipe unit atau ruangan
-- **Format**: `type-[nomor]-[deskripsi].webp`
+- **Format**: `type/nama tipe-[nomor]-[deskripsi].webp`
 - **Contoh**:
   - `type-22-overview.webp`
   - `type-27-layout.webp`
