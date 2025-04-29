@@ -220,6 +220,7 @@ export default function KPRSimulator() {
                       className="w-full px-4 py-3 pl-10 rounded-lg border border-tosca-100 focus:ring-2 focus:ring-tosca-200"
                       value={formatRupiah(uangMukaNum)}
                       onChange={handleUangMukaChange}
+                      disabled={!hargaPropertiNum}
                     />
                   </div>
                   <div className="relative">
@@ -227,16 +228,16 @@ export default function KPRSimulator() {
                       id="uangMukaPercentage"
                       type="text"
                       inputMode="decimal"
-                      placeholder="Persentase"
-                      className="w-full px-4 py-3 rounded-lg border border-tosca-100 focus:ring-2 focus:ring-tosca-200"
+                      placeholder="Persen"
+                      className="w-full px-2 py-3 pr-8 rounded-lg border border-tosca-100 focus:ring-2 focus:ring-tosca-200"
                       value={uangMukaPercentage}
                       onChange={handleUangMukaPercentageChange}
+                      disabled={!hargaPropertiNum}
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 bg-white px-1">
                       %
-                    </span>
-                  </div>
-                </div>
+                    </div>
+                  </div>                </div>
               </div>
             </div>
 
@@ -294,8 +295,9 @@ export default function KPRSimulator() {
                 <input
                   type="text"
                   readOnly
-                  className="w-full px-4 py-3 pl-10 rounded-lg bg-gray-100 cursor-not-allowed"
+                  className="w-full px-4 py-3 pl-10 rounded-lg bg-gray-100 cursor-not-allowed "
                   value={formatRupiah(jumlahPinjaman)}
+                  disabled
                 />
               </div>
             </div>
