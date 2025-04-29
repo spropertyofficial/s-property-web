@@ -1458,6 +1458,10 @@ export const residentialsData = [
     },
     gallery: [
       {
+        src: "/images/Residentials/greenwoods-country-serpong/damita-overview.webp",
+        alt: "Damita House Type Overview",
+      },
+      {
         src: "/images/Residentials/greenwoods-country-serpong/cluster-overview.webp",
         alt: "Greenwoods Country Serpong Cluster Overview",
       },
@@ -1524,6 +1528,69 @@ export const residentialsData = [
       {
         src: "/images/Residentials/greenwoods-country-serpong/dinara-swimming-pool.webp",
         alt: "Dinara Swimming Pool",
+      },
+    ],
+  },
+  {
+    id: "cikupa-green-village",
+    name: "Cikupa Green Village",
+    startPrice: 300000000,
+    propertyStatus: "SALE",
+    developer: "Citra Permai Pesona",
+    clusters: [],
+    location: {
+      region: "Banten",
+      city: "Kabupaten Tangerang",
+      area: "Panongan",
+      address:
+        "Jl. Raya Kutruk - Rancaiyuh, Ranca Iyuh, Kec. Panongan, Kabupaten Tangerang, Banten",
+      country: "Indonesia",
+      mapsLink: generalMaps,
+    },
+    gallery: [
+      {
+        src: "/images/Residentials/cikupa-green-village/deluxe-overview.webp",
+        alt: "Cikupa Green Village Deluxe Type Overview",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/deluxe-living-room.webp",
+        alt: "Deluxe Type Living Room",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/deluxe-living-room-view-2.webp",
+        alt: "Deluxe Type Living Room View 2",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/deluxe-living-room-view-3.webp",
+        alt: "Deluxe Type Living Room View 3",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/deluxe-living-room-view-4.webp",
+        alt: "Deluxe Type Living Room View 4",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/deluxe-bed-room-view-1.webp",
+        alt: "Deluxe Type Bedroom View 1",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/deluxe-bed-room-view-2.webp",
+        alt: "Deluxe Type Bedroom View 2",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/premium-living-room.webp",
+        alt: "Premium Type Living Room",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/premium-living-room-view-2.webp",
+        alt: "Premium Type Living Room View 2",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/premium-bed-room.webp",
+        alt: "Premium Type Bedroom",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/premium-bed-room-view-2.webp",
+        alt: "Premium Type Bedroom View 2",
       },
     ],
   },
