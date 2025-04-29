@@ -207,7 +207,7 @@ export default function KPRSimulator() {
                 <label className="block text-tosca-400 mb-2" htmlFor="uangMuka">
                   Uang Muka
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-4 gap-2">
                   <div className="relative col-span-2">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
                       Rp
@@ -220,17 +220,19 @@ export default function KPRSimulator() {
                       className="w-full px-4 py-3 pl-10 rounded-lg border border-tosca-100 focus:ring-2 focus:ring-tosca-200"
                       value={formatRupiah(uangMukaNum)}
                       onChange={handleUangMukaChange}
+                      disabled={!hargaPropertiNum}
                     />
                   </div>
-                  <div className="relative">
+                  <div className="relative col-span-2">
                     <input
                       id="uangMukaPercentage"
                       type="text"
                       inputMode="decimal"
-                      placeholder="Persentase"
+                      placeholder="Persen"
                       className="w-full px-4 py-3 rounded-lg border border-tosca-100 focus:ring-2 focus:ring-tosca-200"
                       value={uangMukaPercentage}
                       onChange={handleUangMukaPercentageChange}
+                      disabled={!hargaPropertiNum}
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
                       %
@@ -294,8 +296,9 @@ export default function KPRSimulator() {
                 <input
                   type="text"
                   readOnly
-                  className="w-full px-4 py-3 pl-10 rounded-lg bg-gray-100 cursor-not-allowed"
+                  className="w-full px-4 py-3 pl-10 rounded-lg bg-gray-100 cursor-not-allowed "
                   value={formatRupiah(jumlahPinjaman)}
+                  disabled
                 />
               </div>
             </div>
