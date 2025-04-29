@@ -1402,8 +1402,7 @@ export const residentialsData = [
       region: "Banten",
       city: "Kabupaten Tangerang",
       area: "Cisauk",
-      address:
-        "Cisauk, Kec. Cisauk, Kabupaten Tangerang, Banten",
+      address: "Cisauk, Kec. Cisauk, Kabupaten Tangerang, Banten",
       country: "Indonesia",
       mapsLink: generalMaps,
     },
@@ -1441,6 +1440,158 @@ export const residentialsData = [
         alt: "Lacovia Overview 5",
       },
     ],
-
+  },
+  {
+    id: "greenwoods-country-serpong",
+    name: "Greenwoods Country Serpong",
+    startPrice: 3000000000,
+    propertyStatus: "SALE",
+    developer: "PT Baruna Realty",
+    clusters: [],
+    location: {
+      region: "Banten",
+      city: "Kota Tangerang Selatan",
+      area: "BSD",
+      address: "Buaran, Kec. Serpong, Kota Tangerang Selatan, Banten",
+      country: "Indonesia",
+      mapsLink: generalMaps,
+    },
+    gallery: [
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/damita-overview.webp",
+        alt: "Damita House Type Overview",
+      },
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/cluster-overview.webp",
+        alt: "Greenwoods Country Serpong Cluster Overview",
+      },
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/daksa-overview.webp",
+        alt: "Daksa House Type Overview",
+      },
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/daksa-living-and-dining.webp",
+        alt: "Daksa Living and Dining Area",
+      },
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/daksa-bed-room.webp",
+        alt: "Daksa Bedroom",
+      },
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/daksa-balkon.webp",
+        alt: "Daksa Balcony",
+      },
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/daksa-swimming-pool.webp",
+        alt: "Daksa Swimming Pool",
+      },
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/damita-overview.webp",
+        alt: "Damita House Type Overview",
+      },
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/damita-living-and-dining.webp",
+        alt: "Damita Living and Dining Area",
+      },
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/damita-bed-room-view-1.webp",
+        alt: "Damita Bedroom View 1",
+      },
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/damita-bed-room-view-2.webp",
+        alt: "Damita Bedroom View 2",
+      },
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/damita-roof-top.webp",
+        alt: "Damita Roof Top",
+      },
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/dinara-overview.webp",
+        alt: "Dinara House Type Overview",
+      },
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/dinara-living-room.webp",
+        alt: "Dinara Living Room",
+      },
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/dinara-dining-room.webp",
+        alt: "Dinara Dining Room",
+      },
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/dinara-bed-room-inward.webp",
+        alt: "Dinara Bedroom Interior View",
+      },
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/dinara-bed-room-outward.webp",
+        alt: "Dinara Bedroom Exterior View",
+      },
+      {
+        src: "/images/Residentials/greenwoods-country-serpong/dinara-swimming-pool.webp",
+        alt: "Dinara Swimming Pool",
+      },
+    ],
+  },
+  {
+    id: "cikupa-green-village",
+    name: "Cikupa Green Village",
+    startPrice: 300000000,
+    propertyStatus: "SALE",
+    developer: "Citra Permai Pesona",
+    clusters: [],
+    location: {
+      region: "Banten",
+      city: "Kabupaten Tangerang",
+      area: "Panongan",
+      address:
+        "Jl. Raya Kutruk - Rancaiyuh, Ranca Iyuh, Kec. Panongan, Kabupaten Tangerang, Banten",
+      country: "Indonesia",
+      mapsLink: generalMaps,
+    },
+    gallery: [
+      {
+        src: "/images/Residentials/cikupa-green-village/deluxe-overview.webp",
+        alt: "Cikupa Green Village Deluxe Type Overview",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/deluxe-living-room.webp",
+        alt: "Deluxe Type Living Room",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/deluxe-living-room-view-2.webp",
+        alt: "Deluxe Type Living Room View 2",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/deluxe-living-room-view-3.webp",
+        alt: "Deluxe Type Living Room View 3",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/deluxe-living-room-view-4.webp",
+        alt: "Deluxe Type Living Room View 4",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/deluxe-bed-room-view-1.webp",
+        alt: "Deluxe Type Bedroom View 1",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/deluxe-bed-room-view-2.webp",
+        alt: "Deluxe Type Bedroom View 2",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/premium-living-room.webp",
+        alt: "Premium Type Living Room",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/premium-living-room-view-2.webp",
+        alt: "Premium Type Living Room View 2",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/premium-bed-room.webp",
+        alt: "Premium Type Bedroom",
+      },
+      {
+        src: "/images/Residentials/cikupa-green-village/premium-bed-room-view-2.webp",
+        alt: "Premium Type Bedroom View 2",
+      },
+    ],
   },
 ];
