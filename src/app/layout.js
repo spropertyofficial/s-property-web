@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import "@/styles/globals.css";
+import {Analytics} from '@vercel/analytics/next'
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import ReduxProvider from "@/components/providers/ReduxProvider";
@@ -38,6 +39,7 @@ export default function RootLayout({ children }) {
           {children}
           <ServiceWorkerRegistration />
           <Footer />
+          <Analytics />
         </ReduxProvider>
       </body>
     </html>

@@ -1442,8 +1442,8 @@ export const residentialsData = [
     ],
   },
   {
-    id: "greenwoods-country-serpong",
-    name: "Greenwoods Country Serpong",
+    id: " damara-Village ",
+    name: "Damara Village by Greenwoods Country Serpong",
     startPrice: 3000000000,
     propertyStatus: "SALE",
     developer: "PT Baruna Realty",
