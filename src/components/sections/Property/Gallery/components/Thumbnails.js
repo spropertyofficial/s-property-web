@@ -11,6 +11,12 @@ const Thumbnails = ({ images, onSelect, activeImage }) => {
       <Swiper
         spaceBetween={8}
         slidesPerView={3.5}
+        breakpoints={{
+          640: { slidesPerView: 5, spaceBetween: 8 },
+          768: { slidesPerView: 6, spaceBetween: 10 },
+          1024: { slidesPerView: 8, spaceBetween: 12 },
+          1280: { slidesPerView: 10, spaceBetween: 12 },
+        }}
         className="thumbnails-slider"
       >
         {images.map((image, index) => (
@@ -24,9 +30,11 @@ const Thumbnails = ({ images, onSelect, activeImage }) => {
                 overflow-hidden 
                 transition-all 
                 duration-300
+                hover:opacity-100
+                md:max-h-24 lg:max-h-20
                 ${
                   activeImage.src === image.src
-                    ? "opacity-100 scale-90"
+                    ? "opacity-100 ring-2 ring-tosca-200"
                     : "opacity-60"
                 }
               `}
@@ -38,6 +46,7 @@ const Thumbnails = ({ images, onSelect, activeImage }) => {
                 fill
                 style={{ objectFit: "cover" }}
                 className="transition-opacity"
+                sizes="(max-width: 640px) 33vw, (max-width: 768px) 20vw, (max-width: 1024px) 12vw, 10vw"
               />
               <div className="absolute w-full h-full flex items-center justify-center">
                 <Image
@@ -46,7 +55,7 @@ const Thumbnails = ({ images, onSelect, activeImage }) => {
                   width={50}
                   height={30}
                   sizes="100vw"
-                  className="object-cover w-auto h-20"
+                  className="object-cover w-auto h-20 md:h-16 lg:h-12"
                 />
               </div>
             </div>
