@@ -7,11 +7,11 @@ export default function ExploreCities() {
 
   // Daftar kota yang ingin kita pantau
   const citiesToTrack = [
-    "Tangerang Selatan",
-    "Kabupaten Sidoarjo",
-    "Kabupaten Tangerang",
-    "Kabupaten Bogor",
-    "Kabupaten Lebak"
+    ...new Set(
+      residentialsData
+        .map((property) => property.location.city)
+        .filter((city) => city)
+    ),
   ];
 
   // Inisialisasi counter untuk setiap kota
@@ -33,33 +33,19 @@ export default function ExploreCities() {
     }
   });
 
-  const cities = [
-    {
-      name: "Tangerang Selatan",
-      imageUrl: "/images/Cities/tangerang-selatan.webp",
-      propertyCount: cityCounts["Tangerang Selatan"] || 0,
-    },
-    {
-      name: "Kabupaten Sidoarjo",
-      imageUrl: "/images/Cities/kabupaten-sidoarjo.webp",
-      propertyCount: cityCounts["Kabupaten Sidoarjo"] || 0,
-    },
-    {
-      name: "Kabupaten Tangerang",
-      imageUrl: "/images/Cities/kabupaten-tangerang.webp",
-      propertyCount: cityCounts["Kabupaten Tangerang"] || 0,
-    },
-    {
-      name: "Kabupaten Bogor",
-      imageUrl: "/images/Cities/kabupaten-bogor.webp",
-      propertyCount: cityCounts["Kabupaten Bogor"] || 0,
-    },
-    {
-      name: "Kabupaten Lebak",
-      imageUrl: "/images/Cities/kabupaten-lebak.webp",
-      propertyCount: cityCounts["Kabupaten Lebak"] || 0,
-    },
-  ];
+  const cities = citiesToTrack
+    .map((cityName) => {
+      // Buat objek kota dengan data yang diperlukan
+      return {
+        name: cityName,
+        // Gunakan gambar placeholder jika tidak ada gambar spesifik
+        imageUrl: `/images/Cities/${cityName
+          .toLowerCase()
+          .replace(/\s+/g, "-")}.webp`,
+        propertyCount: cityCounts[cityName] || 0,
+      };
+    })
+    .filter((city) => city.propertyCount > 0); // Hanya tampilkan kota dengan properti
 
   return (
     <div className="px-6 py-8 bg-white">
@@ -79,7 +65,7 @@ export default function ExploreCities() {
       </div>
 
       {/* Updated Grid Section with Links */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-auto-fit gap-4">
         {cities.map(
           (city, index) =>
             city.propertyCount > 0 && (
@@ -90,7 +76,7 @@ export default function ExploreCities() {
                 key={index}
               >
                 <div className="group cursor-pointer">
-                  <div className="relative h-[160px] md:h-[200px] rounded-lg overflow-hidden">
+                  <div className="relative h-[160px] md:h-[200px] rounded-lg overflow-hidden bg-gradient-to-r from-tosca-200 to-tosca-100">
                     <Image
                       src={city.imageUrl}
                       alt={city.name}
@@ -108,13 +94,6 @@ export default function ExploreCities() {
                         {city.propertyCount}
                         {city.propertyCount === 1 ? " Property" : " Properties"}
                       </p>
-                    </div>
-
-                    {/* More Details Button */}
-                    <div className="absolute bottom-4 right-4 hidden md:block">
-                      <span className="text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:underline">
-                        MORE DETAILS
-                      </span>
                     </div>
                   </div>
                 </div>

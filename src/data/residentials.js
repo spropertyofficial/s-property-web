@@ -1345,10 +1345,10 @@ export const residentialsData = [
     clusters: [],
     location: {
       region: "Banten",
-      city: "Kota Tangerang Selatan",
+      city: "Tangerang Selatan",
       area: "BSD",
       address:
-        "Jl. Saparua No.3 Blok NB, BSD, Kec. Serpong, Kota Tangerang Selatan, Banten 15310",
+        "Jl. Saparua No.3 Blok NB, BSD, Kec. Serpong, Tangerang Selatan, Banten 15310",
       country: "Indonesia",
       mapsLink: generalMaps,
     },
@@ -1450,9 +1450,9 @@ export const residentialsData = [
     clusters: [],
     location: {
       region: "Banten",
-      city: "Kota Tangerang Selatan",
+      city: "Tangerang Selatan",
       area: "BSD",
-      address: "Buaran, Kec. Serpong, Kota Tangerang Selatan, Banten",
+      address: "Buaran, Kec. Serpong, Tangerang Selatan, Banten",
       country: "Indonesia",
       mapsLink: generalMaps,
     },
