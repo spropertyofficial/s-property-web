@@ -8,6 +8,16 @@ import { useGetResidentialsQuery } from "@/store/api/residentialsApi";
 
 export default function Home() {
   const { data: properties, isLoading, error } = useGetResidentialsQuery();
+  const masterLeadProjects = properties?.filter(
+    (property) =>
+      property.name === "Griya Harmoni Cibugel" ||
+      property.name === "Taman Cisoka Indah"
+  );
+  const subLeadProjects = properties?.filter(
+    (property) =>
+      property.name == "Grand Tenjo Residence" ||
+      property.name === "Cikupa Green Village"
+  );
   return (
     <main>
       <div>
@@ -17,9 +27,15 @@ export default function Home() {
         <CategoryMenu />
         <ExploreCities />
         <PropertyListing
-          data={properties}
+          data={masterLeadProjects}
           type="residentials"
-          title="Property Pilihan"
+          title="Master Lead Project"
+          isLoading={isLoading}
+        />
+        <PropertyListing
+          data={subLeadProjects}
+          type="residentials"
+          title="Sub Lead Project"
           isLoading={isLoading}
         />
       </div>

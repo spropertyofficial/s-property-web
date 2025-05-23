@@ -14,7 +14,7 @@ const nextConfig = {
   reactStrictMode: true,
 
   images: {
-    domains: ["images.pexels.com", "picsum.photos"],
+    domains: ["images.pexels.com", "picsum.photos", "res.cloudinary.com"],
   },
 
   webpack: (config) => {
