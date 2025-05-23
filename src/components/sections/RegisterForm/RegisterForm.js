@@ -27,13 +27,6 @@ export default function RegisterForm() {
     bankBookFile: null,
   });
 
-  // State untuk progress upload
-  const [uploadProgress, setUploadProgress] = useState({
-    ktpFile: 0,
-    npwpFile: 0,
-    bankBookFile: 0,
-  });
-
   // State untuk status upload
   const [uploadStatus, setUploadStatus] = useState({
     ktpFile: false,
@@ -211,7 +204,7 @@ export default function RegisterForm() {
   const handleNpwpNumberChange = (e) => {
     const { value } = e.target;
     // Filter hanya angka dan batasi maksimal 15 digit
-    const numericValue = value.replace(/\D/g, "").slice(0, 15);
+    const numericValue = value.replace(/\D/g, "").slice(0, 16);
 
     // Update formData dengan nilai yang sudah difilter
     setFormData((prev) => ({ ...prev, npwpNumber: numericValue }));
@@ -322,155 +315,34 @@ export default function RegisterForm() {
       });
     }
 
-    // Reset progress dan status
-    setUploadProgress((prev) => ({ ...prev, [fileType]: 0 }));
-    setUploadStatus((prev) => ({ ...prev, [fileType]: false }));
+    // Set isUploading to true
     setIsUploading((prev) => ({ ...prev, [fileType]: true }));
 
     // Baca file dengan FileReader
     const reader = new FileReader();
 
-    // Simulasi progress saat membaca file
-    let lastProgress = 0;
-    const progressSimulation = setInterval(() => {
-      // Tingkatkan progress secara bertahap hingga 50%
-      // Setengah pertama simulasi membaca file
-      if (lastProgress < 50) {
-        lastProgress += 5;
-        setUploadProgress((prev) => ({ ...prev, [fileType]: lastProgress }));
-      } else {
-        clearInterval(progressSimulation);
-      }
-    }, 100);
-
     reader.onload = (event) => {
-      clearInterval(progressSimulation);
-      setUploadProgress((prev) => ({ ...prev, [fileType]: 50 }));
+      // Store the file data
+      setFiles((prev) => ({
+        ...prev,
+        [fileType]: event.target.result,
+      }));
 
-      // Cek jika file adalah PDF
-      if (file.type === "application/pdf") {
-        // Untuk PDF, kita tidak perlu kompresi, langsung gunakan base64
-        setUploadProgress((prev) => ({ ...prev, [fileType]: 100 }));
+      // Set upload status to true
+      setUploadStatus((prev) => ({ ...prev, [fileType]: true }));
 
-        // Simpan hasil ke state
-        setTimeout(() => {
-          setFiles((prev) => ({
-            ...prev,
-            [fileType]: event.target.result,
-          }));
-
-          // Set status upload selesai
-          setUploadStatus((prev) => ({ ...prev, [fileType]: true }));
-          setIsUploading((prev) => ({ ...prev, [fileType]: false }));
-        }, 300);
-        return;
-      }
-      // Fase kedua - kompresi gambar
-      // const img = new Image();
-      // img.onload = () => {
-      //   // Simulasi progress saat memproses gambar
-      //   let processProgress = 50;
-      //   const processingSimulation = setInterval(() => {
-      //     if (processProgress < 90) {
-      //       processProgress += 5;
-      //       setUploadProgress((prev) => ({
-      //         ...prev,
-      //         [fileType]: processProgress,
-      //       }));
-      //     } else {
-      //       clearInterval(processingSimulation);
-      //     }
-      //   }, 100);
-
-      //   const canvas = document.createElement("canvas");
-      //   const ctx = canvas.getContext("2d");
-      //   const maxWidth = 800;
-      //   const maxHeight = 600;
-      //   let width = img.width;
-      //   let height = img.height;
-
-      //   // Resize
-      //   if (width > height) {
-      //     if (width > maxWidth) {
-      //       height *= maxWidth / width;
-      //       width = maxWidth;
-      //     }
-      //   } else {
-      //     if (height > maxHeight) {
-      //       width *= maxHeight / height;
-      //       height = maxHeight;
-      //     }
-      //   }
-
-      //   canvas.width = width;
-      //   canvas.height = height;
-      //   ctx.drawImage(img, 0, 0, width, height);
-
-      //   // Kompresi dengan kualitas lebih rendah
-      //   const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
-
-      //   // Validasi ukuran base64 setelah kompresi
-      //   const base64Size = compressedBase64.length * 0.75; // Perkiraan ukuran dalam bytes
-      //   const maxSizeAfterCompression = 900 * 1024; // 900KB (hampir 1MB)
-
-      //   if (base64Size > maxSizeAfterCompression) {
-      //     // Jika masih terlalu besar setelah kompresi pertama, kompres lagi dengan kualitas lebih rendah
-      //     const moreCompressedBase64 = canvas.toDataURL("image/jpeg", 0.5);
-
-      //     // Simulasi finalisasi dan selesai
-      //     clearInterval(processingSimulation);
-      //     setUploadProgress((prev) => ({ ...prev, [fileType]: 100 }));
-
-      //     setTimeout(() => {
-      //       setFiles((prev) => ({
-      //         ...prev,
-      //         [fileType]: moreCompressedBase64,
-      //       }));
-
-      //       // Set status upload selesai
-      //       setUploadStatus((prev) => ({ ...prev, [fileType]: true }));
-      //       setIsUploading((prev) => ({ ...prev, [fileType]: false }));
-      //     }, 300);
-      //   } else {
-      //     // Simulasi finalisasi dan selesai
-      //     clearInterval(processingSimulation);
-      //     setUploadProgress((prev) => ({ ...prev, [fileType]: 100 }));
-
-      //     setTimeout(() => {
-      //       setFiles((prev) => ({
-      //         ...prev,
-      //         [fileType]: compressedBase64,
-      //       }));
-
-      //       // Set status upload selesai
-      //       setUploadStatus((prev) => ({ ...prev, [fileType]: true }));
-      //       setIsUploading((prev) => ({ ...prev, [fileType]: false }));
-      //     }, 300);
-      //   }
-      // };
-
-      // img.onerror = () => {
-      //   clearInterval(progressSimulation);
-      //   Swal.fire({
-      //     icon: "error",
-      //     title: "Proses Gambar Gagal",
-      //     text: "Tidak dapat memproses gambar ini. Silakan coba file lain.",
-      //   });
-      //   setIsUploading((prev) => ({ ...prev, [fileType]: false }));
-      // };
-
-      // img.src = event.target.result;
+      // Set isUploading to false
+      setIsUploading((prev) => ({ ...prev, [fileType]: false }));
     };
 
     reader.onerror = () => {
-      clearInterval(progressSimulation);
       Swal.fire({
         icon: "error",
         title: "Proses File Gagal",
         text: "Terjadi kesalahan saat memproses file. Silakan coba lagi.",
       });
-      setIsUploading((prev) => ({ ...prev, [fileType]: false }));
       setErrors((prev) => ({ ...prev, [fileType]: "Gagal memproses file" }));
+      setIsUploading((prev) => ({ ...prev, [fileType]: false }));
 
       // Reset input file agar nama file tidak muncul
       fileInput.value = "";
@@ -563,20 +435,20 @@ export default function RegisterForm() {
           stepErrors.idNumber = "Nomor NIK harus terdiri dari 16 digit angka";
         }
 
-        if (!files.ktpFile || !uploadStatus.ktpFile) {
+        if (!files.ktpFile) {
           stepErrors.ktpFile = "File KTP wajib diupload";
         }
 
         if (!formData.npwpNumber || formData.npwpNumber.trim() === "") {
           stepErrors.npwpNumber = "Nomor NPWP wajib diisi";
         } else if (
-          !/^\d{15}$/.test(formData.npwpNumber.replace(/[.\-]/g, ""))
+          !/^\d{16}$/.test(formData.npwpNumber.replace(/[.\-]/g, ""))
         ) {
           stepErrors.npwpNumber =
             "Nomor NPWP harus terdiri dari 15 digit angka";
         }
 
-        if (!files.npwpFile || !uploadStatus.npwpFile) {
+        if (!files.npwpFile) {
           stepErrors.npwpFile = "File NPWP wajib diupload";
         }
         break;
@@ -602,7 +474,7 @@ export default function RegisterForm() {
           stepErrors.accountHolder = "Nama pemilik rekening minimal 3 karakter";
         }
 
-        if (!files.bankBookFile || !uploadStatus.bankBookFile) {
+        if (!files.bankBookFile) {
           stepErrors.bankBookFile = "File buku tabungan wajib diupload";
         }
         break;
@@ -777,7 +649,9 @@ export default function RegisterForm() {
             <input
               type="text"
               name="fullName"
-              className={`w-full p-2 border ${errors.fullName ? "border-red-500" : "border-green-200"} outline-none rounded focus:ring-2 focus:ring-green-200`}
+              className={`w-full p-2 border ${
+                errors.fullName ? "border-red-500" : "border-green-200"
+              } outline-none rounded focus:ring-2 focus:ring-green-200`}
               onChange={handleChange}
               onBlur={handleBlur}
               value={formData.fullName || ""}
@@ -795,7 +669,9 @@ export default function RegisterForm() {
             <input
               type="text"
               name="birthPlace"
-              className={`w-full p-2 border ${errors.birthPlace ? "border-red-500" : "border-green-200"} outline-none rounded focus:ring-2 focus:ring-green-200`}
+              className={`w-full p-2 border ${
+                errors.birthPlace ? "border-red-500" : "border-green-200"
+              } outline-none rounded focus:ring-2 focus:ring-green-200`}
               onChange={handleChange}
               onBlur={handleBlur}
               value={formData.birthPlace || ""}
@@ -817,7 +693,9 @@ export default function RegisterForm() {
               onChange={handleBirthDateChange}
               dateFormat="dd/MM/yyyy"
               placeholderText="Pilih tanggal"
-              className={`w-full p-2 border ${errors.birthDate ? "border-red-500" : "border-green-200"} outline-none rounded focus:ring-2 focus:ring-green-200`}
+              className={`w-full p-2 border ${
+                errors.birthDate ? "border-red-500" : "border-green-200"
+              } outline-none rounded focus:ring-2 focus:ring-green-200`}
               showYearDropdown
               yearDropdownItemNumber={100}
               scrollableYearDropdown
@@ -835,7 +713,9 @@ export default function RegisterForm() {
             <input
               type="tel"
               name="phone"
-              className={`w-full p-2 border ${errors.phone ? "border-red-500" : "border-green-200"} outline-none rounded focus:ring-2 focus:ring-green-200`}
+              className={`w-full p-2 border ${
+                errors.phone ? "border-red-500" : "border-green-200"
+              } outline-none rounded focus:ring-2 focus:ring-green-200`}
               onChange={handleChange}
               onBlur={handleBlur}
               value={formData.phone || ""}
@@ -853,7 +733,9 @@ export default function RegisterForm() {
             <input
               type="email"
               name="email"
-              className={`w-full p-2 border ${errors.email ? "border-red-500" : "border-green-200"} outline-none rounded focus:ring-2 focus:ring-green-200`}
+              className={`w-full p-2 border ${
+                errors.email ? "border-red-500" : "border-green-200"
+              } outline-none rounded focus:ring-2 focus:ring-green-200`}
               onChange={handleChange}
               onBlur={handleBlur}
               value={formData.email || ""}
@@ -883,7 +765,9 @@ export default function RegisterForm() {
             <input
               type="tel"
               name="referralPhone"
-              className={`w-full p-2 border ${errors.referralPhone ? "border-red-500" : "border-green-200"} outline-none rounded focus:ring-2 focus:ring-green-200`}
+              className={`w-full p-2 border ${
+                errors.referralPhone ? "border-red-500" : "border-green-200"
+              } outline-none rounded focus:ring-2 focus:ring-green-200`}
               onChange={handleChange}
               onBlur={handleBlur}
               value={formData.referralPhone || ""}
@@ -903,7 +787,9 @@ export default function RegisterForm() {
             <input
               type="text"
               name="city"
-              className={`w-full p-2 border ${errors.city ? "border-red-500" : "border-green-200"} outline-none rounded focus:ring-2 focus:ring-green-200`}
+              className={`w-full p-2 border ${
+                errors.city ? "border-red-500" : "border-green-200"
+              } outline-none rounded focus:ring-2 focus:ring-green-200`}
               onChange={handleChange}
               onBlur={handleBlur}
               value={formData.city || ""}
@@ -921,7 +807,9 @@ export default function RegisterForm() {
             <input
               type="text"
               name="idNumber"
-              className={`w-full p-2 border ${errors.idNumber ? "border-red-500" : "border-green-200"} outline-none rounded focus:ring-2 focus:ring-green-200`}
+              className={`w-full p-2 border ${
+                errors.idNumber ? "border-red-500" : "border-green-200"
+              } outline-none rounded focus:ring-2 focus:ring-green-200`}
               onChange={handleIdNumberChange}
               onBlur={handleBlur}
               value={formData.idNumber || ""}
@@ -940,31 +828,16 @@ export default function RegisterForm() {
               Upload Foto KTP *
             </label>
             <div
-              className={`border ${errors.ktpFile ? "border-red-500" : "border-dashed"} rounded p-4`}
+              className={`border ${
+                errors.ktpFile ? "border-red-500" : "border-dashed"
+              } rounded p-4`}
             >
               <input
                 type="file"
                 accept="image/*,.pdf"
                 onChange={(e) => handleFileChange(e, "ktpFile")}
                 className="w-full"
-                disabled={isUploading.ktpFile}
               />
-
-              {/* Progress bar untuk KTP */}
-              {isUploading.ktpFile && (
-                <div className="mt-2">
-                  <div className="flex justify-between text-xs mb-1">
-                    <span>Uploading...</span>
-                    <span>{uploadProgress.ktpFile}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${uploadProgress.ktpFile}%` }}
-                    ></div>
-                  </div>
-                </div>
-              )}
 
               {files.ktpFile && uploadStatus.ktpFile && (
                 <div className="mt-2 text-sm text-green-600">
@@ -986,13 +859,14 @@ export default function RegisterForm() {
             <input
               type="text"
               name="npwpNumber"
-              className={`w-full p-2 border ${errors.npwpNumber ? "border-red-500" : "border-green-200"} outline-none rounded focus:ring-2 focus:ring-green-200`}
+              className={`w-full p-2 border ${
+                errors.npwpNumber ? "border-red-500" : "border-green-200"
+              } outline-none rounded focus:ring-2 focus:ring-green-200`}
               onChange={handleNpwpNumberChange}
               onBlur={handleBlur}
               value={formData.npwpNumber || ""}
-              maxLength="15"
+              maxLength="16"
               inputMode="numeric"
-              pattern="[0-9]*"
             />
             {errors.npwpNumber && (
               <p className="text-red-500 text-xs mt-1">{errors.npwpNumber}</p>
@@ -1005,14 +879,15 @@ export default function RegisterForm() {
               Upload Foto NPWP *
             </label>
             <div
-              className={`border ${errors.npwpFile ? "border-red-500" : "border-dashed"} rounded p-4`}
+              className={`border ${
+                errors.npwpFile ? "border-red-500" : "border-dashed"
+              } rounded p-4`}
             >
               <input
                 type="file"
                 accept="image/*,.pdf"
                 onChange={(e) => handleFileChange(e, "npwpFile")}
                 className="w-full"
-                disabled={isUploading.npwpFile}
               />
 
               {/* Progress bar untuk NPWP */}
@@ -1020,12 +895,10 @@ export default function RegisterForm() {
                 <div className="mt-2">
                   <div className="flex justify-between text-xs mb-1">
                     <span>Uploading...</span>
-                    <span>{uploadProgress.npwpFile}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${uploadProgress.npwpFile}%` }}
                     ></div>
                   </div>
                 </div>
@@ -1052,8 +925,11 @@ export default function RegisterForm() {
             </button>
             <button
               onClick={handleNext}
-              disabled={isUploadingInStep(2)}
-              className={`w-full ${isUploadingInStep(2) ? "bg-gray-400 cursor-not-allowed" : "bg-green-200 hover:bg-green-400"} text-white p-2 rounded`}
+              className={`w-full ${
+                isUploadingInStep(2)
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-green-200 hover:bg-green-400"
+              } text-white p-2 rounded`}
             >
               {isUploadingInStep(2) ? "Menunggu Upload..." : "Selanjutnya"}
             </button>
@@ -1072,7 +948,9 @@ export default function RegisterForm() {
             <input
               type="text"
               name="accountNumber"
-              className={`w-full p-2 border ${errors.accountNumber ? "border-red-500" : "border-green-200"} outline-none rounded focus:ring-2 focus:ring-green-200`}
+              className={`w-full p-2 border ${
+                errors.accountNumber ? "border-red-500" : "border-green-200"
+              } outline-none rounded focus:ring-2 focus:ring-green-200`}
               onChange={handleAccountNumberChange}
               onBlur={handleBlur}
               value={formData.accountNumber || ""}
@@ -1094,7 +972,9 @@ export default function RegisterForm() {
             </label>
             <select
               name="bankName"
-              className={`w-full p-2 border ${errors.bankName ? "border-red-500" : "border-green-200"} outline-none rounded focus:ring-2 focus:ring-green-200`}
+              className={`w-full p-2 border ${
+                errors.bankName ? "border-red-500" : "border-green-200"
+              } outline-none rounded focus:ring-2 focus:ring-green-200`}
               onChange={handleChange}
               onBlur={handleBlur}
               value={formData.bankName || ""}
@@ -1121,7 +1001,9 @@ export default function RegisterForm() {
             <input
               type="text"
               name="accountHolder"
-              className={`w-full p-2 border ${errors.accountHolder ? "border-red-500" : "border-green-200"} outline-none rounded focus:ring-2 focus:ring-green-200`}
+              className={`w-full p-2 border ${
+                errors.accountHolder ? "border-red-500" : "border-green-200"
+              } outline-none rounded focus:ring-2 focus:ring-green-200`}
               onChange={handleChange}
               onBlur={handleBlur}
               value={formData.accountHolder || ""}
@@ -1139,31 +1021,16 @@ export default function RegisterForm() {
               Upload Foto Buku Tabungan *
             </label>
             <div
-              className={`border ${errors.bankBookFile ? "border-red-500" : "border-dashed"} rounded p-4`}
+              className={`border ${
+                errors.bankBookFile ? "border-red-500" : "border-dashed"
+              } rounded p-4`}
             >
               <input
                 type="file"
                 accept="image/*,.pdf"
                 onChange={(e) => handleFileChange(e, "bankBookFile")}
                 className="w-full"
-                disabled={isUploading.bankBookFile}
               />
-
-              {/* Progress bar untuk Buku Tabungan */}
-              {isUploading.bankBookFile && (
-                <div className="mt-2">
-                  <div className="flex justify-between text-xs mb-1">
-                    <span>Uploading...</span>
-                    <span>{uploadProgress.bankBookFile}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${uploadProgress.bankBookFile}%` }}
-                    ></div>
-                  </div>
-                </div>
-              )}
 
               {files.bankBookFile && uploadStatus.bankBookFile && (
                 <div className="mt-2 text-sm text-green-600">
@@ -1188,14 +1055,17 @@ export default function RegisterForm() {
             </button>
             <button
               onClick={handleSubmit}
-              disabled={isLoading || isUploadingInStep(3)}
-              className={`w-full ${isLoading || isUploadingInStep(3) ? "bg-gray-400 cursor-not-allowed" : "bg-green-200 hover:bg-green-400"} text-white p-2 rounded`}
+              className={`w-full ${
+                isLoading || isUploadingInStep(3)
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-green-200 hover:bg-green-400"
+              } text-white p-2 rounded`}
             >
               {isLoading
                 ? "Mendaftar..."
                 : isUploadingInStep(3)
-                  ? "Menunggu Upload..."
-                  : "Daftar"}
+                ? "Menunggu Upload..."
+                : "Daftar"}
             </button>
           </div>
         </div>
