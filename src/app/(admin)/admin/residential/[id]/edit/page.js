@@ -356,10 +356,16 @@ export default function EditResidentialPage() {
     setIsSubmitting(true);
 
     try {
+      const formattedData = {
+        ...form,
+        name: toCapitalCase(form.name),
+        developer: toCapitalCase(form.developer),
+        id: generateId(form.name),
+      };
       const res = await fetch(`/api/residential/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(formattedData),
       });
 
       if (!res.ok) {
@@ -415,20 +421,19 @@ export default function EditResidentialPage() {
         className="bg-white p-6 rounded-lg shadow-sm space-y-6"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* ID Properti (Disabled) */}
-          <div>
+          {/* ID Properti (Read-only display) */}
+          <div className="md:col-span-2">
             <label className="block font-medium mb-1">ID Properti</label>
-            <input
-              name="_id"
-              value={form._id || ""}
-              disabled
-              className="input w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
-            />
-            <p className="text-xs text-gray-500 mt-1">ID tidak dapat diubah</p>
+            <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-600">
+              {form.id || form._id}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              ID tidak dapat diubah setelah properti dibuat
+            </p>
           </div>
 
           {/* Nama Properti */}
-          <div>
+          <div className="md:col-span-2">
             <label className="block font-medium mb-1">
               Nama Properti <span className="text-red-500">*</span>
             </label>

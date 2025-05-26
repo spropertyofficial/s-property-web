@@ -15,7 +15,15 @@ const nextConfig = {
 
   images: {
     domains: ["images.pexels.com", "picsum.photos", "res.cloudinary.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
+      },
+    ],
   },
+  env: {},
 
   webpack: (config) => {
     config.optimization.splitChunks = false;

@@ -78,8 +78,7 @@ export default function AdminDashboard() {
             throw new Error("Failed to delete");
           }
         } catch (error) {
-          console.error("Error deleting:", error);
-          Swal.fire("Error!", "Gagal menghapus properti.", "error");
+          Swal.fire("Error!", "Gagal menghapus properti.", error);
         }
       }
     });
@@ -382,7 +381,7 @@ export default function AdminDashboard() {
                           </Link>
 
                           <Link
-                            href={`/admin/residential/edit/${r._id}`}
+                            href={`/admin/residential/${r._id}/edit`}
                             className="text-blue-600 hover:text-blue-900"
                             title="Edit"
                           >

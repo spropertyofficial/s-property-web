@@ -4,7 +4,9 @@ import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { FaUpload, FaTrash, FaSpinner } from "react-icons/fa";
 import Image from "next/image";
-import { generateSlug } from "@/utils/generateSlug";
+import { handleImageUpload as uploadImage } from "@/utils/handleImagesUpload";
+import { generateId } from "@/utils/generateSlug";
+import { toCapitalCase } from "@/utils/toCapitalcase";
 
 export default function AddResidentialPage() {
   const router = useRouter();
@@ -82,107 +84,29 @@ export default function AddResidentialPage() {
         location: { ...prev.location, [key]: value },
       }));
     } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
+      setForm((prev) => {
+        const updatedForm = { ...prev, [name]: value };
 
-      // Jika nama properti berubah, otomatis update ID
-      if (name === "name") {
-        setForm((prev) => ({
-          ...prev,
-          [name]: value,
-          id: generateSlug(value),
-        }));
-      }
+        // Jika yang diubah adalah nama, generate ID otomatis
+        if (name === "name") {
+          updatedForm.id = generateId(value);
+        }
+
+        return updatedForm;
+      });
     }
   };
 
-  const handleImageUpload = async (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length === 0) return;
-
-    if (previewImages.length + files.length > 10) {
-      Swal.fire({
-        title: "Peringatan",
-        text: "Maksimal 10 gambar yang dapat diunggah",
-        icon: "warning",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#131414",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-    const newGalleryItems = [];
-    const newPreviewImages = [];
-
-    // Inisialisasi progress
-    setUploadProgress(5);
-
-    try {
-      // Ambil nama residential untuk folder
-      const residentialName = form.name
-        ? form.name
-            .toLowerCase()
-            .replace(/\s+/g, "-")
-            .replace(/[^a-z0-9-]/g, "")
-        : "general";
-
-      // Proses upload untuk setiap file
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("residential", residentialName);
-        formData.append("category", "residential"); // Ini adalah gambar untuk residential
-
-        // Update progress
-        const progressPerFile = 90 / files.length;
-        setUploadProgress(5 + progressPerFile * i);
-
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-          newGalleryItems.push({
-            src: data.url,
-            alt: file.name,
-            type: "property",
-            publicId: data.publicId,
-          });
-
-          newPreviewImages.push({
-            url: data.url,
-            name: file.name,
-            size: file.size,
-            publicId: data.publicId,
-          });
-        } else {
-          throw new Error(data.error || "Upload gagal");
-        }
-      }
-
-      // Update state
-      setUploadProgress(100);
-      setPreviewImages((prev) => [...prev, ...newPreviewImages]);
-      setForm((prev) => ({
-        ...prev,
-        gallery: [...(prev.gallery || []), ...newGalleryItems],
-      }));
-
-      setTimeout(() => setUploadProgress(0), 1000);
-    } catch (error) {
-      console.error("Upload error:", error);
-      Swal.fire({
-        title: "Error",
-        text: "Terjadi kesalahan saat mengunggah gambar",
-        icon: "error",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleImageUpload = (e) => {
+    uploadImage(e, {
+      previewImages,
+      setPreviewImages,
+      form,
+      setForm,
+      maxImages: 10,
+      residentialName: form.name,
+      setUploadProgress,
+    });
   };
 
   const removeImage = async (index) => {
@@ -254,6 +178,7 @@ export default function AddResidentialPage() {
       });
       return;
     }
+
     if (form.gallery.length === 0) {
       Swal.fire({
         title: "Gambar belum diupload",
@@ -268,14 +193,20 @@ export default function AddResidentialPage() {
     setIsSubmitting(true);
 
     try {
+      const formattedData = {
+        ...form,
+        name: toCapitalCase(form.name),
+        id: generateId(form.name), // Pastikan ID ter-generate dari nama final
+      };
+      console.log(formattedData);
       const res = await fetch("/api/residential", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(formattedData),
       });
 
       const data = await res.json();
-      console.log(form);
+      console.log(res);
 
       if (!res.ok) throw new Error(data.message || "Gagal menyimpan data");
 
@@ -319,31 +250,9 @@ export default function AddResidentialPage() {
         className="bg-white p-6 rounded-lg shadow-sm space-y-6"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* ID Properti */}
-          <div>
-            <label className="block font-medium mb-1">
-              ID Properti <span className="text-red-500">*</span>
-            </label>
-            <input
-              name="id"
-              value={form.id}
-              onChange={handleChange}
-              className={`input w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.id ? "border-red-500" : "border-gray-300"
-              }`}
-              placeholder="Contoh: terravia-bsd"
-            />
-            {errors.id && (
-              <p className="text-red-500 text-sm mt-1">{errors.id}</p>
-            )}
-            <p className="text-xs text-gray-500 mt-1">
-              ID akan digunakan dalam URL. Gunakan huruf kecil, angka, dan tanda
-              hubung.
-            </p>
-          </div>
-
           {/* Nama Properti */}
-          <div>
+          {/* Nama Properti */}
+          <div className="md:col-span-2">
             <label className="block font-medium mb-1">
               Nama Properti <span className="text-red-500">*</span>
             </label>
@@ -358,6 +267,15 @@ export default function AddResidentialPage() {
             />
             {errors.name && (
               <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+            )}
+            {/* Preview ID yang akan di-generate */}
+            {form.name && (
+              <p className="text-xs text-gray-500 mt-1">
+                ID yang akan di-generate:{" "}
+                <code className="bg-gray-100 px-1 rounded">
+                  {generateId(form.name)}
+                </code>
+              </p>
             )}
           </div>
 
