@@ -15,7 +15,7 @@ export default function Home() {
   );
   const subLeadProjects = properties?.filter(
     (property) =>
-      property.name == "Grand Tenjo Residence" ||
+      property.name === "Grand Tenjo Residence" ||
       property.name === "Cikupa Green Village"
   );
   return (
