@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Admin from "@/lib/models/Admin";
@@ -8,6 +7,7 @@ import connectDB from "@/lib/mongodb";
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
 export async function POST(req) {
+
   try {
     await connectDB();
     const { email, password } = await req.json();

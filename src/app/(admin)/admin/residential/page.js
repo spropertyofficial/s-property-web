@@ -16,7 +16,6 @@ import {
   FaEye,
 } from "react-icons/fa";
 import Swal from "sweetalert2";
-
 export default function AdminDashboard() {
   const [residentials, setResidentials] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -343,6 +342,7 @@ export default function AdminDashboard() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+
                             ${
                               r.propertyStatus === "SALE"
                                 ? "bg-green-100 text-green-800"
@@ -441,5 +441,6 @@ export default function AdminDashboard() {
         </div>
       )}
     </div>
+
   );
 }

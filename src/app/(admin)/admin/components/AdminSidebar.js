@@ -59,7 +59,6 @@ export default function AdminSidebar({ handleLogout }) {
             {sidebarOpen ? <FaTimes /> : <FaBars />}
           </button>
         </div>
-
         {/* Navigation */}
         <nav className="flex-1 py-4 overflow-y-auto">
           <ul>
@@ -80,7 +79,6 @@ export default function AdminSidebar({ handleLogout }) {
             ))}
           </ul>
         </nav>
-
         {/* Logout Button */}
         <div className="p-4 border-t">
           <button

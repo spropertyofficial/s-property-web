@@ -16,6 +16,5 @@ export async function POST() {
   });
 
   console.log("Cookie cleared"); // Debug log
-
   return response;
 }

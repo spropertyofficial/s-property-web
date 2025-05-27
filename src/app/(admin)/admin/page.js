@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
-
-// Import komponen
 import QuickActions from "./components/QuickActions";
 import RecentActivity from "./components/RecentActivity";
 import AnalyticsOverview from "./components/AnalyticsOverview";
@@ -64,7 +62,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
 
       {/* Main Content */}
       <div
