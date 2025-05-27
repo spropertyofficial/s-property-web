@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 
 // Import komponen
-import AdminSidebar from "./components/AdminSidebar";
 import QuickActions from "./components/QuickActions";
 import RecentActivity from "./components/RecentActivity";
 import AnalyticsOverview from "./components/AnalyticsOverview";
@@ -66,12 +65,10 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <AdminSidebar handleLogout={handleLogout} />
 
       {/* Main Content */}
       <div
-        className={`flex-1 transition-all duration-300 ${
-          sidebarOpen ? "ml-64" : "ml-0 md:ml-20"
+        className={`flex-1 transition-all duration-300
         }`}
       >
         <div className="p-6">

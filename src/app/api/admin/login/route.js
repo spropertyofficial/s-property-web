@@ -1,34 +1,50 @@
 import { NextResponse } from "next/server";
+
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import connectDB from "@/lib/mongodb";
 import Admin from "@/lib/models/Admin";
+import connectDB from "@/lib/mongodb";
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
 export async function POST(req) {
-  await connectDB();
-  const { email, password } = await req.json();
+  try {
+    await connectDB();
+    const { email, password } = await req.json();
 
-  const admin = await Admin.findOne({ email });
-  if (!admin || !(await bcrypt.compare(password, admin.password))) {
-    return NextResponse.json(
-      { message: "Invalid credentials" },
-      { status: 401 }
-    );
+    const admin = await Admin.findOne({ email });
+    if (!admin || !(await bcrypt.compare(password, admin.password))) {
+      return NextResponse.json(
+        { message: "Invalid credentials" },
+        { status: 401 }
+      );
+    }
+
+    const token = jwt.sign({ id: admin._id, role: admin.role }, JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    console.log("Login successful, setting cookie..."); // Debug log
+
+    const res = NextResponse.json({
+      message: "Login success",
+      success: true,
+    });
+
+    // Set cookie dengan options yang benar
+    res.cookies.set("token", token, {
+      httpOnly: true,
+      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+      sameSite: "lax", // Penting untuk cross-site requests
+    });
+
+    console.log("Cookie set with token:", token.substring(0, 20) + "..."); // Debug log
+
+    return res;
+  } catch (err) {
+    console.error("Login error:", err);
+    return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
-
-  const token = jwt.sign({ id: admin._id, role: admin.role }, JWT_SECRET, {
-    expiresIn: "7d",
-  });
-
-  const res = NextResponse.json({ message: "Login success" });
-  res.cookies.set("token", token, {
-    httpOnly: true,
-    path: "/",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 7 * 24 * 60 * 60,
-  });
-
-  return res;
 }
