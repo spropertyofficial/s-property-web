@@ -4,6 +4,7 @@ import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import ReduxProvider from "@/components/providers/ReduxProvider";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import { AuthProvider } from "@/context/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -35,8 +36,10 @@ export default function SiteLayout({ children }) {
       <body className={inter.className}>
         <ReduxProvider>
           <Header />
-          {children}
-          <ServiceWorkerRegistration />
+          <AuthProvider>
+            {children}
+            <ServiceWorkerRegistration />
+          </AuthProvider>
           <Footer />
           <Analytics />
         </ReduxProvider>
