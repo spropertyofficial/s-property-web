@@ -136,7 +136,6 @@ function redirectToLogin(request) {
 
   return response;
 }
-
 export const config = {
   matcher: [
     "/admin/:path*",
