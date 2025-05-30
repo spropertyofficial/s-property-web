@@ -2,7 +2,7 @@ import React from "react";
 import PropertyCard from "../PropertyCard";
 import LoadingWrapper from "../LoadingWrapper";
 
-function PropertyListing({ data, type, title, isLoading, className = "" }) {
+function PropertyList({ data, type, title, isLoading, className = "" }) {
   return (
     <section className={`w-full px-4 py-6 ${className}`}>
       {title && (
@@ -28,4 +28,4 @@ function PropertyListing({ data, type, title, isLoading, className = "" }) {
   );
 }
 
-export default PropertyListing;
+export default PropertyList;
