@@ -57,11 +57,6 @@ export default function Home() {
         {/* Agent-only Content */}
         {isAgent() ? (
           <>
-            {/* KPR Simulator - Agent Only */}
-            <div className="my-8">
-              <KPRSimulator />
-            </div>
-
             {/* Property Listings - Agent Only */}
             <div className="space-y-8">
               <PropertyListing
