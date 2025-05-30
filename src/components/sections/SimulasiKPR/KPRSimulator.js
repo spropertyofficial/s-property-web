@@ -1,7 +1,5 @@
 // components/KPRSimulator.jsx
 "use client";
-
-import { formatToShortRupiah } from "@/utils/formatCurrency";
 import Image from "next/image";
 import { FaCheckCircle } from "react-icons/fa";
 import { useState, useEffect, useMemo } from "react";
@@ -11,8 +9,13 @@ import {
   documentRequirements,
 } from "./data/documentRequirements";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
+import UserView from "./components/UserView";
+import LoadingWrapper from "@/components/common/LoadingWrapper";
+import LoadingLogo from "@/components/common/LoadingWrapper/components/LoadingLogo";
 
 export default function KPRSimulator() {
+  const { isAgent, loading } = useAuth();
   // State with more descriptive variable names and better initial values
   const [hargaProperti, setHargaProperti] = useState("");
   const [uangMuka, setUangMuka] = useState("");
@@ -147,6 +150,15 @@ export default function KPRSimulator() {
     return totalPembayaran - jumlahPinjaman;
   }, [totalPembayaran, jumlahPinjaman]);
 
+
+  if (loading) {
+    return <LoadingLogo />;
+  }
+
+  if (!isAgent()) {
+    return <UserView />;
+  }
+
   return (
     <div className="w-full bg-tosca-50 py-8 px-4 md:px-8 rounded-xl my-5">
       <div className="max-w-6xl mx-auto">
@@ -237,7 +249,8 @@ export default function KPRSimulator() {
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 bg-white px-1">
                       %
                     </div>
-                  </div>                </div>
+                  </div>{" "}
+                </div>
               </div>
             </div>
 
