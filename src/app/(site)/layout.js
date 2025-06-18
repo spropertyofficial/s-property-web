@@ -35,12 +35,12 @@ export default function SiteLayout({ children }) {
     <html lang="en">
       <body className={inter.className}>
         <ReduxProvider>
-          <Header />
           <AuthProvider>
+            <Header />
             {children}
             <ServiceWorkerRegistration />
+            <Footer />
           </AuthProvider>
-          <Footer />
           <Analytics />
         </ReduxProvider>
       </body>
