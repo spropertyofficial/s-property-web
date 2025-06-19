@@ -37,7 +37,7 @@ export default function Footer() {
               <Link href="/">
                 <Image
                   src="/images/logos/footer-logo.png"
-                  alt="Griya Harmoni Cibugel Logo"
+                  alt="S-Property Logo"
                   width={250}
                   height={50}
                   className="h-auto"
@@ -106,7 +106,7 @@ export default function Footer() {
         {/* Garis pemisah dan Copyright */}
         <div className="border-t border-gray-600 mt-10 pt-8 text-center">
           <p className="text-base text-gray-300">
-            © {new Date().getFullYear()} Griya Harmoni Cibugel. All rights
+            © {new Date().getFullYear()} S-Property. All rights
             reserved.
           </p>
         </div>
