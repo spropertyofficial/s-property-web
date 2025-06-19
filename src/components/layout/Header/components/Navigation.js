@@ -1,8 +1,10 @@
+
 "use client";
 import AuthButton from "@/components/auth/AuthButton";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect } from "react";
+
 
 const menuItems = [
   { label: "Home", href: "/" },

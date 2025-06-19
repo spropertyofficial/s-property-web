@@ -49,7 +49,6 @@ export const AuthProvider = ({ children }) => {
 
       if (response.ok) {
         setUser(data.user);
-        console.log("User:", user);
         return { success: true, message: data.message };
       } else {
         return { success: false, message: data.message };
