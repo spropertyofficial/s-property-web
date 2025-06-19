@@ -76,12 +76,16 @@ export default function LoginPage() {
       </div>
 
       <div className="w-full lg:w-1/2 flex flex-col">
-        <div className="lg:hidden bg-white border-b border-gray-200 px-6 py-4">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-tosca-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold">S</span>
-            </div>
-            <span className="text-xl font-bold text-tosca-600">S-Property</span>
+        <div className="lg:hidden bg-tosca-100 px-6">
+          <Link href="/" className="flex items-center justify-center space-x-2">
+            <Image
+              src="/images/logos/header-logo.png"
+              alt="S-Property Logo"
+              width={100}
+              height={50}
+              className="h-auto"
+            />
+            
           </Link>
         </div>
 
