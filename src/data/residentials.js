@@ -1024,10 +1024,10 @@ export const residentialsData = [
     name: "Tenjo City Metropolis",
     startPrice: 200000000,
     location: {
-      region: "West Java",
+      region: "Jawa Barat",
       city: "Kabupaten Bogor Barat",
       area: "Tenjo",
-      address: "Tenjo, Bogor Regency, West Java 16370",
+      address: "Tenjo, Bogor Regency, Jawa Barat 16370",
       country: "Indonesia",
       mapsLink: generalMaps,
     },
