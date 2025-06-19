@@ -1,11 +1,8 @@
-
 "use client";
 import AuthButton from "@/components/auth/AuthButton";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect } from "react";
-
-
 const menuItems = [
   { label: "Home", href: "/" },
   { label: "Properti", href: "/properties/residentials" },
@@ -16,17 +13,8 @@ const menuItems = [
 ];
 
 export default function Navigation() {
-  const { user, loading } = useAuth();
 
-  console.log("Navigation render - User:", user, "Loading:", loading);
-
-  useEffect(() => {
-    if (user) {
-      console.log("User is logged in:", user);
-    } else {
-      console.log("User is not logged in");
-    }
-  }, [user]);
+  const { loading } = useAuth();
 
   // Show loading state for entire nav
   if (loading) {
@@ -58,9 +46,9 @@ export default function Navigation() {
         <Link
           key={item.href}
           href={item.href}
-          className="relative text-tosca-300 hover:text-tosca-100 font-medium transition-colors duration-200
+          className="relative text-white hover:text-white font-medium transition-colors duration-200
             after:content-[''] after:absolute after:w-full after:h-0.5 
-            after:bg-tosca-100 after:left-0 after:-bottom-1 
+            after:bg-white after:left-0 after:-bottom-1 
             after:scale-x-0 hover:after:scale-x-100 
             after:transition-transform after:duration-300 after:origin-left"
         >

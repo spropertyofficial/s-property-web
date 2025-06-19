@@ -369,7 +369,6 @@ export default function Home() {
                       </div>
                     </div>
                     <p className="text-gray-600 mb-4 italic">
-
                       &quot;Pelayanan yang sangat memuaskan! Tim S-Property membantu
                       saya menemukan rumah impian dengan proses yang mudah dan
                       transparan.&quot;
@@ -405,7 +404,6 @@ export default function Home() {
                       &quot;Investasi properti pertama saya berjalan lancar berkat
                       bimbingan dari S-Property. Sangat profesional dan
                       terpercaya.&quot;
-
                     </p>
                     <div className="flex items-center">
                       <div className="w-10 h-10 bg-tosca-200 rounded-full flex items-center justify-center mr-3">
@@ -435,11 +433,9 @@ export default function Home() {
                       </div>
                     </div>
                     <p className="text-gray-600 mb-4 italic">
-
                       &quot;Proses KPR yang tadinya rumit menjadi mudah dengan
                       bantuan tim S-Property. Terima kasih atas pelayanan
                       terbaiknya!&quot;
-
                     </p>
                     <div className="flex items-center">
                       <div className="w-10 h-10 bg-tosca-200 rounded-full flex items-center justify-center mr-3">
