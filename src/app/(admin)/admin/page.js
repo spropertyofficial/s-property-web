@@ -38,8 +38,8 @@ export default function AdminDashboard() {
 
       setStats({
         residentials: residentialsData.residentials?.length || 0,
-        clusters: 12, // Placeholder
-        units: 48, // Placeholder
+        clusters: 0, // Placeholder
+        units: 0, // Placeholder
       });
     } catch (error) {
       console.error("Error fetching stats:", error);
