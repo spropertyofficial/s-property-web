@@ -13,7 +13,6 @@ const menuItems = [
 ];
 
 export default function Navigation() {
-
   const { loading } = useAuth();
 
   // Show loading state for entire nav
