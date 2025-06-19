@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+
 export default function LoginButton({ className = "" }) {
   const { loading } = useAuth();
 

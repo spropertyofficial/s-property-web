@@ -3,6 +3,7 @@ import BurgerMenu from "./components/BurgerMenu";
 import Link from "next/link";
 import Navigation from "./components/Navigation";
 
+
 export default function Header() {
   return (
     <header className="w-full sticky top-0 z-50">
