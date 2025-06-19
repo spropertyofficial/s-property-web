@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
@@ -18,7 +17,6 @@ export default function BurgerMenu() {
     { label: "Tentang Kami", href: "/about" },
     { label: "Kontak", href: "/contact" },
   ];
-
   useEffect(() => {
     if (user) {
       console.log("BurgerMenu - User is logged in:", user);
@@ -75,7 +73,6 @@ export default function BurgerMenu() {
                 {item.label}
               </Link>
             ))}
-
             {/* Auth Section */}
             <div className="pt-4 border-t border-white/20">
               {loading ? (

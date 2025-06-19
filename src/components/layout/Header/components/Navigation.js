@@ -3,7 +3,6 @@ import AuthButton from "@/components/auth/AuthButton";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect } from "react";
-
 const menuItems = [
   { label: "Home", href: "/" },
   { label: "Properti", href: "/properties/residentials" },
@@ -14,6 +13,7 @@ const menuItems = [
 ];
 
 export default function Navigation() {
+
   const { loading } = useAuth();
 
   // Show loading state for entire nav
