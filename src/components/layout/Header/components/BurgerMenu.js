@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import Image from "next/image";
-import LoginButton from "@/components/auth/LoginButton";
+import AuthButton from "@/components/auth/AuthButton";
+import { useAuth } from "@/context/AuthContext";
 
 export default function BurgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, loading } = useAuth();
 
   const menuItems = [
     { label: "Home", href: "/" },
@@ -17,6 +19,22 @@ export default function BurgerMenu() {
     { label: "Tentang Kami", href: "/about" },
     { label: "Kontak", href: "/contact" },
   ];
+  useEffect(() => {
+    if (user) {
+      console.log("BurgerMenu - User is logged in:", user);
+    } else {
+      console.log("BurgerMenu - User is not logged in");
+    }
+  }, [user]);
+
+  // Close menu when clicking outside or on menu items
+  const handleMenuItemClick = () => {
+    setIsOpen(false);
+  };
+
+  const handleLogoutComplete = () => {
+    handleMenuItemClick(); // Close menu after logout
+  };
 
   return (
     <div>
@@ -24,6 +42,7 @@ export default function BurgerMenu() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="text-tosca-200 hover:text-tosca-300 transition-colors"
+        aria-label={isOpen ? "Close menu" : "Open menu"}
       >
         {isOpen ? <X size={30} /> : <Menu size={30} />}
       </button>
@@ -51,13 +70,44 @@ export default function BurgerMenu() {
                 key={index}
                 href={item.href}
                 className="block text-white hover:text-white/50 transition-colors"
-                onClick={() => setIsOpen(false)}
+                onClick={handleMenuItemClick}
               >
                 {item.label}
               </Link>
             ))}
-            <div className="px-3 py2">
-              <LoginButton />
+            {/* Auth Section */}
+            <div className="pt-4 border-t border-white/20">
+              {loading ? (
+                <div className="px-3 py-2">
+                  <div className="animate-pulse bg-white/20 h-8 w-full rounded"></div>
+                </div>
+              ) : user ? (
+                <div className="space-y-3">
+                  {/* User Info */}
+                  <div className="px-3 py-2 bg-white/10 rounded-md">
+                    <div className="text-white text-sm font-medium">
+                      {user.name}
+                    </div>
+                    {user.agentCode && (
+                      <div className="text-white/70 text-xs">
+                        Agent: {user.agentCode}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Logout Button */}
+                  <AuthButton
+                    variant="mobile"
+                    showUserInfo={false}
+                    onLogoutComplete={handleLogoutComplete}
+                  />
+                </div>
+              ) : (
+                <div className="px-3 py-2">
+                  <AuthButton variant="mobile" />
+                </div>
+              )}
+
             </div>
           </nav>
         </div>

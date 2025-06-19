@@ -11,7 +11,6 @@ import {
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import UserView from "./components/UserView";
-import LoadingWrapper from "@/components/common/LoadingWrapper";
 import LoadingLogo from "@/components/common/LoadingWrapper/components/LoadingLogo";
 
 export default function KPRSimulator() {

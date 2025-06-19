@@ -1,10 +1,7 @@
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
-import Footer from "@/components/layout/Footer";
-import Header from "@/components/layout/Header";
-import ReduxProvider from "@/components/providers/ReduxProvider";
-import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import { AuthProvider } from "@/context/AuthContext";
+import ReduxProvider from "@/components/providers/ReduxProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,11 +9,11 @@ export const metadata = {
   icons: {
     icon: "/favicon.ico",
   },
-  title: "S-Property",
+  title: "Login - S-Property",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "S-Property",
+    title: "S-Property Login",
   },
   formatDetection: {
     telephone: false,
@@ -30,16 +27,15 @@ export const viewport = {
   maximumScale: 1,
 };
 
-export default function SiteLayout({ children }) {
+export default function AuthLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
         <ReduxProvider>
           <AuthProvider>
-            <Header />
-            {children}
-            <ServiceWorkerRegistration />
-            <Footer />
+            <div className="min-h-screen bg-gradient-to-br from-tosca-50 to-tosca-100">
+              {children}
+            </div>
           </AuthProvider>
           <Analytics />
         </ReduxProvider>
