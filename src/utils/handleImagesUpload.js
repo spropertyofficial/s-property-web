@@ -1,6 +1,8 @@
+// util/handleImageUpload.js
+
 import Swal from "sweetalert2";
 
-const MAX_FILE_SIZE_MB = 8;
+const MAX_FILE_SIZE_MB = 10; 
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 export const handleImageUpload = async (
@@ -13,22 +15,26 @@ export const handleImageUpload = async (
     maxImages = 10,
     residentialName = "general",
     setUploadProgress = null,
-    onSuccess = null,
-    onError = null,
   }
 ) => {
   const files = Array.from(e.target.files);
   if (files.length === 0) return;
 
+  // Validasi jumlah & ukuran (tetap penting)
   if (previewImages.length + files.length > maxImages) {
-    Swal.fire({
-      title: "Peringatan",
-      text: `Maksimal ${maxImages} gambar yang dapat diunggah`,
-      icon: "warning",
-      confirmButtonText: "OK",
-      confirmButtonColor: "#131414",
-    });
+    Swal.fire("Peringatan", `Maksimal ${maxImages} gambar.`, "warning");
     return;
+  }
+  for (const file of files) {
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      Swal.fire(
+        "Ukuran File Terlalu Besar",
+        `File "${file.name}" melebihi batas ${MAX_FILE_SIZE_MB} MB.`,
+        "error"
+      );
+      e.target.value = null;
+      return;
+    }
   }
 
   for (const file of files) {
@@ -48,54 +54,76 @@ export const handleImageUpload = async (
 
   const newGalleryItems = [];
   const newPreviewImages = [];
+  const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const API_KEY = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
+
+  if (!CLOUD_NAME || !API_KEY) {
+    console.error("Cloudinary env variables not set!");
+    Swal.fire(
+      "Error Konfigurasi",
+      "Konfigurasi Cloudinary tidak ditemukan.",
+      "error"
+    );
+    return;
+  }
 
   try {
     if (setUploadProgress) setUploadProgress(5);
 
-    const residentialId = residentialName
-      ? residentialName
-          .toLowerCase()
-          .replace(/\s+/g, "-")
-          .replace(/[^a-z0-9-]/g, "")
-      : "general";
-
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
 
+      const timestamp = Math.round(new Date().getTime() / 1000);
+      const folder = `s-property/residential/${residentialName
+        .toLowerCase()
+        .replace(/\s+/g, "-")}`;
+      const paramsToSign = { timestamp, folder };
+
+      const signRes = await fetch("/api/sign-cloudinary-upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paramsToSign }),
+      });
+      const signData = await signRes.json();
+      if (!signRes.ok)
+        throw new Error(signData.error || "Gagal mendapatkan signature");
+      const { signature } = signData;
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("api_key", API_KEY);
+      formData.append("timestamp", timestamp);
+      formData.append("signature", signature);
+      formData.append("folder", folder);
       if (setUploadProgress) {
         const progressPerFile = 90 / files.length;
         setUploadProgress(5 + progressPerFile * i);
       }
 
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("residential", residentialId);
-      formData.append("category", "residential");
-
-      const res = await fetch("/api/upload", {
+      const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+      const uploadRes = await fetch(cloudinaryUrl, {
         method: "POST",
         body: formData,
       });
 
-      const data = await res.json();
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok)
+        throw new Error(
+          uploadData.error?.message || "Upload ke Cloudinary gagal"
+        );
 
-      if (res.ok) {
-        newGalleryItems.push({
-          src: data.url,
-          alt: file.name,
-          type: "property",
-          publicId: data.publicId,
-        });
-
-        newPreviewImages.push({
-          url: data.url,
-          name: file.name,
-          size: file.size,
-          publicId: data.publicId,
-        });
-      } else {
-        throw new Error(data.error || `Upload gagal untuk file: ${file.name}`);
-      }
+      newGalleryItems.push({
+        src: uploadData.secure_url,
+        alt: file.name,
+        type: "property",
+        publicId: uploadData.public_id,
+      });
+      newPreviewImages.push({
+        url: uploadData.secure_url,
+        name: file.name,
+        size: file.size,
+        publicId: uploadData.public_id,
+      });
     }
 
     if (setUploadProgress) {
@@ -109,30 +137,15 @@ export const handleImageUpload = async (
       gallery: [...(prev.gallery || []), ...newGalleryItems],
     }));
 
-    if (onSuccess) {
-      onSuccess(newGalleryItems, newPreviewImages);
-    } else {
-      Swal.fire({
-        title: "Berhasil!",
-        text: `${files.length} gambar berhasil diunggah`,
-        icon: "success",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-    }
+    Swal.fire(
+      "Berhasil!",
+      `${files.length} gambar berhasil diunggah`,
+      "success",
+      { timer: 1500, showConfirmButton: false }
+    );
   } catch (error) {
-    console.error("Upload error:", error);
-
-    if (onError) {
-      onError(error);
-    } else {
-      Swal.fire({
-        title: "Error",
-        text: error.message || "Gagal mengunggah gambar",
-        icon: "error",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#131414",
-      });
-    }
+    console.error("Direct upload error:", error);
+    Swal.fire("Error", error.message || "Gagal mengunggah gambar", "error");
+    if (setUploadProgress) setUploadProgress(0);
   }
 };
