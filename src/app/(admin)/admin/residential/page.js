@@ -16,6 +16,7 @@ import {
   FaEye,
 } from "react-icons/fa";
 import Swal from "sweetalert2";
+import { getResidentials } from "@/services/residentialsApi";
 export default function AdminDashboard() {
   const [residentials, setResidentials] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,17 +36,14 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/residential");
-      const data = await res.json();
-      setResidentials(data.residentials || []);
+      const data = await getResidentials();
+      setResidentials(data);
     } catch (error) {
       console.error("Error fetching data:", error);
       Swal.fire({
         title: "Error!",
-        text: "Gagal mengambil data properti",
+        text: error.message || "Gagal mengambil data properti",
         icon: "error",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#131414",
       });
     } finally {
       setLoading(false);
@@ -441,6 +439,5 @@ export default function AdminDashboard() {
         </div>
       )}
     </div>
-
   );
 }
