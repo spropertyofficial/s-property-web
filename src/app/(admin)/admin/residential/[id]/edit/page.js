@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Swal from "sweetalert2";
 import { FaTrash, FaUpload, FaSpinner } from "react-icons/fa";
 import Image from "next/image";
+import { toCapitalCase } from "@/utils/toCapitalcase";
 
 export default function EditResidentialPage() {
   const router = useRouter();
