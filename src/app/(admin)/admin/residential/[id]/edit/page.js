@@ -283,7 +283,7 @@ export default function EditResidentialPage() {
         const publicId = publicIdWithVersion.replace(/\.[^/.]+$/, "");
 
         // Kirim permintaan ke API untuk menghapus gambar dari Cloudinary
-        const deleteResponse = await fetch("/api/upload/delete", {
+        const deleteResponse = await fetch("/api/upload", {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
@@ -361,7 +361,7 @@ export default function EditResidentialPage() {
         ...form,
         name: form.name,
         developer: form.developer,
-        id: generateId(form.name),
+        id: form.name,
       };
       const res = await fetch(`/api/residential/${id}`, {
         method: "PUT",
@@ -410,7 +410,7 @@ export default function EditResidentialPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Edit Properti Residential</h1>
         <button
-          onClick={() => router.back()}
+          onClick={() => router.push(`/admin/residential`)}
           className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
         >
           Kembali
