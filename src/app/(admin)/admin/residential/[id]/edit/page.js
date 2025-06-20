@@ -359,8 +359,8 @@ export default function EditResidentialPage() {
     try {
       const formattedData = {
         ...form,
-        name: toCapitalCase(form.name),
-        developer: toCapitalCase(form.developer),
+        name: form.name,
+        developer: form.developer,
         id: generateId(form.name),
       };
       const res = await fetch(`/api/residential/${id}`, {
