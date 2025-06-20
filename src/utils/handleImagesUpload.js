@@ -37,6 +37,21 @@ export const handleImageUpload = async (
     }
   }
 
+  for (const file of files) {
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      Swal.fire({
+        title: "Ukuran File Terlalu Besar",
+        text: `File "${file.name}" melebihi batas maksimal ${MAX_FILE_SIZE_MB} MB. Silakan pilih file lain.`,
+        icon: "error",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#131414",
+      });
+      e.target.value = null;
+      return; 
+    }
+  }
+  // <-- AKHIR MODIFIKASI
+
   const newGalleryItems = [];
   const newPreviewImages = [];
   const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
@@ -80,7 +95,6 @@ export const handleImageUpload = async (
       formData.append("timestamp", timestamp);
       formData.append("signature", signature);
       formData.append("folder", folder);
-
       if (setUploadProgress) {
         const progressPerFile = 90 / files.length;
         setUploadProgress(5 + progressPerFile * i);
