@@ -63,7 +63,6 @@ export async function POST(req) {
 export async function DELETE(req) {
   try {
     const { publicId } = await req.json();
-    console.log("Received DELETE request:", { publicId });
 
     if (!publicId) {
       return NextResponse.json(
@@ -74,7 +73,6 @@ export async function DELETE(req) {
 
     let result;
 
-    // Jika publicId tersedia, gunakan itu
     result = await cloudinary.uploader.destroy(publicId);
 
     if (result.result === "ok") {

@@ -1,5 +1,8 @@
 import Swal from "sweetalert2";
 
+const MAX_FILE_SIZE_MB = 8;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
 export const handleImageUpload = async (
   e,
   {
@@ -28,11 +31,25 @@ export const handleImageUpload = async (
     return;
   }
 
+  for (const file of files) {
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      Swal.fire({
+        title: "Ukuran File Terlalu Besar",
+        text: `File "${file.name}" melebihi batas maksimal ${MAX_FILE_SIZE_MB} MB. Silakan pilih file lain.`,
+        icon: "error",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#131414",
+      });
+      e.target.value = null;
+      return; 
+    }
+  }
+  // <-- AKHIR MODIFIKASI
+
   const newGalleryItems = [];
   const newPreviewImages = [];
 
   try {
-    // Set initial progress
     if (setUploadProgress) setUploadProgress(5);
 
     const residentialId = residentialName
@@ -45,7 +62,6 @@ export const handleImageUpload = async (
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
 
-      // Update progress
       if (setUploadProgress) {
         const progressPerFile = 90 / files.length;
         setUploadProgress(5 + progressPerFile * i);
@@ -82,20 +98,17 @@ export const handleImageUpload = async (
       }
     }
 
-    // Complete progress
     if (setUploadProgress) {
       setUploadProgress(100);
       setTimeout(() => setUploadProgress(0), 1000);
     }
 
-    // Update state
     setPreviewImages((prev) => [...prev, ...newPreviewImages]);
     setForm((prev) => ({
       ...prev,
       gallery: [...(prev.gallery || []), ...newGalleryItems],
     }));
 
-    // Success callback atau default notification
     if (onSuccess) {
       onSuccess(newGalleryItems, newPreviewImages);
     } else {
