@@ -1,21 +1,16 @@
 import { residentialsData } from "@/data/residentials";
 import PropertyCard from "@/components/common/PropertyCard/PropertyCard";
-import { getResidentials } from "@/services/residentialsApi";
+import { getResidentialsData } from "@/app/api/residential/route";
 
 export default async function ResidentialsPage({ searchParams }) {
   const { city } = searchParams;
 
-  const residentials = await getResidentials();
-  console.log("Residentials:", residentials);
-
-  const dynamicResidentials = await getResidentials().catch((err) => {
-    console.error(
-      "Failed to fetch for public page, returning empty.",
-      err.message
-    );
-    return [];
-  });
-  console.log("Dynamic residentials:", dynamicResidentials);
+  let dynamicResidentials = [];
+  try {
+    dynamicResidentials = await getResidentialsData();
+  } catch (error) {
+    console.error("Gagal mengambil data langsung dari server:", error);
+  }
   const combinedDataMap = new Map();
 
   residentialsData.forEach((item) => {
