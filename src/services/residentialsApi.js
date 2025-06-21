@@ -5,7 +5,7 @@ import { getBaseUrl } from "@/lib/utils/getBaseUrl";
 export async function getResidentials() {
   try {
     const baseUrl = getBaseUrl();
-    const apiUrl = `${baseUrl}/api/residentials`;
+    const apiUrl = `${baseUrl}/api/residential`;
     const res = await fetch(apiUrl, {
       cache: "no-store",
     });
