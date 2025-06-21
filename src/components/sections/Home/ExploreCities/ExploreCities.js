@@ -7,9 +7,6 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { residentialsData } from "@/data/residentials"; // Pastikan path ini benar
 
-// =================================================================
-// Konfigurasi Animasi
-// =================================================================
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
