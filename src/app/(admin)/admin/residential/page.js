@@ -17,6 +17,7 @@ import {
 } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { getResidentials } from "@/services/residentialsApi";
+import { getResidentialsData } from "@/app/api/residential/route";
 export default function AdminDashboard() {
   const [residentials, setResidentials] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,8 +37,12 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await getResidentials();
-      setResidentials(data);
+      const res = await fetch("/api/residential");
+      if (!res.ok) {
+        throw new Error("Gagal mengambil data dari server");
+      }
+      const data = await res.json();
+      setResidentials(data.residentials || []);
     } catch (error) {
       console.error("Error fetching data:", error);
       Swal.fire({
