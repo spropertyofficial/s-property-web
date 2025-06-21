@@ -11,7 +11,6 @@ export default async function ResidentialsPage({ searchParams }) {
   } catch (error) {
     console.error("Gagal mengambil data langsung dari server:", error);
   }
-
   const combinedDataMap = new Map();
 
   residentialsData.forEach((item) => {
