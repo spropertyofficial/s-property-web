@@ -5,6 +5,9 @@ import { getResidentials } from "@/services/residentialsApi";
 export default async function ResidentialsPage({ searchParams }) {
   const { city } = searchParams;
 
+  const residentials = await getResidentials();
+  console.log("Residentials:", residentials);
+
   const dynamicResidentials = await getResidentials().catch((err) => {
     console.error(
       "Failed to fetch for public page, returning empty.",
@@ -12,6 +15,7 @@ export default async function ResidentialsPage({ searchParams }) {
     );
     return [];
   });
+  console.log("Dynamic residentials:", dynamicResidentials);
   const combinedDataMap = new Map();
 
   residentialsData.forEach((item) => {
