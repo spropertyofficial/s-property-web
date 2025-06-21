@@ -12,6 +12,7 @@ export default async function ResidentialsPage({ searchParams }) {
     );
     return [];
   });
+  console.log("Dynamic residentials:", dynamicResidentials);
   const combinedDataMap = new Map();
 
   residentialsData.forEach((item) => {
