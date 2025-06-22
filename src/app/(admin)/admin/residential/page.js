@@ -16,8 +16,6 @@ import {
   FaEye,
 } from "react-icons/fa";
 import Swal from "sweetalert2";
-import { getResidentials } from "@/services/residentialsApi";
-import { getResidentialsData } from "@/app/api/residential/route";
 export default function AdminDashboard() {
   const [residentials, setResidentials] = useState([]);
   const [loading, setLoading] = useState(true);
