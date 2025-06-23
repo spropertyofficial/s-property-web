@@ -9,18 +9,18 @@ export default function AdminLayoutWrapper({ children }) {
   // Jika login page, render tanpa AdminLayout
   if (pathname === "/admin/login") {
     return (
-      <html lang="id">
-        <body>{children}</body>
-      </html>
+      <>
+        <main>{children}</main>
+      </>
     );
   }
 
   // Untuk halaman admin lainnya
   return (
-    <html lang="id">
-      <body>
+    <>
+      <main>
         <AdminLayout>{children}</AdminLayout>
-      </body>
-    </html>
+      </main>
+    </>
   );
 }

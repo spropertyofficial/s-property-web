@@ -29,17 +29,15 @@ export const viewport = {
 
 export default function AuthLayout({ children }) {
   return (
-    <html lang="id">
-      <body className={inter.className}>
-        <ReduxProvider>
-          <AuthProvider>
-            <div className="min-h-screen bg-gradient-to-br from-tosca-50 to-tosca-100">
-              {children}
-            </div>
-          </AuthProvider>
-          <Analytics />
-        </ReduxProvider>
-      </body>
-    </html>
+    <div className={inter.className}>
+      <ReduxProvider>
+        <AuthProvider>
+          <div className="min-h-screen bg-gradient-to-br from-tosca-50 to-tosca-100">
+            {children}
+          </div>
+        </AuthProvider>
+        <Analytics />
+      </ReduxProvider>
+    </div>
   );
 }
