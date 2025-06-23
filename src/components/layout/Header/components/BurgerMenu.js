@@ -1,24 +1,13 @@
 "use client";
-<<<<<<< HEAD
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-=======
-import { useState } from "react";
-import Link from "next/link";
-import { Menu, X } from "lucide-react";
-import Image from "next/image";
-import LoginButton from "@/components/auth/LoginButton";
->>>>>>> 3e85ff7f41efb6baf0f4293450d393d287c356d1
 import AuthButton from "@/components/auth/AuthButton";
 
 export default function BurgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
-<<<<<<< HEAD
   const { user, loading } = useAuth();
-=======
->>>>>>> 3e85ff7f41efb6baf0f4293450d393d287c356d1
 
   const menuItems = [
     { label: "Home", href: "/" },
@@ -28,7 +17,6 @@ export default function BurgerMenu() {
     { label: "Tentang Kami", href: "/about" },
     { label: "Kontak", href: "/contact" },
   ];
-<<<<<<< HEAD
 
   useEffect(() => {
     if (user) {
@@ -37,21 +25,16 @@ export default function BurgerMenu() {
       console.log("BurgerMenu - User is not logged in");
     }
   }, [user]);
-=======
->>>>>>> 3e85ff7f41efb6baf0f4293450d393d287c356d1
 
   // Close menu when clicking on menu items
   const handleMenuItemClick = () => {
     setIsOpen(false);
   };
 
-<<<<<<< HEAD
   const handleLogoutComplete = () => {
     handleMenuItemClick(); // Close menu after logout
   };
 
-=======
->>>>>>> 3e85ff7f41efb6baf0f4293450d393d287c356d1
   return (
     <div>
       {/* Burger Icon */}
@@ -91,7 +74,6 @@ export default function BurgerMenu() {
                 {item.label}
               </Link>
             ))}
-<<<<<<< HEAD
 
             {/* Auth Section */}
             <div className="pt-4 border-t border-white/20">
@@ -126,15 +108,6 @@ export default function BurgerMenu() {
                 </div>
               )}
             </div>
-=======
-
-            {/* Auth Section - Push to bottom */}
-            <AuthButton
-              variant="mobile"
-              showUserInfo={true}
-              className="px-3 py-2"
-            />
->>>>>>> 3e85ff7f41efb6baf0f4293450d393d287c356d1
           </nav>
         </div>
       </div>

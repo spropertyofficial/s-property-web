@@ -3,10 +3,6 @@ import AuthButton from "@/components/auth/AuthButton";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect } from "react";
-<<<<<<< HEAD
-
-=======
->>>>>>> 3e85ff7f41efb6baf0f4293450d393d287c356d1
 const menuItems = [
   { label: "Home", href: "/" },
   { label: "Properti", href: "/properties/residentials" },
