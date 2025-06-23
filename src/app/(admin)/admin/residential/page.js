@@ -36,16 +36,17 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const res = await fetch("/api/residential");
+      if (!res.ok) {
+        throw new Error("Gagal mengambil data dari server");
+      }
       const data = await res.json();
       setResidentials(data.residentials || []);
     } catch (error) {
       console.error("Error fetching data:", error);
       Swal.fire({
         title: "Error!",
-        text: "Gagal mengambil data properti",
+        text: error.message || "Gagal mengambil data properti",
         icon: "error",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#131414",
       });
     } finally {
       setLoading(false);
@@ -441,6 +442,5 @@ export default function AdminDashboard() {
         </div>
       )}
     </div>
-
   );
 }

@@ -2,7 +2,10 @@
 
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3e85ff7f41efb6baf0f4293450d393d287c356d1
 export default function LoginButton({ className = "" }) {
   const { loading } = useAuth();
 

@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: "10mb",
+    },
+  },
+};
+
 export async function POST(req) {
   const formData = await req.formData();
   const file = formData.get("file");
@@ -63,7 +71,6 @@ export async function POST(req) {
 export async function DELETE(req) {
   try {
     const { publicId } = await req.json();
-    console.log("Received DELETE request:", { publicId });
 
     if (!publicId) {
       return NextResponse.json(
@@ -74,7 +81,6 @@ export async function DELETE(req) {
 
     let result;
 
-    // Jika publicId tersedia, gunakan itu
     result = await cloudinary.uploader.destroy(publicId);
 
     if (result.result === "ok") {

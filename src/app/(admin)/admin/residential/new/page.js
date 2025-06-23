@@ -117,7 +117,7 @@ export default function AddResidentialPage() {
       if (imageToRemove.publicId) {
         console.log("Deleting image with publicId:", imageToRemove.publicId);
 
-        const deleteResponse = await fetch("/api/upload/delete", {
+        const deleteResponse = await fetch("/api/upload/", {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
@@ -455,7 +455,7 @@ export default function AddResidentialPage() {
               {isUploading ? "Sedang Mengupload..." : "Pilih Gambar"}
             </button>
             <p className="text-xs text-gray-500 mt-1">
-              Format yang didukung: JPG, PNG, WebP. Maksimal 10 gambar.
+              Format yang didukung: JPG, PNG, WebP. Maksimal Ukuran: 10MB.
             </p>
           </div>
 
@@ -513,6 +513,9 @@ export default function AddResidentialPage() {
               <p className="text-gray-400">Belum ada gambar yang diunggah</p>
             </div>
           )}
+          <p className="text-xs text-gray-500 mt-1">
+            Maksimal 10 Gambar.
+          </p>
         </fieldset>
 
         {/* Tombol Submit */}

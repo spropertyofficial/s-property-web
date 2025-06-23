@@ -26,7 +26,7 @@ export default function AboutHero() {
           <div className="md:w-1/2 relative w-full flex justify-center">
             <div className="relative w-full shadow-md bg-white h-[250px] md:h-[400px] max-w-[500px] rounded-lg">
               <Image
-                src="/images/main-logo.webp"
+                src="/images/hero-image.png"
                 alt="S-Property Logo"
                 fill
                 style={{ objectFit: 'scale-down' }}

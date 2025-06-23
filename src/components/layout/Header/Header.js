@@ -2,7 +2,10 @@ import Image from "next/image";
 import BurgerMenu from "./components/BurgerMenu";
 import Link from "next/link";
 import Navigation from "./components/Navigation";
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3e85ff7f41efb6baf0f4293450d393d287c356d1
 
 export default function Header() {
   return (
