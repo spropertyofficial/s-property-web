@@ -1,3 +1,4 @@
+//app//api/residential/route.js
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Residential from "@/lib/models/Residential";

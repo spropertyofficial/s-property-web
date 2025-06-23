@@ -1,18 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-// LANGKAH 1: Impor motion dan AnimatePresence dari framer-motion
 import { motion, AnimatePresence } from "framer-motion";
-import { residentialsData } from "@/data/residentials"; // Pastikan path ini benar
 
+// Animation variants
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.08, // Jeda antar animasi kartu
+      staggerChildren: 0.08,
     },
   },
 };
@@ -29,38 +28,77 @@ const cardVariants = {
   },
 };
 
-const ExploreCities = () => {
-  const [selectedRegion, setSelectedRegion] = useState(null);
+// Function to fetch all residentials from API
+async function fetchAllResidentials() {
+  try {
+    const res = await fetch("/api/properties/all-residentials");
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.residentials || [];
+  } catch (error) {
+    console.error("Failed to fetch all residentials for ExploreCities", error);
+    return [];
+  }
+}
 
-  // Logika Data (Tidak ada perubahan di sini)
-  const hierarchicalData = {};
-  residentialsData.forEach((property) => {
-    const region = property.location?.region;
-    const city = property.location?.city;
-    if (region && city) {
-      if (!hierarchicalData[region]) {
-        hierarchicalData[region] = {
-          name: region,
-          propertyCount: 0,
-          imageUrl: `/images/Regions/${region
-            .toLowerCase()
-            .replace(/\s+/g, "-")}.webp`,
-          cities: {},
-        };
+export default function ExploreCities() {
+  const [selectedRegion, setSelectedRegion] = useState(null);
+  const [hierarchicalData, setHierarchicalData] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch and process data when component mounts
+  useEffect(() => {
+    const processData = async () => {
+      setIsLoading(true);
+      try {
+        const allProperties = await fetchAllResidentials();
+
+        const data = {};
+        allProperties.forEach((property) => {
+          const region = property.location?.region;
+          const city = property.location?.city;
+
+          if (region && city) {
+            // Initialize region if it doesn't exist
+            if (!data[region]) {
+              data[region] = {
+                name: region,
+                propertyCount: 0,
+                imageUrl: `/images/Regions/${region
+                  .toLowerCase()
+                  .replace(/\s+/g, "-")}.webp`,
+                cities: {},
+              };
+            }
+
+            // Initialize city if it doesn't exist
+            if (!data[region].cities[city]) {
+              data[region].cities[city] = {
+                name: city,
+                propertyCount: 0,
+                imageUrl: `/images/Cities/${city
+                  .toLowerCase()
+                  .replace(/\s+/g, "-")}.webp`,
+              };
+            }
+
+            // Increment counters
+            data[region].propertyCount += 1;
+            data[region].cities[city].propertyCount += 1;
+          }
+        });
+
+        setHierarchicalData(data);
+      } catch (error) {
+        console.error("Error processing residential data:", error);
+      } finally {
+        setIsLoading(false);
       }
-      if (!hierarchicalData[region].cities[city]) {
-        hierarchicalData[region].cities[city] = {
-          name: city,
-          propertyCount: 0,
-          imageUrl: `/images/Cities/${city
-            .toLowerCase()
-            .replace(/\s+/g, "-")}.webp`,
-        };
-      }
-      hierarchicalData[region].propertyCount += 1;
-      hierarchicalData[region].cities[city].propertyCount += 1;
-    }
-  });
+    };
+
+    processData();
+  }, []);
+
   const regionsList = Object.values(hierarchicalData).filter(
     (r) => r.propertyCount > 0
   );
@@ -72,6 +110,29 @@ const ExploreCities = () => {
   const handleBackClick = () => {
     setSelectedRegion(null);
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-12 px-4">
+        <div className="text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-2">
+            Jelajahi Kota Impian
+          </h2>
+          <p className="text-gray-600 mb-8">Memuat data properti...</p>
+          <div className="grid grid-cols-auto-fit gap-4">
+            {/* Loading skeleton */}
+            {[...Array(6)].map((_, index) => (
+              <div
+                key={index}
+                className="h-[160px] md:h-[200px] rounded-lg bg-gray-200 animate-pulse"
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-12 px-4">
@@ -91,50 +152,59 @@ const ExploreCities = () => {
             <p className="text-gray-600 text-center mb-8">
               Pilih wilayah untuk menemukan properti idaman Anda.
             </p>
-            <motion.div
-              className="grid grid-cols-auto-fit gap-4"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              {regionsList.map((region) => (
-                <motion.div
-                  key={region.name}
-                  variants={cardVariants}
-                  whileHover={{
-                    scale: 1.05,
-                    y: -8,
-                    boxShadow: "0px 10px 20px rgba(0,0,0,0.1)",
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleRegionClick(region)}
-                  className="cursor-pointer"
-                >
-                  <div className="relative h-[160px] md:h-[200px] rounded-lg overflow-hidden bg-gradient-to-r from-tosca-200 to-tosca-100 shadow-md">
-                    <Image
-                      src={region.imageUrl}
-                      alt={`Properti di ${region.name}`}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 50vw, 33vw"
-                      className="object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-40 flex items-end p-4">
-                      <div>
-                        <h3 className="text-white font-bold text-lg md:text-xl">
-                          {region.name}
-                        </h3>
-                        <p className="text-white text-sm">
-                          {region.propertyCount} Properti
-                        </p>
+
+            {regionsList.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500">
+                  Belum ada data properti tersedia.
+                </p>
+              </div>
+            ) : (
+              <motion.div
+                className="grid grid-cols-auto-fit gap-4"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                {regionsList.map((region) => (
+                  <motion.div
+                    key={region.name}
+                    variants={cardVariants}
+                    whileHover={{
+                      scale: 1.05,
+                      y: -8,
+                      boxShadow: "0px 10px 20px rgba(0,0,0,0.1)",
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleRegionClick(region)}
+                    className="cursor-pointer"
+                  >
+                    <div className="relative h-[160px] md:h-[200px] rounded-lg overflow-hidden bg-gradient-to-r from-tosca-200 to-tosca-100 shadow-md">
+                      <Image
+                        src={region.imageUrl}
+                        alt={`Properti di ${region.name}`}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw, 33vw"
+                        className="object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-40 flex items-end p-4">
+                        <div>
+                          <h3 className="text-white font-bold text-lg md:text-xl">
+                            {region.name}
+                          </h3>
+                          <p className="text-white text-sm">
+                            {region.propertyCount} Properti
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
           </motion.div>
         )}
 
@@ -166,14 +236,16 @@ const ExploreCities = () => {
               </svg>
               Kembali
             </button>
+
             <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">
               Properti di {selectedRegion.name}
             </h2>
             <p className="text-gray-600 text-center mb-8">
               Tersedia di kota-kota berikut.
             </p>
+
             <motion.div
-              className="grid grid-cols-auto-fit gap-4"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
@@ -228,6 +300,4 @@ const ExploreCities = () => {
       </AnimatePresence>
     </div>
   );
-};
-
-export default ExploreCities;
+}
