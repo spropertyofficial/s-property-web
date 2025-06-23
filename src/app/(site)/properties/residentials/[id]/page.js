@@ -1,48 +1,154 @@
-// src\app\properties\residentials\[id]\page.js
-"use client";
-
-import { use } from "react";
+// src/app/(site)/properties/residentials/[id]/page.js
+import { getResidentialById } from "@/services/propertyService";
+import { notFound } from "next/navigation";
 import AddressInfo from "@/components/sections/Property/AddressInfo";
 import Gallery from "@/components/sections/Property/Gallery";
 import Header from "@/components/sections/Property/Header";
-import { useGetResidentialByIdQuery } from "@/store/api/residentialsApi";
 import WhatsAppButton from "@/components/common/WhatsappButton";
 
-const PropertyDetailPage = ({ params }) => {
-  const { id } = use(params);
-  const { data: property, isLoading, error } = useGetResidentialByIdQuery(id);
+export default async function ResidentialDetailPage({ params }) {
+  const { id } = await params;
 
-  if (isLoading) {
-    return <div className="container mx-auto px-4 py-6">Loading...</div>;
-  }
+  // Use centralized service to fetch property data
+  const property = await getResidentialById(id);
 
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-6">Error loading property</div>
-    );
-  }
-
-  if (!property || !property.gallery) {
-    return (
-      <div className="container mx-auto px-4 py-6">Property not found</div>
-    );
+  // If property with this ID is not found in combined data,
+  // show 404 page
+  if (!property) {
+    notFound();
   }
 
   return (
     <>
       <div className="container mx-auto px-4 py-6">
-        <Gallery images={property.gallery} />
+        {/* Gallery Section */}
+        {property.gallery && property.gallery.length > 0 && (
+          <Gallery images={property.gallery} />
+        )}
+
+        {/* Property Header */}
         <Header
           title={property.name}
           {...property}
           price={property.startPrice}
-          type={"Residential"}
+          type="Residential"
         />
-        <AddressInfo {...property.location} />
+
+        {/* Address Information */}
+        {property.location && <AddressInfo {...property.location} />}
+
+        {/* Additional Property Details */}
+        <div className="mt-8 space-y-6">
+          {/* Property Description */}
+          {property.description && (
+            <section className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+                Deskripsi Properti
+              </h2>
+              <p className="text-gray-600 leading-relaxed">
+                {property.description}
+              </p>
+            </section>
+          )}
+
+          {/* Property Specifications */}
+          {(property.landSize ||
+            property.buildingSize ||
+            property.bedrooms ||
+            property.bathrooms) && (
+            <section className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+                Spesifikasi
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {property.landSize && (
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-500">Luas Tanah</p>
+                    <p className="text-lg font-semibold text-gray-800">
+                      {property.landSize} m²
+                    </p>
+                  </div>
+                )}
+                {property.buildingSize && (
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-500">Luas Bangunan</p>
+                    <p className="text-lg font-semibold text-gray-800">
+                      {property.buildingSize} m²
+                    </p>
+                  </div>
+                )}
+                {property.bedrooms && (
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-500">Kamar Tidur</p>
+                    <p className="text-lg font-semibold text-gray-800">
+                      {property.bedrooms}
+                    </p>
+                  </div>
+                )}
+                {property.bathrooms && (
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-500">Kamar Mandi</p>
+                    <p className="text-lg font-semibold text-gray-800">
+                      {property.bathrooms}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* Facilities */}
+          {property.facilities && property.facilities.length > 0 && (
+            <section className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+                Fasilitas
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {property.facilities.map((facility, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-tosca-200 rounded-full"></div>
+                    <span className="text-gray-600">{facility}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
       </div>
+
+      {/* WhatsApp Button */}
       <WhatsAppButton propertyData={property} />
     </>
   );
-};
+}
 
-export default PropertyDetailPage;
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const property = await getResidentialById(id);
+
+  if (!property) {
+    return {
+      title: "Property Not Found",
+      description: "The requested property could not be found.",
+    };
+  }
+
+  return {
+    title: `${property.name} - S-Property`,
+    description: `${property.name} di ${property.location?.area}, ${
+      property.location?.city
+    }. Mulai dari ${
+      property.startPrice
+        ? `Rp ${property.startPrice.toLocaleString("id-ID")}`
+        : "Hubungi kami untuk harga"
+    }.`,
+    openGraph: {
+      title: `${property.name} - S-Property`,
+      description: `${property.name} di ${property.location?.area}, ${property.location?.city}`,
+      images:
+        property.gallery && property.gallery.length > 0
+          ? [property.gallery[0]]
+          : [],
+    },
+  };
+}

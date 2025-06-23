@@ -30,7 +30,7 @@ export default function Footer() {
     <footer className="bg-gradient-to-b from-[#0F1A2E] to-[#1a2942] text-white">
       <div className="container mx-auto px-8 py-16">
         {/* Grid utama untuk 3 kolom */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 text-center">
           {/* Kolom 1: Identitas & Deskripsi */}
           <div className="space-y-6">
             <div className="w-fit hover:opacity-90 transition-opacity">

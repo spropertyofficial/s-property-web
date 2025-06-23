@@ -32,7 +32,6 @@ export default function Home() {
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <LoadingLogo />
-          <p className="mt-4 text-gray-600">Memuat...</p>
         </div>
       </main>
     );
@@ -369,9 +368,9 @@ export default function Home() {
                       </div>
                     </div>
                     <p className="text-gray-600 mb-4 italic">
-                      &quot;Pelayanan yang sangat memuaskan! Tim S-Property membantu
-                      saya menemukan rumah impian dengan proses yang mudah dan
-                      transparan.&quot;
+                      &quot;Pelayanan yang sangat memuaskan! Tim S-Property
+                      membantu saya menemukan rumah impian dengan proses yang
+                      mudah dan transparan.&quot;
                     </p>
                     <div className="flex items-center">
                       <div className="w-10 h-10 bg-tosca-200 rounded-full flex items-center justify-center mr-3">
@@ -401,8 +400,8 @@ export default function Home() {
                       </div>
                     </div>
                     <p className="text-gray-600 mb-4 italic">
-                      &quot;Investasi properti pertama saya berjalan lancar berkat
-                      bimbingan dari S-Property. Sangat profesional dan
+                      &quot;Investasi properti pertama saya berjalan lancar
+                      berkat bimbingan dari S-Property. Sangat profesional dan
                       terpercaya.&quot;
                     </p>
                     <div className="flex items-center">

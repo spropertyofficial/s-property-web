@@ -1,6 +1,13 @@
-import { NextResponse } from 'next/server'
-import connectDB from '@/lib/mongodb'
-import Residential from '@/lib/models/Residential'
+//app//api/residential/route.js
+import { NextResponse } from "next/server";
+import connectDB from "@/lib/mongodb";
+import Residential from "@/lib/models/Residential";
+
+export async function getResidentialsData() {
+  await connectDB();
+  const residentials = await Residential.find().lean();
+  return residentials;
+}
 
 export async function GET() {
   try {
