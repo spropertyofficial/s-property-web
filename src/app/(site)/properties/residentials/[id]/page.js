@@ -17,13 +17,14 @@ export default async function ResidentialDetailPage({ params }) {
   if (!property) {
     notFound();
   }
+  const plainProperty = JSON.parse(JSON.stringify(property));
 
   return (
     <>
       <div className="container mx-auto px-4 py-6">
         {/* Gallery Section */}
-        {property.gallery && property.gallery.length > 0 && (
-          <Gallery images={property.gallery} />
+        {plainProperty.gallery && plainProperty.gallery.length > 0 && (
+          <Gallery images={plainProperty.gallery} />
         )}
 
         {/* Property Header */}
@@ -117,7 +118,7 @@ export default async function ResidentialDetailPage({ params }) {
       </div>
 
       {/* WhatsApp Button */}
-      <WhatsAppButton propertyData={property} />
+      <WhatsAppButton propertyData={plainProperty} />
     </>
   );
 }
@@ -128,26 +129,29 @@ export async function generateMetadata({ params }) {
 
   if (!property) {
     return {
-      title: "Property Not Found",
-      description: "The requested property could not be found.",
+      title: "Properti Tidak Ditemukan",
+      description: "Properti yang Anda cari tidak dapat ditemukan.",
     };
   }
 
+  // Lakukan juga serialisasi di sini untuk keamanan
+  const plainProperty = JSON.parse(JSON.stringify(property));
+
   return {
-    title: `${property.name} - S-Property`,
-    description: `${property.name} di ${property.location?.area}, ${
-      property.location?.city
+    title: `${plainProperty.name} - S-Property`,
+    description: `${plainProperty.name} di ${plainProperty.location?.area}, ${
+      plainProperty.location?.city
     }. Mulai dari ${
-      property.startPrice
-        ? `Rp ${property.startPrice.toLocaleString("id-ID")}`
+      plainProperty.startPrice
+        ? `Rp ${plainProperty.startPrice.toLocaleString("id-ID")}`
         : "Hubungi kami untuk harga"
     }.`,
     openGraph: {
-      title: `${property.name} - S-Property`,
-      description: `${property.name} di ${property.location?.area}, ${property.location?.city}`,
+      title: `${plainProperty.name} - S-Property`,
+      description: `${plainProperty.name} di ${plainProperty.location?.area}, ${plainProperty.location?.city}`,
       images:
-        property.gallery && property.gallery.length > 0
-          ? [property.gallery[0]]
+        plainProperty.gallery && plainProperty.gallery.length > 0
+          ? [plainProperty.gallery[0].src] // Pastikan gallery[0] memiliki .src
           : [],
     },
   };

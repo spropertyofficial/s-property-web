@@ -6,17 +6,17 @@
 .custom-calendar {
   background-color: white !important;
   border-radius: 12px !important;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
-  border: 1px solid #4BD487 !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid #4bd487 !important;
 }
 
 .custom-calendar .react-datepicker__day--selected {
-  background-color: #4BD487 !important;
+  background-color: #4bd487 !important;
   color: white !important;
 }
 
 .custom-calendar .react-datepicker__day:hover {
-  background-color: #4BD487 !important;
+  background-color: #4bd487 !important;
   color: white !important;
 }
 
@@ -40,8 +40,19 @@
 }
 
 .bg-pattern {
-  background-image: radial-gradient(circle at 25px 25px, white 2%, transparent 0%),
+  background-image: radial-gradient(
+      circle at 25px 25px,
+      white 2%,
+      transparent 0%
+    ),
     radial-gradient(circle at 75px 75px, white 2%, transparent 0%);
   background-size: 100px 100px;
 }
 
+.nprogress .bar {
+  z-index: 99999 !important;
+}
+
+.nprogress .peg {
+  box-shadow: 0 0 10px #00a79d, 0 0 5px #00a79d !important;
+}

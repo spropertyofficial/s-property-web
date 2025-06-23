@@ -29,7 +29,7 @@ export const viewport = {
 
 export default function AuthLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="id">
       <body className={inter.className}>
         <ReduxProvider>
           <AuthProvider>
