@@ -50,6 +50,7 @@ const MainImage = ({ src, alt, images }) => {
               width={800}
               height={600}
               className="object-contain max-w-full max-h-full"
+              priority
             />
             <Watermark />
 
@@ -73,6 +74,7 @@ const MainImage = ({ src, alt, images }) => {
           fill
           style={{ objectFit: "cover" }}
           quality={100}
+          priority
         />
         <Watermark />
       </div>
