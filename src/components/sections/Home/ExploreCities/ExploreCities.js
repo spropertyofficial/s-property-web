@@ -172,8 +172,9 @@ const ExploreCities = () => {
             <p className="text-gray-600 text-center mb-8">
               Tersedia di kota-kota berikut.
             </p>
+
             <motion.div
-              className="grid grid-cols-auto-fit gap-4"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
