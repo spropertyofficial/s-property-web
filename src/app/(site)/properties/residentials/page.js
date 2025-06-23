@@ -3,7 +3,7 @@ import PropertyCard from "@/components/common/PropertyCard/PropertyCard";
 import { getResidentialsData } from "@/app/api/residential/route";
 
 export default async function ResidentialsPage({ searchParams }) {
-  const { city } = searchParams;
+  const { city } = await searchParams;
 
   let dynamicResidentials = [];
   try {
@@ -48,13 +48,20 @@ export default async function ResidentialsPage({ searchParams }) {
         </p>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredResidentials.map((residential) => (
-            <PropertyCard
-              key={residential.id}
-              type="residentials"
-              data={residential}
-            />
-          ))}
+          {filteredResidentials.map((residential) => {
+            const plainData = JSON.parse(JSON.stringify(residential));
+
+            // Pastikan key unik dan dalam bentuk string
+            const keyId = plainData.id || `static-${index}`;
+
+            return (
+              <PropertyCard
+                key={residential.id}
+                type="residentials"
+                data={residential}
+              />
+            );
+          })}
         </div>
       )}
     </div>

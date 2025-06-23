@@ -32,18 +32,16 @@ export const viewport = {
 
 export default function SiteLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <ReduxProvider>
-          <AuthProvider>
-            <Header />
-            {children}
-            <ServiceWorkerRegistration />
-            <Footer />
-          </AuthProvider>
-          <Analytics />
-        </ReduxProvider>
-      </body>
-    </html>
+    <div className={inter.className}>
+      <ReduxProvider>
+        <AuthProvider>
+          <Header />
+          {children}
+          <ServiceWorkerRegistration />
+          <Footer />
+        </AuthProvider>
+        <Analytics />
+      </ReduxProvider>
+    </div>
   );
 }

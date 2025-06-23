@@ -28,9 +28,9 @@ export default function Footer() {
 
   return (
     <footer className="bg-gradient-to-b from-[#0F1A2E] to-[#1a2942] text-white">
-      <div className="container mx-auto px-8 py-16">
+      <div className="mx-auto px-8 py-16">
         {/* Grid utama untuk 3 kolom */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 text-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 justify-items-center">
           {/* Kolom 1: Identitas & Deskripsi */}
           <div className="space-y-6">
             <div className="w-fit hover:opacity-90 transition-opacity">
@@ -39,8 +39,9 @@ export default function Footer() {
                   src="/images/logos/footer-logo.png"
                   alt="S-Property Logo"
                   width={250}
-                  height={50}
-                  className="h-auto"
+                  height={100}
+                  className="w-auto h-auto"
+                  priority
                 />
               </Link>
             </div>
@@ -66,21 +67,21 @@ export default function Footer() {
           </div>
 
           {/* Kolom 3: Terhubung Dengan Kami */}
-          <div className="lg:pl-8">
+          <div className="lg:pl-8 justify-items-center">
             <h3 className="text-lg font-bold mb-6 text-tosca-100">
               Terhubung Dengan Kami
             </h3>
             <div className="flex space-x-6 mb-8">
               {socialLinks.map((social, index) => (
-                <a
+                <Link
                   key={index}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-200 hover:text-tosca-100 hover:scale-125 transform transition-all duration-300"
+                  className="text-gray-200 hover:text-tosca-100 active:scale-95 hover:scale-110 transform transition-all duration-300"
                 >
                   <span className="text-2xl">{social.icon}</span>
-                </a>
+                </Link>
               ))}
             </div>
             <div className="space-y-4 text-base">
@@ -106,8 +107,7 @@ export default function Footer() {
         {/* Garis pemisah dan Copyright */}
         <div className="border-t border-gray-600 mt-10 pt-8 text-center">
           <p className="text-base text-gray-300">
-            © {new Date().getFullYear()} S-Property. All rights
-            reserved.
+            © {new Date().getFullYear()} S-Property. All rights reserved.
           </p>
         </div>
       </div>

@@ -142,7 +142,7 @@ export default function PropertyCard({
             src={gallery[0].src}
             alt={name}
             fill
-            sizes=""
+            sizes="(max-width: 768px) 100vw"
             className="object-cover"
           />
           <Watermark />
