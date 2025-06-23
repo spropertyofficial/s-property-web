@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import AuthButton from "@/components/auth/AuthButton";
+import { useAuth } from "@/context/AuthContext";
 
 export default function BurgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
