@@ -1,0 +1,61 @@
+name: 🐛 Laporan Bug
+description: Buat laporan untuk membantu kami memperbaiki sesuatu.
+title: "[BUG] <Judul bug yang singkat dan jelas>"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Terima kasih telah meluangkan waktu untuk mengisi laporan bug ini!
+  - type: input
+    id: version
+    attributes:
+      label: Versi Aplikasi
+      description: Versi aplikasi mana yang Anda gunakan saat menemukan bug?
+      placeholder: "Contoh: v1.2.3"
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Sistem Operasi
+      description: Di sistem operasi mana Anda menemukan bug ini?
+      options:
+        - Windows 11
+        - Windows 10
+        - macOS (Sonoma)
+        - macOS (Ventura)
+        - Linux (Sebutkan di deskripsi)
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Deskripsi Bug
+      description: Jelaskan dengan jelas dan singkat apa masalahnya.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Langkah-langkah Reproduksi
+      description: Jelaskan langkah demi langkah bagaimana cara kami bisa mengalami bug yang sama.
+      placeholder: |
+        1. Pergi ke halaman '...'
+        2. Klik tombol '...'
+        3. Gulir ke bawah ke '...'
+        4. Lihat error
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Hasil yang Diharapkan
+      description: Jelaskan apa yang seharusnya terjadi.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Screenshot atau Log Error
+      description: Jika memungkinkan, tempelkan log error atau unggah screenshot untuk membantu menjelaskan masalah Anda.
