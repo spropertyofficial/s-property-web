@@ -25,15 +25,12 @@ export default async function ResidentialsPage({ searchParams }) {
   const allResidentials = Array.from(combinedDataMap.values());
 
   const filteredResidentials = city
-    ? allResidentials.filter(
-        (residential) =>
-          (residential.location?.city || "")
-            .toLowerCase()
-            .includes(city.toLowerCase()) ||
-          (residential.location?.area || "")
-            .toLowerCase()
-            .includes(city.toLowerCase())
-      )
+    ? allResidentials.filter((residential) => {
+        const cityName = (residential.location?.city || "").toLowerCase();
+        const areaName = (residential.location?.area || "").toLowerCase();
+        const searchCity = city.toLowerCase();
+        return cityName === searchCity || areaName === searchCity;
+      })
     : allResidentials;
 
   return (
@@ -48,15 +45,13 @@ export default async function ResidentialsPage({ searchParams }) {
         </p>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredResidentials.map((residential) => {
-            const plainData = JSON.parse(JSON.stringify(residential));
-
+          {filteredResidentials.map((residential, index) => {
             // Pastikan key unik dan dalam bentuk string
-            const keyId = plainData.id || `static-${index}`;
+            const keyId = residential.id || `static-${index}`;
 
             return (
               <PropertyCard
-                key={residential.id}
+                key={keyId}
                 type="residentials"
                 data={residential}
               />
