@@ -1,3 +1,5 @@
+# Nama file: .github/ISSUE_TEMPLATE/bug-report.yml
+
 name: 🐛 Laporan Bug
 description: Buat laporan untuk membantu kami memperbaiki sesuatu.
 title: "[BUG] <Judul bug yang singkat dan jelas>"
