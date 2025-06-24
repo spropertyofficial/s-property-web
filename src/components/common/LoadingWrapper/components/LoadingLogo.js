@@ -4,7 +4,7 @@ export default function LoadingLogo() {
   return (
     <div className="flex items-center justify-center min-h-[400px]">
       <Image
-        src="/images/main-logo.webp"
+        src="/images/logo.png"
         alt="Loading"
         width={50}
         height={40}

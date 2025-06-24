@@ -198,7 +198,6 @@ export default function AddResidentialPage() {
         name: toCapitalCase(form.name),
         id: generateId(form.name), // Pastikan ID ter-generate dari nama final
       };
-      console.log(formattedData);
       const res = await fetch("/api/residential", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

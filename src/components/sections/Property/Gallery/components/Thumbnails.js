@@ -4,7 +4,6 @@ import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import Watermark from "./Watermark";
-
 const Thumbnails = ({ images, onSelect, activeImage }) => {
   return (
     <div className="w-full px-2">
@@ -47,6 +46,7 @@ const Thumbnails = ({ images, onSelect, activeImage }) => {
                 style={{ objectFit: "cover" }}
                 className="transition-opacity"
                 sizes="(max-width: 640px) 33vw, (max-width: 768px) 20vw, (max-width: 1024px) 12vw, 10vw"
+                priority
               />
               <div className="absolute w-full h-full flex items-center justify-center">
                 <Image
