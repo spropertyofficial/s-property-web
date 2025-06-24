@@ -1,3 +1,5 @@
+# Nama file: .github/ISSUE_TEMPLATE/feature-request.yml
+
 name: ✨ Permintaan Fitur Baru
 description: Sarankan sebuah ide atau fitur baru untuk proyek ini.
 title: "[FITUR] <Judul fitur yang singkat>"
@@ -11,7 +13,9 @@ body:
     id: problem
     attributes:
       label: Apakah fitur ini berhubungan dengan suatu masalah?
-      description: Jelaskan masalah yang ingin Anda selesaikan. Contoh: "Saya sulit melacak progres saya karena tidak ada halaman dashboard."
+      description: |
+        Jelaskan masalah yang ingin Anda selesaikan. 
+        Contoh: "Saya sulit melacak progres saya karena tidak ada halaman dashboard."
     validations:
       required: true
   - type: textarea
