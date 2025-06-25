@@ -45,13 +45,15 @@ export default async function ResidentialsPage({ searchParams }) {
         </p>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredResidentials.map((residential, index) => {
+          {filteredResidentials.map((residential) => {
+            const plainData = JSON.parse(JSON.stringify(residential));
+
             // Pastikan key unik dan dalam bentuk string
-            const keyId = residential.id || `static-${index}`;
+            const keyId = plainData.id || `static-${index}`;
 
             return (
               <PropertyCard
-                key={keyId}
+                key={residential.id}
                 type="residentials"
                 data={residential}
               />
