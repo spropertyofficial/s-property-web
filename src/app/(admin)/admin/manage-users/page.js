@@ -1,3 +1,4 @@
+// src/app/(admin)/admin/manage-users/page.js
 "use client";
 import { useEffect, useState } from "react";
 
@@ -27,7 +28,7 @@ export default function ManageUsers() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-10">
+    <div className="max-w-4xl mx-auto py-10">
       <h1 className="text-xl font-bold mb-6">Daftar Admin</h1>
       {loading ? (
         <p>Loading...</p>
@@ -35,20 +36,31 @@ export default function ManageUsers() {
         <table className="w-full border text-left text-sm">
           <thead>
             <tr className="border-b">
-              <th className="py-2">Email</th>
-              <th className="py-2">Role</th>
-              <th className="py-2">Aksi</th>
+              {/* PERUBAHAN: Tambah kolom Nama */}
+              <th className="p-2">Nama</th>
+              <th className="p-2">Email</th>
+              <th className="p-2">Role</th>
+              <th className="p-2">Aksi</th>
             </tr>
           </thead>
           <tbody>
             {admins.map((admin) => (
               <tr key={admin._id}>
+                {/* PERUBAHAN: Tambah input untuk Nama */}
                 <td>
                   <input
                     type="text"
-                    defaultValue={admin.email}
-                    onChange={(e) => (admin.email = e.target.value)}
+                    defaultValue={admin.name}
+                    onChange={(e) => (admin.name = e.target.value)}
                     className="border px-2 py-1 rounded w-full"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="email"
+                    defaultValue={admin.email}
+                    readOnly
+                    className="border px-2 py-1 rounded w-full bg-gray-100"
                   />
                 </td>
                 <td>
@@ -57,9 +69,9 @@ export default function ManageUsers() {
                     onChange={(e) => (admin.role = e.target.value)}
                     className="border px-2 py-1 rounded"
                   >
-                    <option value="superadmin">superadmin</option>
-                    <option value="editor">editor</option>
-                    <option value="viewer">viewer</option>
+                    <option value="superadmin">Superadmin</option>
+                    <option value="editor">Editor</option>
+                    <option value="viewer">Viewer</option>
                   </select>
                 </td>
                 <td className="space-x-2">
@@ -90,9 +102,8 @@ export default function ManageUsers() {
                         `Yakin hapus user ${admin.email}?`
                       );
                       if (confirmDelete) {
-                        fetch("/api/admin/delete-user", {
-                          method: "POST",
-                          body: JSON.stringify({ userId: admin._id }),
+                        fetch(`/api/admin/delete-user/${admin._id}`, {
+                          method: "DELETE",
                         })
                           .then((res) => res.json())
                           .then((data) => {
@@ -111,13 +122,13 @@ export default function ManageUsers() {
                         method: "POST",
                         body: JSON.stringify({
                           userId: admin._id,
-                          email: admin.email,
+                          name: admin.name,
                           role: admin.role,
                         }),
                       });
                       const data = await res.json();
                       setMessage(data.message);
-                      fetchAdmins(); // refresh data
+                      fetchAdmins();
                     }}
                     className="bg-yellow-500 text-white px-2 py-1 rounded text-sm"
                   >
@@ -137,6 +148,7 @@ export default function ManageUsers() {
           const res = await fetch("/api/admin/create", {
             method: "POST",
             body: JSON.stringify({
+              name: form.name.value,
               email: form.email.value,
               password: form.password.value,
               role: form.role.value,
@@ -150,6 +162,13 @@ export default function ManageUsers() {
         }}
         className="space-y-4 max-w-sm"
       >
+        <input
+          name="name"
+          type="text"
+          placeholder="Nama Lengkap"
+          className="border p-2 w-full"
+          required
+        />
         <input
           name="email"
           type="email"

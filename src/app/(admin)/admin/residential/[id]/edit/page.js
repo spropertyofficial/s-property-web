@@ -5,7 +5,6 @@ import { useRouter, useParams } from "next/navigation";
 import Swal from "sweetalert2";
 import { FaTrash, FaUpload, FaSpinner } from "react-icons/fa";
 import Image from "next/image";
-import { toCapitalCase } from "@/utils/toCapitalcase";
 
 export default function EditResidentialPage() {
   const router = useRouter();
@@ -239,7 +238,7 @@ export default function EditResidentialPage() {
       if (imageToDelete && imageToDelete.publicId) {
         console.log("Using stored publicId:", imageToDelete.publicId);
 
-        const deleteResponse = await fetch("/api/upload/delete", {
+        const deleteResponse = await fetch("/api/upload", {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
@@ -678,7 +677,7 @@ export default function EditResidentialPage() {
         <div className="flex justify-end gap-4 mt-6">
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={() => router.push(`/admin/residential`)}
             className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
             disabled={isSubmitting}
           >

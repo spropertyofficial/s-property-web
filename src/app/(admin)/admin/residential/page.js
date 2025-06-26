@@ -1,3 +1,4 @@
+// src/app/(admin)/admin/residential/page.js
 "use client";
 
 import { useEffect, useState } from "react";
@@ -150,6 +151,18 @@ export default function AdminDashboard() {
     },
   ];
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    const options = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return new Date(dateString).toLocaleDateString("id-ID", options);
+  };
+
   return (
     <div className="p-6">
       {/* Header */}
@@ -295,26 +308,33 @@ export default function AdminDashboard() {
         </div>
       ) : (
         <div className="bg-white p-6 rounded-lg shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-100">
+          <div className="overflow-x-auto bg-white p-6 rounded-lg shadow-sm">
+            <table className="min-w-full divide-y divide-gray-100 table-fixed">
               <thead>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  {/* PERUBAHAN 2: Beri lebar eksplisit pada setiap kolom */}
+                  <th className="w-1/4 px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Nama Properti
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="w-1/4 px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Developer
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="w-1/4 px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Harga Mulai
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Lokasi
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="w-24 px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="w-1/5 px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Dibuat Oleh
+                  </th>
+                  <th className="w-1/5 px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Diubah Oleh
+                  </th>
+                  <th className="w-24 px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Aksi
                   </th>
                 </tr>
@@ -322,20 +342,22 @@ export default function AdminDashboard() {
               <tbody className="bg-white divide-y divide-gray-100">
                 {currentItems.map((r) => (
                   <tr key={r._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-500">
                         {r.name}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-300">{r.developer}</div>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-300 truncate">
+                        {r.developer}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4">
                       <div className="text-sm text-gray-300">
                         Rp{r.startPrice?.toLocaleString() || "N/A"}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4">
                       <div className="text-sm text-gray-300">
                         {r.location?.area}, {r.location?.city}
                       </div>
@@ -361,7 +383,19 @@ export default function AdminDashboard() {
                           : r.propertyStatus}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <td className="px-6 py-4 text-sm text-gray-500  white">
+                      <div>{r.createdBy?.name || "-"}</div>
+                      <div className="text-xs text-gray-400">
+                        {formatDate(r.createdAt)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      <div>{r.updatedBy?.name || "-"}</div>
+                      <div className="text-xs text-gray-400">
+                        {formatDate(r.updatedAt)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm whitespace-nowrap font-medium">
                       <div className="flex gap-2">
                         <Link
                           href={`/admin/residential/${r._id}`}

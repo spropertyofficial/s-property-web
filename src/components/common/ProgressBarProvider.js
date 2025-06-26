@@ -8,8 +8,6 @@ const Providers = ({ children }) => {
       color="#CDDA04"
       options={{ showSpinner: false }}
       shallowRouting
-      disableSameURL={false}
-      spinnerPosition="top-left"
     >
       {children}
     </ProgressProvider>

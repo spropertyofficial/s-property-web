@@ -1,35 +1,35 @@
+// src/app/api/admin/create/route.js
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import connectDB from "@/lib/mongodb";
 import Admin from "@/lib/models/Admin";
-
-const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
+import { verifyAdmin } from "@/lib/auth";
 
 export async function POST(req) {
-  await connectDB();
-
-  const token = req.cookies.get("token")?.value;
-  if (!token)
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const requester = await Admin.findById(decoded.id);
+    // 1. Verifikasi admin yang sedang login dengan satu baris
+    const { success, admin, error } = await verifyAdmin(req);
 
-    if (requester.role !== "superadmin") {
-      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    // 2. Periksa apakah verifikasi berhasil dan rolenya adalah superadmin
+    if (!success || admin.role !== "superadmin") {
+      return NextResponse.json(
+        { message: error || "Akses Ditolak: Butuh Superadmin" },
+        { status: 403 }
+      );
     }
 
-    const { email, password, role } = await req.json();
+    // 3. Ambil data dari body
+    const { name, email, password, role } = await req.json();
 
-    if (!email || !password || !role) {
+    if (!name || !email || !password || !role) {
       return NextResponse.json(
         { message: "Lengkapi semua field" },
         { status: 400 }
       );
     }
 
+    // 4. Proses pembuatan user baru (kode Anda sudah benar)
+    await connectDB();
     const existing = await Admin.findOne({ email });
     if (existing) {
       return NextResponse.json(
@@ -41,15 +41,20 @@ export async function POST(req) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new Admin({
+      name,
       email,
       password: hashedPassword,
-      role, // 'editor' | 'viewer'
+      role,
     });
 
     await newUser.save();
 
     return NextResponse.json({ message: "User berhasil dibuat" });
   } catch (error) {
-    return NextResponse.json({ message: "Terjadi kesalahan" }, { status: 500 });
+    console.error("Create admin error:", error);
+    return NextResponse.json(
+      { message: "Terjadi kesalahan server" },
+      { status: 500 }
+    );
   }
 }

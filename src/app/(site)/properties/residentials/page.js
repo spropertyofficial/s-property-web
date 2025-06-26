@@ -25,15 +25,12 @@ export default async function ResidentialsPage({ searchParams }) {
   const allResidentials = Array.from(combinedDataMap.values());
 
   const filteredResidentials = city
-    ? allResidentials.filter(
-        (residential) =>
-          (residential.location?.city || "")
-            .toLowerCase()
-            .includes(city.toLowerCase()) ||
-          (residential.location?.area || "")
-            .toLowerCase()
-            .includes(city.toLowerCase())
-      )
+    ? allResidentials.filter((residential) => {
+        const cityName = (residential.location?.city || "").toLowerCase();
+        const areaName = (residential.location?.area || "").toLowerCase();
+        const searchCity = city.toLowerCase();
+        return cityName === searchCity || areaName === searchCity;
+      })
     : allResidentials;
 
   return (
