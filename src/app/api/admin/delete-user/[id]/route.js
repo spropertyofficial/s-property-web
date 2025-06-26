@@ -1,15 +1,18 @@
-// src/app/api/admin/reset-password/route.js
+// src/app/api/admin/delete-user/[id]/route.js
 
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Admin from "@/lib/models/Admin";
-import bcrypt from "bcryptjs";
 import { verifyAdmin } from "@/lib/auth";
 
-export async function POST(req) {
+// Ganti nama fungsi dari POST menjadi DELETE
+// Tambahkan { params } untuk menangkap ID dari URL
+export async function DELETE(req, { params }) {
   try {
-    // 1. Verifikasi & Otorisasi: Hanya superadmin yang boleh
+    // 1. Verifikasi siapa yang melakukan request
     const { success, admin: requester, error } = await verifyAdmin(req);
+
+    // 2. Otorisasi: Hanya superadmin yang boleh menghapus
     if (!success || requester.role !== "superadmin") {
       return NextResponse.json(
         { message: error || "Akses Ditolak" },
@@ -17,44 +20,40 @@ export async function POST(req) {
       );
     }
 
-    // 2. Ambil data dari body
-    const { userId, newPassword } = await req.json();
+    // 3. Ambil ID user dari parameter URL, bukan dari body
+    const { id: userId } = params;
 
-    if (!userId || !newPassword) {
+    if (!userId) {
       return NextResponse.json(
-        { message: "User ID dan password baru diperlukan" },
+        { message: "User ID diperlukan" },
         { status: 400 }
       );
     }
 
-    if (newPassword.length < 6) {
+    // 4. Aturan keamanan: Superadmin tidak boleh menghapus dirinya sendiri
+    if (requester._id.toString() === userId) {
       return NextResponse.json(
-        { message: "Password minimal harus 6 karakter" },
+        { message: "Tidak dapat menghapus akun sendiri" },
         { status: 400 }
       );
     }
 
-    // 3. Cari user yang akan diupdate
+    // 5. Cari dan hapus user
     await connectDB();
-    const userToUpdate = await Admin.findById(userId);
+    const deletedUser = await Admin.findByIdAndDelete(userId);
 
-    if (!userToUpdate) {
+    if (!deletedUser) {
       return NextResponse.json(
         { message: "User tidak ditemukan" },
         { status: 404 }
       );
     }
 
-    // 4. Hash password baru dan simpan
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    userToUpdate.password = hashedPassword;
-    await userToUpdate.save();
-
     return NextResponse.json({
-      message: `Password untuk user ${userToUpdate.email} berhasil direset.`,
+      message: `User ${deletedUser.email} berhasil dihapus.`,
     });
   } catch (err) {
-    console.error("Reset password error:", err);
+    console.error("Delete user error:", err);
     return NextResponse.json(
       { message: "Terjadi kesalahan server" },
       { status: 500 }

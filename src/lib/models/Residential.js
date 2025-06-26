@@ -1,3 +1,4 @@
+// src/lib/models/Residentials.js
 import mongoose from "mongoose";
 
 const ResidentialSchema = new mongoose.Schema(
@@ -29,6 +30,16 @@ const ResidentialSchema = new mongoose.Schema(
       },
     ],
     description: String,
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+      required: true,
+    },
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+      required: true,
+    },
   },
   { timestamps: true }
 );
