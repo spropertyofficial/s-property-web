@@ -6,6 +6,7 @@ import Property from "@/lib/models/Property";
 import CategoryAssetType from "@/lib/models/CategoryAssetType";
 import CategoryMarketStatus from "@/lib/models/CategoryMarketStatus";
 import CategoryListingStatus from "@/lib/models/CategoryListingStatus";
+import Cluster from "@/lib/models/Cluster";
 import { verifyAdmin } from "@/lib/auth";
 
 // Fungsi ini sekarang bisa menerima filter
@@ -58,7 +59,6 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     const { success, admin } = await verifyAdmin(req);
-    console.log("Admin verification result:", success, admin);
     if (!success) {
       return NextResponse.json(
         { error: "Akses tidak diizinkan" },
@@ -67,21 +67,49 @@ export async function POST(req) {
     }
 
     const body = await req.json();
+    // Ambil flag baru dari frontend untuk menentukan tipe perumahan
+    const { hasMultipleClusters, ...propertyData } = body;
+
     await connectDB();
 
-    const propertyData = {
-      ...body,
+    // Dapatkan nama dari assetType ID untuk logika kondisional
+    const assetTypeDoc = await CategoryAssetType.findById(
+      propertyData.assetType
+    );
+    const assetTypeName = assetTypeDoc ? assetTypeDoc.name : "";
+
+    // Siapkan data properti awal
+    const newPropertyPayload = {
+      ...propertyData,
       createdBy: admin._id,
       updatedBy: admin._id,
+      clusters: [], // Mulai dengan array cluster kosong
     };
 
-    const property = new Property(propertyData);
+    const property = new Property(newPropertyPayload);
     await property.save();
 
-    return NextResponse.json({ success: true, id: property._id });
+    if (assetTypeName === "Perumahan" && hasMultipleClusters === false) {
+      console.log(`Membuat cluster default untuk perumahan: ${property.name}`);
+      const defaultCluster = new Cluster({
+        name: `Tipe Unit - ${property.name}`, // Nama cluster default
+        description: `Cluster utama untuk perumahan ${property.name}`,
+        property: property._id, // Hubungkan ke properti yang baru dibuat
+      });
+      await defaultCluster.save();
+
+      // Update kembali properti untuk menambahkan ID cluster default ini
+      property.clusters.push(defaultCluster._id);
+      await property.save();
+    }
+
+    return NextResponse.json({
+      success: true,
+      id: property._id,
+      message: "Properti berhasil dibuat",
+    });
   } catch (err) {
     console.error("POST property error:", err);
-    // Berikan pesan error yang lebih detail jika ada error validasi
     if (err.name === "ValidationError") {
       return NextResponse.json(
         { error: "Data tidak valid", details: err.errors },
