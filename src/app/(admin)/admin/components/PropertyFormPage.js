@@ -275,10 +275,10 @@ export default function PropertyFormPage({ propertyId = null }) {
         {
           timer: 1500,
           showConfirmButton: false,
-        }
-      ).then(() => {
-        router.push("/admin/properties");
-      });
+        }.then(() => {
+          router.back();
+        })
+      );
     } catch (err) {
       Swal.fire("Error", err.message || "Terjadi kesalahan", "error");
     } finally {
@@ -405,7 +405,7 @@ export default function PropertyFormPage({ propertyId = null }) {
                   }`}
                 >
                   <option value="" className="text-gray-500">
-                    -- Pilih Tipe Aset --
+                    Pilih Tipe Aset
                   </option>
                   {categories.assetTypes.map((cat) => (
                     <option
@@ -440,7 +440,7 @@ export default function PropertyFormPage({ propertyId = null }) {
                   }`}
                 >
                   <option value="" className="text-gray-500">
-                    -- Pilih Status Pasar --
+                    Pilih Status Pasar
                   </option>
                   {categories.marketStatuses.map((cat) => (
                     <option
@@ -475,7 +475,7 @@ export default function PropertyFormPage({ propertyId = null }) {
                   }`}
                 >
                   <option value="" className="text-gray-500">
-                    -- Pilih Status Ketersediaan --
+                    Pilih Status Ketersediaan
                   </option>
                   {categories.listingStatuses.map((cat) => (
                     <option

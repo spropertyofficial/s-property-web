@@ -1,5 +1,6 @@
 import connectDB from "@/lib/mongodb";
 import Property from "@/lib/models/Property"; // Gunakan model Property yang baru
+import cloudinary from "@/lib/cloudinary";
 import { NextResponse } from "next/server";
 import { verifyAdmin } from "@/lib/auth"; // Impor helper verifikasi
 
