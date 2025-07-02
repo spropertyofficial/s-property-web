@@ -140,6 +140,18 @@ export default function AdminRukoPage() {
     return new Date(dateString).toLocaleDateString("id-ID", options);
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    const options = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return new Date(dateString).toLocaleDateString("id-ID", options);
+  };
+
   return (
     <div className="p-6">
       {/* Header */}
