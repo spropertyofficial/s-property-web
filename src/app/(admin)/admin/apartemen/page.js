@@ -6,10 +6,7 @@ export default function AdminApartemenPage() {
     <PropertyListPage
       assetType="Apartemen"
       title="Daftar Properti Apartemen"
-      addUrl="/admin/properties/add"
-      editUrl="/admin/properties/edit"
-      detailUrl="/admin/properties"
-      apiEndpoint="/api/properties"
+      detailUrl="/admin/apartemen"
     />
   );
 }
