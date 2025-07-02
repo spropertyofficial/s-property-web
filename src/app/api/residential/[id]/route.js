@@ -106,7 +106,6 @@ export async function DELETE(req, { params }) {
       );
     }
 
-    // ... sisa logika hapus Cloudinary Anda (sudah benar) ...
     const folderName = property.name
       .toLowerCase()
       .replace(/\s+/g, "-")
