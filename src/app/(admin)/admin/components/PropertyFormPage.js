@@ -12,7 +12,6 @@ export default function PropertyFormPage({ propertyId = null }) {
   const router = useRouter();
   const fileInputRef = useRef(null);
   const isEdit = !!propertyId;
-
   const initialFormState = {
     id: "",
     name: "",
@@ -41,6 +40,7 @@ export default function PropertyFormPage({ propertyId = null }) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(isEdit);
+  const [hasMultipleClusters, setHasMultipleClusters] = useState(false);
 
   const [categories, setCategories] = useState({
     assetTypes: [],
@@ -254,6 +254,7 @@ export default function PropertyFormPage({ propertyId = null }) {
         ...form,
         name: toCapitalCase(form.name),
         id: isEdit ? form.id : generateId(form.name),
+        hasMultipleClusters: hasMultipleClusters,
       };
 
       const url = isEdit ? `/api/properties/${propertyId}` : "/api/properties";
@@ -268,17 +269,15 @@ export default function PropertyFormPage({ propertyId = null }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal menyimpan data");
 
-      Swal.fire(
-        "Berhasil!",
-        `Properti berhasil ${isEdit ? "diperbarui" : "ditambahkan"}`,
-        "success",
-        {
-          timer: 1500,
-          showConfirmButton: false,
-        }.then(() => {
-          router.back();
-        })
-      );
+      Swal.fire({
+        title: "Berhasil!",
+        text: `Properti berhasil ${isEdit ? "diperbarui" : "ditambahkan"}`,
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      }).then(() => {
+        router.back();
+      });
     } catch (err) {
       Swal.fire("Error", err.message || "Terjadi kesalahan", "error");
     } finally {
@@ -494,6 +493,22 @@ export default function PropertyFormPage({ propertyId = null }) {
                   </p>
                 )}
               </div>
+              {categories.assetTypes.find((cat) => cat._id === form.assetType)
+                ?.name === "Perumahan" && (
+                <div className="col-span-1 md:col-span-3">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={hasMultipleClusters}
+                      onChange={(e) => setHasMultipleClusters(e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">
+                      Banyak Cluster?
+                    </span>
+                  </label>
+                </div>
+              )}
             </div>
           )}
         </fieldset>

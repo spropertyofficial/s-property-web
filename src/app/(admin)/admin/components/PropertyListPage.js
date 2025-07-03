@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import {
   FaHome,
@@ -29,11 +29,7 @@ export default function PropertyListPage({
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  useEffect(() => {
-    fetchData();
-  }, [assetType]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const url = assetType
@@ -57,7 +53,11 @@ export default function PropertyListPage({
     } finally {
       setLoading(false);
     }
-  };
+  }, [assetType, apiEndpoint]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleDelete = async (id, name) => {
     Swal.fire({

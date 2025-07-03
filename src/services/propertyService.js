@@ -1,29 +1,34 @@
 // src/services/propertyService.js
 
-import { residentialsData as staticResidentialsData } from "@/data/residentials";
-import { getResidentialsData } from "@/app/api/residential/route";
+import { residentialsData as staticPropertiesData } from "@/data/residentials";
+// PERBAIKAN: Impor fungsi logika langsung dari file API-nya
+import { getPropertiesData } from "@/app/api/properties/route";
 
-// Fungsi untuk mendapatkan SEMUA properti (statis + dinamis)
-export async function getAllResidentials() {
-  let dynamicResidentials = [];
+/**
+ * Mengambil SEMUA properti (gabungan dari DB dan data statis).
+ * Cocok untuk halaman daftar atau komponen yang butuh semua data.
+ */
+export async function getAllProperties() {
+  let dynamicProperties = [];
   try {
-    // Panggil logika langsung untuk efisiensi di server
-    dynamicResidentials = await getResidentialsData();
+    // PERBAIKAN: Panggil fungsi logika langsung, bukan lewat fetch.
+    // Ini menghilangkan masalah URL dan lebih cepat.
+    dynamicProperties = await getPropertiesData();
   } catch (error) {
-    console.error("Failed to get dynamic residentials, continuing with static data only.", error);
-    // Jika gagal, kita lanjutkan dengan data statis saja
+    console.error(
+      "Gagal mengambil properti dinamis, lanjut dengan data statis.",
+      error
+    );
   }
 
-  // Gabungkan dan de-duplikasi data
+  // Logika penggabungan dan de-duplikasi Anda tetap sama (sudah benar)
   const combinedDataMap = new Map();
 
-  // Masukkan data statis terlebih dahulu
-  staticResidentialsData.forEach(item => {
+  staticPropertiesData.forEach((item) => {
     combinedDataMap.set(item.id, item);
   });
 
-  // Timpa atau tambahkan dengan data dinamis
-  dynamicResidentials.forEach(item => {
+  dynamicProperties.forEach((item) => {
     const normalizedId = item._id ? item._id.toString() : item.id;
     combinedDataMap.set(normalizedId, { ...item, id: normalizedId });
   });
@@ -31,14 +36,35 @@ export async function getAllResidentials() {
   return Array.from(combinedDataMap.values());
 }
 
+/**
+ * Mengambil SATU properti berdasarkan ID.
+ * Menggunakan fetch karena ini bisa dipanggil dari KLIEN.
+ * (Kode ini sudah benar dari perbaikan kita sebelumnya, tidak perlu diubah)
+ */
+export async function getPropertyById(id) {
+  try {
+    const res = await fetch(
+      `${
+        process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4004"
+      }/api/properties/${id}`,
+      { cache: "no-store" }
+    );
 
-// Fungsi untuk mendapatkan SATU properti berdasarkan ID
-export async function getResidentialById(id) {
-  // Panggil fungsi di atas untuk mendapatkan semua data gabungan
-  const allResidentials = await getAllResidentials();
-  
-  // Cari properti di dalam data gabungan tersebut
-  const property = allResidentials.find(p => p.id === id);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success) {
+        const property = data.property;
+        property.id = property._id.toString();
+        return property;
+      }
+    }
 
-  return property || null;
+    const staticProperty = staticPropertiesData.find((p) => p.id === id);
+    if (staticProperty) return staticProperty;
+
+    return null;
+  } catch (error) {
+    console.error(`Error saat mengambil properti dengan ID ${id}:`, error);
+    return staticPropertiesData.find((p) => p.id === id) || null;
+  }
 }

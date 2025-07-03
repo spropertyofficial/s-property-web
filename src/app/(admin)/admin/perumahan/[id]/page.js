@@ -1,3 +1,4 @@
+// src/app/admin/perumahan/[id]/page.js
 "use client";
 import PropertyDetailPage from "../../components/PropertyDetailPage";
 

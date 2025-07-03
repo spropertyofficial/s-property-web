@@ -10,12 +10,11 @@ import {
   FaTrash,
   FaMapMarkerAlt,
   FaBuilding,
-  FaLayerGroup,
-  FaHome,
   FaTag,
   FaCalendarAlt,
   FaUser,
 } from "react-icons/fa";
+import ClusterManager from "./Properties/ClusterManager";
 
 export default function PropertyDetailPage({
   propertyType = "properties",
@@ -33,6 +32,7 @@ export default function PropertyDetailPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [showAddClusterForm, setShowAddClusterForm] = useState(false); // <-- State baru untuk toggle form
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -215,11 +215,20 @@ export default function PropertyDetailPage({
       </div>
     );
   }
+  const plainProperty = JSON.parse(JSON.stringify(property));
+
+  const canHaveClusters = ["Perumahan", "Apartemen"].includes(
+    plainProperty.assetType?.name
+  );
 
   const statusDisplay = getStatusDisplay(
     property.listingStatus,
     property.propertyStatus
   );
+
+  const isPerumahan = property.assetType?.name
+    ?.toLowerCase()
+    .includes("perumahan");
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -392,42 +401,47 @@ export default function PropertyDetailPage({
 
           <hr className="my-6" />
 
-          {/* Clusters */}
+          {/* Metadata */}
           <div>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-semibold flex items-center">
-                <FaLayerGroup className="mr-2" /> Clusters
-              </h3>
-              <Link
-                href={`${clustersUrl}/new?property=${id}`}
-                className="text-blue-600 hover:underline text-sm"
-              >
-                + Tambah Cluster
-              </Link>
-            </div>
-
-            {property.clusters && property.clusters.length > 0 ? (
-              <div className="space-y-3">
-                {property.clusters.map((cluster, index) => (
-                  <Link
-                    key={index}
-                    href={`${clustersUrl}/${
-                      typeof cluster === "object" ? cluster._id : cluster
-                    }`}
-                    className="flex items-center p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
-                  >
-                    <FaHome className="text-gray-400 mr-3" />
-                    <span>
-                      {typeof cluster === "object" ? cluster.name : cluster}
-                    </span>
-                  </Link>
-                ))}
+            <h3 className="font-semibold mb-3">Metadata</h3>
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center">
+                <FaUser className="text-gray-400 mr-2" />
+                <div>
+                  <p className="text-gray-500">Dibuat oleh</p>
+                  <p>{property.createdBy?.name || "-"}</p>
+                </div>
               </div>
-            ) : (
-              <p className="text-gray-500 text-sm italic">
-                Belum ada cluster yang ditambahkan
-              </p>
-            )}
+
+              <div className="flex items-center">
+                <FaCalendarAlt className="text-gray-400 mr-2" />
+                <div>
+                  <p className="text-gray-500">Tanggal dibuat</p>
+                  <p>{formatDate(property.createdAt)}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <FaEdit className="text-gray-400 mr-2" />
+                <div>
+                  <p className="text-gray-500">Terakhir diubah</p>
+                  <p>{property.updatedBy?.name || "-"}</p>
+                  <p className="text-xs text-gray-400">
+                    {formatDate(property.updatedAt)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <FaTag className="text-gray-400 mr-2" />
+                <div>
+                  <p className="text-gray-500">ID Database</p>
+                  <p className="font-mono text-xs break-all">
+                    {property._id || "-"}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <hr className="my-6" />
@@ -494,6 +508,17 @@ export default function PropertyDetailPage({
           )}
         </div>
       </div>
+
+      {/* Clusters */}
+      {canHaveClusters && (
+        <ClusterManager
+          propertyId={plainProperty._id}
+          propertyName={plainProperty.name}
+          initialClusters={plainProperty.clusters} // <-- Lewatkan data cluster awal
+          assetType={plainProperty.assetType?.name}
+          propertyType={propertyType}
+        />
+      )}
     </div>
   );
 }
