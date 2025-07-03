@@ -18,13 +18,8 @@ const slugify = (text) => {
 // GET: Mengambil satu properti berdasarkan ID
 export async function GET(req, { params }) {
   try {
-    const { success } = await verifyAdmin(req);
-    if (!success) {
-      return NextResponse.json({ message: "Akses Ditolak" }, { status: 401 });
-    }
-
     await connectDB();
-    const { id } = await params;
+    const { id } = params;
 
     const property = await Property.findById(id)
       .populate("assetType", "name")
@@ -32,20 +27,20 @@ export async function GET(req, { params }) {
       .populate("listingStatus", "name")
       .populate("createdBy", "name")
       .populate("updatedBy", "name")
+      .populate("clusters")
       .lean();
 
     if (!property) {
       return NextResponse.json(
-        { message: "Properti tidak ditemukan" },
+        { success: false, error: "Properti tidak ditemukan di database" },
         { status: 404 }
       );
     }
 
-    // Kirimkan sebagai "property", bukan "residential"
     return NextResponse.json({ success: true, property });
   } catch (error) {
     return NextResponse.json(
-      { message: "Gagal mengambil data properti" },
+      { success: false, error: "Gagal mengambil data properti" },
       { status: 500 }
     );
   }
