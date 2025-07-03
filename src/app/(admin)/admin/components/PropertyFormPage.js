@@ -253,7 +253,7 @@ export default function PropertyFormPage({ propertyId = null }) {
       const formattedData = {
         ...form,
         name: toCapitalCase(form.name),
-        id: isEditing ? form.id : generateId(form.name),
+        id: isEdit ? form.id : generateId(form.name),
         hasMultipleClusters: hasMultipleClusters,
       };
 
@@ -269,17 +269,15 @@ export default function PropertyFormPage({ propertyId = null }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal menyimpan data");
 
-      Swal.fire(
-        "Berhasil!",
-        `Properti berhasil ${isEdit ? "diperbarui" : "ditambahkan"}`,
-        "success",
-        {
-          timer: 1500,
-          showConfirmButton: false,
-        }.then(() => {
-          router.back();
-        })
-      );
+      Swal.fire({
+        title: "Berhasil!",
+        text: `Properti berhasil ${isEdit ? "diperbarui" : "ditambahkan"}`,
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      }).then(() => {
+        router.back();
+      });
     } catch (err) {
       Swal.fire("Error", err.message || "Terjadi kesalahan", "error");
     } finally {
