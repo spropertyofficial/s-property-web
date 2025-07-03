@@ -15,6 +15,9 @@ export const handleImageUpload = async (
     maxImages = 10,
     propertyName = "general",
     assetType = "lainnya",
+    clusterName = null, // Tambahan untuk cluster
+    unitType = null, // Tambahan untuk tipe unit
+    uploadType = "property", // "property", "cluster", "unit"
     setUploadProgress = null,
   }
 ) => {
@@ -62,7 +65,6 @@ export const handleImageUpload = async (
       return;
     }
   }
-  // <-- AKHIR MODIFIKASI
 
   const newGalleryItems = [];
   const newPreviewImages = [];
@@ -103,7 +105,42 @@ export const handleImageUpload = async (
         throw new Error("Nama Properti harus diisi sebelum mengunggah gambar.");
       }
 
-      const folder = `s-property/${assetTypeSlug}/${propertyNameSlug}`;
+      // Buat folder berdasarkan tipe upload dan asset type
+      let folder;
+      
+      if (uploadType === "property") {
+        // Upload untuk properti utama
+        folder = `s-property/${assetTypeSlug}/${propertyNameSlug}`;
+      } else if (uploadType === "cluster") {
+        // Upload untuk cluster (khusus perumahan)
+        if (assetTypeSlug === "perumahan" && clusterName) {
+          const clusterSlug = slugify(clusterName);
+          folder = `s-property/${assetTypeSlug}/${propertyNameSlug}/clusters/${clusterSlug}`;
+        } else {
+          throw new Error("Cluster hanya berlaku untuk perumahan dan nama cluster harus diisi.");
+        }
+      } else if (uploadType === "unit") {
+        // Upload untuk tipe unit
+        if (unitType) {
+          const unitTypeSlug = slugify(unitType);
+          
+          if (assetTypeSlug === "perumahan" && clusterName) {
+            // Perumahan: property/cluster/unit-type
+            const clusterSlug = slugify(clusterName);
+            folder = `s-property/${assetTypeSlug}/${propertyNameSlug}/clusters/${clusterSlug}/units/${unitTypeSlug}`;
+          } else if (["ruko", "apartemen"].includes(assetTypeSlug)) {
+            // Ruko/Apartemen: property/unit-type (tanpa cluster)
+            folder = `s-property/${assetTypeSlug}/${propertyNameSlug}/units/${unitTypeSlug}`;
+          } else {
+            throw new Error("Tipe unit tidak sesuai dengan asset type.");
+          }
+        } else {
+          throw new Error("Nama tipe unit harus diisi.");
+        }
+      } else {
+        throw new Error("Tipe upload tidak valid.");
+      }
+
       const timestamp = Math.round(new Date().getTime() / 1000);
       const paramsToSign = { timestamp, folder };
 
@@ -125,6 +162,7 @@ export const handleImageUpload = async (
       formData.append("folder", folder);
       formData.append("propertyName", propertyName);
       formData.append("assetType", assetType);
+      
       if (setUploadProgress) {
         const progressPerFile = 90 / files.length;
         setUploadProgress(5 + progressPerFile * i);
@@ -145,14 +183,17 @@ export const handleImageUpload = async (
       newGalleryItems.push({
         src: uploadData.secure_url,
         alt: file.name,
-        type: "property",
+        type: uploadType, // "property", "cluster", atau "unit"
         publicId: uploadData.public_id,
+        folder: folder, // Simpan info folder untuk referensi
       });
       newPreviewImages.push({
         url: uploadData.secure_url,
         name: file.name,
         size: file.size,
         publicId: uploadData.public_id,
+        uploadType: uploadType,
+        uploaded: true,
       });
     }
 
