@@ -2,7 +2,7 @@
 
 import Swal from "sweetalert2";
 
-const MAX_FILE_SIZE_MB = 10; 
+const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 export const handleImageUpload = async (
@@ -13,10 +13,22 @@ export const handleImageUpload = async (
     form,
     setForm,
     maxImages = 10,
-    residentialName = "general",
+    propertyName = "general",
+    assetType = "lainnya",
     setUploadProgress = null,
   }
 ) => {
+  const slugify = (text) => {
+    if (!text) return "";
+    return text
+      .toString()
+      .toLowerCase()
+      .replace(/\s+/g, "-") // Ganti spasi dengan -
+      .replace(/[^\w\-]+/g, "") // Hapus semua karakter non-word
+      .replace(/\-\-+/g, "-") // Ganti -- ganda dengan -
+      .replace(/^-+/, "") // Pangkas - dari depan
+      .replace(/-+$/, ""); // Pangkas - dari belakang
+  };
   const files = Array.from(e.target.files);
   if (files.length === 0) return;
 
@@ -47,7 +59,7 @@ export const handleImageUpload = async (
         confirmButtonColor: "#131414",
       });
       e.target.value = null;
-      return; 
+      return;
     }
   }
   // <-- AKHIR MODIFIKASI
@@ -56,6 +68,16 @@ export const handleImageUpload = async (
   const newPreviewImages = [];
   const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const API_KEY = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
+
+  if (!propertyName.trim()) {
+    Swal.fire(
+      "Nama Properti Kosong",
+      "Harap isi Nama Properti terlebih dahulu sebelum mengunggah gambar.",
+      "warning"
+    );
+    e.target.value = null;
+    return;
+  }
 
   if (!CLOUD_NAME || !API_KEY) {
     console.error("Cloudinary env variables not set!");
@@ -73,10 +95,16 @@ export const handleImageUpload = async (
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
 
+      const assetTypeSlug = slugify(assetType); // e.g., 'perumahan', 'ruko'
+      const propertyNameSlug = slugify(propertyName); // e.g., 'grand-wisata'
+
+      // Pastikan ada nama properti untuk membuat folder
+      if (!propertyNameSlug) {
+        throw new Error("Nama Properti harus diisi sebelum mengunggah gambar.");
+      }
+
+      const folder = `s-property/${assetTypeSlug}/${propertyNameSlug}`;
       const timestamp = Math.round(new Date().getTime() / 1000);
-      const folder = `s-property/residential/${residentialName
-        .toLowerCase()
-        .replace(/\s+/g, "-")}`;
       const paramsToSign = { timestamp, folder };
 
       const signRes = await fetch("/api/sign-cloudinary-upload", {
@@ -95,6 +123,8 @@ export const handleImageUpload = async (
       formData.append("timestamp", timestamp);
       formData.append("signature", signature);
       formData.append("folder", folder);
+      formData.append("propertyName", propertyName);
+      formData.append("assetType", assetType);
       if (setUploadProgress) {
         const progressPerFile = 90 / files.length;
         setUploadProgress(5 + progressPerFile * i);

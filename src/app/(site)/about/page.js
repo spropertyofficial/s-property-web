@@ -1,9 +1,7 @@
-const { default: AboutPage } = require("@/components/about");
+import AboutPage from "@/components/about";
 
 const About = () => {
-  return (
-    <AboutPage/>
-  );
+  return <AboutPage />;
 };
 
 export default About;

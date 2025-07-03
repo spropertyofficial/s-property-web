@@ -9,52 +9,55 @@ export const config = {
   },
 };
 
+const slugify = (text) => {
+  if (!text) return "";
+  return text
+    .toString()
+    .toLowerCase()
+    .replace(/\s+/g, "-") // Ganti spasi dengan -
+    .replace(/[^\w\-]+/g, "") // Hapus semua karakter non-word
+    .replace(/\-\-+/g, "-") // Ganti -- ganda dengan -
+    .replace(/^-+/, "") // Pangkas - dari depan
+    .replace(/-+$/, ""); // Pangkas - dari belakang
+};
+
 export async function POST(req) {
   const formData = await req.formData();
   const file = formData.get("file");
-
-  // Parameter untuk struktur folder
-  const residential = formData.get("residential") || "general";
-  const category = formData.get("category") || "residential"; // residential, cluster, unit
-  const cluster = formData.get("cluster") || "";
-  const unitType = formData.get("unitType") || "";
 
   if (!file) {
     return NextResponse.json({ error: "No file provided" }, { status: 400 });
   }
 
+  // 1. Ambil semua parameter yang mungkin dari frontend
+  const assetType = slugify(formData.get("assetType") || "lainnya"); // e.g., 'perumahan', 'ruko', 'tanah'
+  const propertyName = slugify(formData.get("propertyName") || "general"); // Dulu 'residential'
+  const clusterName = slugify(formData.get("clusterName") || "");
+  const unitName = slugify(formData.get("unitName") || "");
+
   const buffer = Buffer.from(await file.arrayBuffer());
 
   try {
-    // Buat path folder berdasarkan parameter
-    let folderPath = `s-property/residential/${residential
-      .toLowerCase()
-      .replace(/\s+/g, "-")}`;
+    // 2. Buat path folder secara bertahap
+    let folderPath = `s-property/${assetType}/${propertyName}`;
 
-    // Tambahkan subpath berdasarkan kategori
-    if (category === "cluster" && cluster) {
-      folderPath += `/cluster/${cluster.toLowerCase().replace(/\s+/g, "-")}`;
-    } else if (category === "unit" && cluster && unitType) {
-      folderPath += `/cluster/${cluster
-        .toLowerCase()
-        .replace(/\s+/g, "-")}/unit/${unitType
-        .toLowerCase()
-        .replace(/\s+/g, "-")}`;
+    if (clusterName) {
+      folderPath += `/cluster/${clusterName}`;
+      // Hanya tambahkan unit jika ada cluster
+      if (unitName) {
+        folderPath += `/unit/${unitName}`;
+      }
     }
 
     console.log(`Uploading to Cloudinary folder: ${folderPath}`);
 
+    // Logika upload_stream Anda tetap sama (sudah benar)
     const result = await new Promise((resolve, reject) => {
       cloudinary.uploader
-        .upload_stream(
-          {
-            folder: folderPath,
-          },
-          (err, result) => {
-            if (err) return reject(err);
-            resolve(result);
-          }
-        )
+        .upload_stream({ folder: folderPath }, (err, result) => {
+          if (err) return reject(err);
+          resolve(result);
+        })
         .end(buffer);
     });
 
