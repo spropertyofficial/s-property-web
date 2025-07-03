@@ -1,5 +1,5 @@
 // src/app/(site)/properties/residentials/[id]/page.js
-import { getResidentialById } from "@/services/propertyService";
+import { getPropertyById } from "@/services/propertyService";
 import { notFound } from "next/navigation";
 import AddressInfo from "@/components/sections/Property/AddressInfo";
 import Gallery from "@/components/sections/Property/Gallery";
@@ -10,7 +10,7 @@ export default async function ResidentialDetailPage({ params }) {
   const { id } = await params;
 
   // Use centralized service to fetch property data
-  const property = await getResidentialById(id);
+  const property = await getPropertyById(id);
 
   // If property with this ID is not found in combined data,
   // show 404 page
@@ -125,7 +125,7 @@ export default async function ResidentialDetailPage({ params }) {
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
-  const property = await getResidentialById(id);
+  const property = await getPropertyById(id);
 
   if (!property) {
     return {

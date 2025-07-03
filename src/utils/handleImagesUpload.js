@@ -15,12 +15,9 @@ export const handleImageUpload = async (
     maxImages = 10,
     propertyName = "general",
     assetType = "lainnya",
-<<<<<<< HEAD
     clusterName = null, // Tambahan untuk cluster
     unitType = null, // Tambahan untuk tipe unit
     uploadType = "property", // "property", "cluster", "unit"
-=======
->>>>>>> main
     setUploadProgress = null,
   }
 ) => {
@@ -43,18 +40,6 @@ export const handleImageUpload = async (
     Swal.fire("Peringatan", `Maksimal ${maxImages} gambar.`, "warning");
     return;
   }
-  for (const file of files) {
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      Swal.fire(
-        "Ukuran File Terlalu Besar",
-        `File "${file.name}" melebihi batas ${MAX_FILE_SIZE_MB} MB.`,
-        "error"
-      );
-      e.target.value = null;
-      return;
-    }
-  }
-
   for (const file of files) {
     if (file.size > MAX_FILE_SIZE_BYTES) {
       Swal.fire({
@@ -108,10 +93,9 @@ export const handleImageUpload = async (
         throw new Error("Nama Properti harus diisi sebelum mengunggah gambar.");
       }
 
-<<<<<<< HEAD
       // Buat folder berdasarkan tipe upload dan asset type
       let folder;
-      
+
       if (uploadType === "property") {
         // Upload untuk properti utama
         folder = `s-property/${assetTypeSlug}/${propertyNameSlug}`;
@@ -121,13 +105,15 @@ export const handleImageUpload = async (
           const clusterSlug = slugify(clusterName);
           folder = `s-property/${assetTypeSlug}/${propertyNameSlug}/clusters/${clusterSlug}`;
         } else {
-          throw new Error("Cluster hanya berlaku untuk perumahan dan nama cluster harus diisi.");
+          throw new Error(
+            "Cluster hanya berlaku untuk perumahan dan nama cluster harus diisi."
+          );
         }
       } else if (uploadType === "unit") {
         // Upload untuk tipe unit
         if (unitType) {
           const unitTypeSlug = slugify(unitType);
-          
+
           if (assetTypeSlug === "perumahan" && clusterName) {
             // Perumahan: property/cluster/unit-type
             const clusterSlug = slugify(clusterName);
@@ -145,9 +131,6 @@ export const handleImageUpload = async (
         throw new Error("Tipe upload tidak valid.");
       }
 
-=======
-      const folder = `s-property/${assetTypeSlug}/${propertyNameSlug}`;
->>>>>>> main
       const timestamp = Math.round(new Date().getTime() / 1000);
       const paramsToSign = { timestamp, folder };
 
@@ -169,10 +152,7 @@ export const handleImageUpload = async (
       formData.append("folder", folder);
       formData.append("propertyName", propertyName);
       formData.append("assetType", assetType);
-<<<<<<< HEAD
-      
-=======
->>>>>>> main
+
       if (setUploadProgress) {
         const progressPerFile = 90 / files.length;
         setUploadProgress(5 + progressPerFile * i);
