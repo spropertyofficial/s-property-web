@@ -33,7 +33,7 @@ export async function POST(req) {
   const assetType = slugify(formData.get("assetType") || "lainnya"); // e.g., 'perumahan', 'ruko', 'tanah'
   const propertyName = slugify(formData.get("propertyName") || "general"); // Dulu 'residential'
   const clusterName = slugify(formData.get("clusterName") || "");
-  const unitName = slugify(formData.get("unitName") || "");
+  const unitType = slugify(formData.get("unitType") || "");
 
   const buffer = Buffer.from(await file.arrayBuffer());
 
@@ -44,8 +44,8 @@ export async function POST(req) {
     if (clusterName) {
       folderPath += `/cluster/${clusterName}`;
       // Hanya tambahkan unit jika ada cluster
-      if (unitName) {
-        folderPath += `/unit/${unitName}`;
+      if (unitType) {
+        folderPath += `/unit/${unitType}`;
       }
     }
 

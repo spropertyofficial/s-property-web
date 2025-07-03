@@ -21,6 +21,7 @@ export default function PropertyDetailPage({
   apiEndpoint = "/api/properties",
   listUrl = "/admin/properties",
   editUrl = "/admin/properties/edit",
+  clustersUrl = "/admin/clusters",
   title = "Properti",
 }) {
   const router = useRouter();
@@ -395,6 +396,51 @@ export default function PropertyDetailPage({
                     Lihat di Google Maps
                   </a>
                 )}
+            </div>
+          </div>
+
+          <hr className="my-6" />
+
+          {/* Metadata */}
+          <div>
+            <h3 className="font-semibold mb-3">Metadata</h3>
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center">
+                <FaUser className="text-gray-400 mr-2" />
+                <div>
+                  <p className="text-gray-500">Dibuat oleh</p>
+                  <p>{property.createdBy?.name || "-"}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <FaCalendarAlt className="text-gray-400 mr-2" />
+                <div>
+                  <p className="text-gray-500">Tanggal dibuat</p>
+                  <p>{formatDate(property.createdAt)}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <FaEdit className="text-gray-400 mr-2" />
+                <div>
+                  <p className="text-gray-500">Terakhir diubah</p>
+                  <p>{property.updatedBy?.name || "-"}</p>
+                  <p className="text-xs text-gray-400">
+                    {formatDate(property.updatedAt)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <FaTag className="text-gray-400 mr-2" />
+                <div>
+                  <p className="text-gray-500">ID Database</p>
+                  <p className="font-mono text-xs break-all">
+                    {property._id || "-"}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 

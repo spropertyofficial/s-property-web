@@ -29,7 +29,7 @@ export async function GET(req) {
 // POST: Membuat cluster baru
 export async function POST(req) {
   try {
-    const { success, admin } = await verifyAdmin(req);
+    const { success } = await verifyAdmin(req);
     if (!success) {
       return NextResponse.json(
         { success: false, error: "Akses ditolak" },
@@ -37,7 +37,7 @@ export async function POST(req) {
       );
     }
 
-    const { name, description, propertyId } = await req.json();
+    const { name, description, gallery, propertyId } = await req.json();
 
     if (!name || !propertyId) {
       return NextResponse.json(
@@ -51,15 +51,14 @@ export async function POST(req) {
 
     await connectDB();
 
-    // Langkah 1: Buat dokumen cluster baru
     const newCluster = new Cluster({
       name,
       description,
+      gallery, // <-- Simpan gallery
       property: propertyId,
     });
     await newCluster.save();
 
-    // Langkah 2: Tambahkan ID cluster baru ini ke array 'clusters' di dokumen Property induknya
     await Property.findByIdAndUpdate(propertyId, {
       $push: { clusters: newCluster._id },
     });
@@ -71,10 +70,7 @@ export async function POST(req) {
     });
   } catch (error) {
     return NextResponse.json(
-      {
-        success: false,
-        error: "Terjadi kesalahan server saat membuat cluster",
-      },
+      { success: false, error: "Terjadi kesalahan server" },
       { status: 500 }
     );
   }

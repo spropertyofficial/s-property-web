@@ -45,7 +45,7 @@ export default async function PropertyDetailPageAdmin({ params }) {
       {/* Komponen ini HANYA akan muncul jika tipe propertinya adalah "Perumahan" atau "Apartemen" */}
       {isPerumahan && (
         <ClusterManager
-          propertyId={plainProperty._id}
+          propertyId={plainProperty.id}
           propertyName={plainProperty.name}
         />
       )}

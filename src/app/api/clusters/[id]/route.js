@@ -46,15 +46,14 @@ export async function GET(req, { params }) {
 export async function PUT(req, { params }) {
   try {
     const { success } = await verifyAdmin(req);
-    if (!success) {
+    if (!success)
       return NextResponse.json(
         { success: false, error: "Akses ditolak" },
         { status: 401 }
       );
-    }
 
     const { id } = params;
-    const { name, description } = await req.json();
+    const { name, description, gallery } = await req.json();
 
     if (!name) {
       return NextResponse.json(
@@ -67,16 +66,15 @@ export async function PUT(req, { params }) {
 
     const updatedCluster = await Cluster.findByIdAndUpdate(
       id,
-      { name, description },
-      { new: true } // Opsi ini akan mengembalikan dokumen yang sudah diupdate
+      { name, description, gallery }, // <-- Perbarui gallery
+      { new: true }
     );
 
-    if (!updatedCluster) {
+    if (!updatedCluster)
       return NextResponse.json(
         { success: false, error: "Cluster tidak ditemukan" },
         { status: 404 }
       );
-    }
 
     return NextResponse.json({
       success: true,
