@@ -10,8 +10,6 @@ import {
   FaTrash,
   FaMapMarkerAlt,
   FaBuilding,
-  FaLayerGroup,
-  FaHome,
   FaTag,
   FaCalendarAlt,
   FaUser,
@@ -23,7 +21,6 @@ export default function PropertyDetailPage({
   apiEndpoint = "/api/properties",
   listUrl = "/admin/properties",
   editUrl = "/admin/properties/edit",
-  clustersUrl = "/admin/property",
   title = "Properti",
 }) {
   const router = useRouter();
