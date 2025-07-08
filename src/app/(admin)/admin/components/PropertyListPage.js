@@ -76,7 +76,7 @@ export default function PropertyListPage({
 
   useEffect(() => {
     fetchData();
-  }, [assetType, apiEndpoint]); // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assetType, apiEndpoint]); 
 
   const handleDelete = async (id, name) => {
     const result = await Swal.fire({
