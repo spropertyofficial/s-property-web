@@ -54,6 +54,7 @@ export default function PropertyFormPage({ propertyId = null }) {
   const [isLoading, setIsLoading] = useState(isEdit);
   const [hasMultipleClusters, setHasMultipleClusters] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState(""); // "", "saving", "saved", "error"
+  const [galleryError, setGalleryError] = useState("");
 
 
   const [categories, setCategories] = useState({
@@ -139,13 +140,15 @@ export default function PropertyFormPage({ propertyId = null }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit, propertyId]); // Remove router, notify from dependency to prevent loop
 
-  // Function to get text length from HTML (for validation)
-  const getTextLength = (htmlContent) => {
-    if (!htmlContent || typeof htmlContent !== 'string') return 0;
+  // Function to get text length from markdown content (consistent with RichTextEditor)
+  const getTextLength = (content) => {
+    if (!content || typeof content !== 'string') return 0;
     try {
-      const div = document.createElement("div");
-      div.innerHTML = htmlContent;
-      return (div.textContent || div.innerText || "").length;
+      // Sama seperti di RichTextEditor - hitung karakter dari markdown
+      return content
+        .replace(/[#*_`\[\]()]/g, "") // Remove markdown syntax
+        .replace(/\n/g, " ") // Replace newlines with spaces
+        .trim().length;
     } catch (error) {
       console.error('Error getting text length:', error);
       return 0;
@@ -158,40 +161,136 @@ export default function PropertyFormPage({ propertyId = null }) {
     // Pastikan nilai adalah string sebelum memanggil trim()
     const safeTrim = (value) => (value || "").toString().trim();
     
-    if (!safeTrim(form.name)) newErrors.name = "Nama properti wajib diisi";
-    if (!form.startPrice) newErrors.startPrice = "Harga awal wajib diisi";
-    if (!safeTrim(form.developer))
-      newErrors.developer = "Nama developer wajib diisi";
-    if (!safeTrim(form.location?.city))
-      newErrors["location.city"] = "Kota wajib diisi";
-    if (!safeTrim(form.location?.area))
-      newErrors["location.area"] = "Area wajib diisi";
-    if (!form.assetType) newErrors.assetType = "Tipe Aset wajib dipilih";
-    if (!form.marketStatus)
-      newErrors.marketStatus = "Status Pasar wajib dipilih";
-    if (!form.listingStatus)
-      newErrors.listingStatus = "Status Ketersediaan wajib dipilih";
-
-    if (
-      form.startPrice &&
-      (isNaN(form.startPrice) || Number(form.startPrice) <= 0)
-    ) {
+    // Validasi field wajib umum
+    if (!safeTrim(form.name)) {
+      newErrors.name = "Nama properti wajib diisi";
+    }
+    
+    if (!form.startPrice) {
+      newErrors.startPrice = "Harga awal wajib diisi";
+    } else if (isNaN(form.startPrice) || Number(form.startPrice) <= 0) {
       newErrors.startPrice = "Harga harus berupa angka positif";
     }
+    
+    if (!safeTrim(form.developer)) {
+      newErrors.developer = "Nama developer wajib diisi";
+    }
+    
+    if (!form.assetType) {
+      newErrors.assetType = "Tipe Aset wajib dipilih";
+    }
+    
+    if (!form.marketStatus) {
+      newErrors.marketStatus = "Status Pasar wajib dipilih";
+    }
+    
+    if (!form.listingStatus) {
+      newErrors.listingStatus = "Status Ketersediaan wajib dipilih";
+    }
 
-    // Validasi description untuk rich text
+    // Validasi field spesifik berdasarkan tipe aset
+    const selectedAssetType = categories.assetTypes.find(
+      (cat) => cat._id === form.assetType
+    );
+    const assetTypeName = selectedAssetType?.name;
+
+    if (assetTypeName) {
+      // Validasi location hanya untuk Perumahan
+      if (assetTypeName === "Perumahan") {
+        if (!safeTrim(form.location?.city)) {
+          newErrors["location.city"] = "Kota wajib diisi";
+        }
+        
+        if (!safeTrim(form.location?.area)) {
+          newErrors["location.area"] = "Area wajib diisi";
+        }
+      }
+
+      // Validasi untuk Apartemen
+      if (assetTypeName === "Apartemen") {
+        if (!form.buildingSize) {
+          newErrors.buildingSize = "Luas bangunan wajib diisi";
+        } else if (isNaN(form.buildingSize) || Number(form.buildingSize) <= 0) {
+          newErrors.buildingSize = "Luas bangunan harus berupa angka positif";
+        }
+        
+        if (!form.unitFloor) {
+          newErrors.unitFloor = "Lantai unit wajib diisi";
+        }
+        
+        if (!form.bedrooms) {
+          newErrors.bedrooms = "Jumlah kamar tidur wajib dipilih";
+        }
+        
+        if (!form.bathrooms) {
+          newErrors.bathrooms = "Jumlah kamar mandi wajib dipilih";
+        }
+        
+        if (!form.furnishing) {
+          newErrors.furnishing = "Kondisi furnishing wajib dipilih";
+        }
+      }
+      
+      // Validasi untuk Kavling/Tanah
+      if (assetTypeName === "Kavling" || assetTypeName === "Tanah") {
+        if (!form.landSize) {
+          newErrors.landSize = "Luas tanah wajib diisi";
+        } else if (isNaN(form.landSize) || Number(form.landSize) <= 0) {
+          newErrors.landSize = "Luas tanah harus berupa angka positif";
+        }
+        
+        if (!form.certificateStatus) {
+          newErrors.certificateStatus = "Status sertifikat wajib dipilih";
+        }
+      }
+      
+      // Validasi untuk Ruko
+      if (assetTypeName === "Ruko") {
+        if (!form.totalUnits) {
+          newErrors.totalUnits = "Jumlah unit ruko wajib diisi";
+        } else if (isNaN(form.totalUnits) || Number(form.totalUnits) <= 0) {
+          newErrors.totalUnits = "Jumlah unit harus berupa angka positif";
+        }
+        
+        if (!form.yearBuilt) {
+          newErrors.yearBuilt = "Tahun dibangun wajib diisi";
+        } else if (isNaN(form.yearBuilt) || Number(form.yearBuilt) < 1900 || Number(form.yearBuilt) > new Date().getFullYear()) {
+          newErrors.yearBuilt = "Tahun dibangun tidak valid";
+        }
+        
+        if (!form.buildingCondition) {
+          newErrors.buildingCondition = "Kondisi bangunan wajib dipilih";
+        }
+        
+        if (!form.certificateStatus) {
+          newErrors.certificateStatus = "Status sertifikat wajib dipilih";
+        }
+        
+        if (!form.businessSuitability) {
+          newErrors.businessSuitability = "Jenis usaha yang cocok wajib dipilih";
+        }
+      }
+      
+      // Validasi untuk Perumahan
+      if (assetTypeName === "Perumahan") {
+        // Tambahkan validasi spesifik Perumahan di sini
+        // Mari saya lihat PerumahanForm dulu untuk tahu field apa saja
+      }
+    }
+
+    // Validasi description untuk markdown content
     const textContent = getTextLength(form.description);
-    const safeTextContent = safeTrim(textContent);
-    if (safeTextContent.length > 0 && safeTextContent.length < 50) {
+    if (textContent > 0 && textContent < 50) {
       newErrors.description = "Deskripsi minimal 50 karakter jika diisi";
     }
-    if (textContent.length > 1000) {
+    if (textContent > 1000) {
       newErrors.description = "Deskripsi maksimal 1000 karakter";
     }
 
     setErrors(newErrors);
+    
     return Object.keys(newErrors).length === 0;
-  }, [form]);
+  }, [form, categories.assetTypes]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -230,7 +329,7 @@ export default function PropertyFormPage({ propertyId = null }) {
   const handleDescriptionChange = (content) => {
     setForm((prev) => ({ ...prev, description: content }));
 
-    // Clear error jika ada
+    // Clear error jika ada dan re-validate
     if (errors.description) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -238,9 +337,26 @@ export default function PropertyFormPage({ propertyId = null }) {
         return newErrors;
       });
     }
+
+    // Validate immediately untuk real-time feedback
+    const textLength = getTextLength(content);
+    if (content && textLength > 0 && textLength < 50) {
+      setErrors((prev) => ({
+        ...prev,
+        description: "Deskripsi minimal 50 karakter jika diisi"
+      }));
+    } else if (textLength > 1000) {
+      setErrors((prev) => ({
+        ...prev,
+        description: "Deskripsi maksimal 1000 karakter"
+      }));
+    }
   };
 
   const handleImageUpload = (e) => {
+    // Clear gallery error when user starts uploading
+    if (galleryError) setGalleryError("");
+    
     const selectedAssetType = categories.assetTypes.find(
       (cat) => cat._id === form.assetType
     );
@@ -316,12 +432,61 @@ export default function PropertyFormPage({ propertyId = null }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) {
-      notify.error("Mohon periksa kembali form Anda");
+    
+    // Reset gallery error
+    setGalleryError("");
+    
+    // Validasi form dan dapatkan error details
+    const isValid = validateForm();
+    if (!isValid) {
+      // Kumpulkan semua error messages
+      const errorMessages = Object.entries(errors).map(([field, message]) => {
+        const fieldNames = {
+          'name': 'Nama Properti',
+          'startPrice': 'Harga Awal',
+          'developer': 'Developer',
+          'location.city': 'Kota',
+          'location.area': 'Area',
+          'assetType': 'Tipe Aset',
+          'marketStatus': 'Status Pasar',
+          'listingStatus': 'Status Ketersediaan',
+          'description': 'Deskripsi',
+          // Field Apartemen
+          'buildingSize': 'Luas Bangunan',
+          'unitFloor': 'Lantai Unit',
+          'bedrooms': 'Jumlah Kamar Tidur',
+          'bathrooms': 'Jumlah Kamar Mandi',
+          'furnishing': 'Kondisi Furnishing',
+          // Field Ruko
+          'totalUnits': 'Jumlah Unit Ruko',
+          'yearBuilt': 'Tahun Dibangun',
+          'buildingCondition': 'Kondisi Bangunan',
+          'businessSuitability': 'Jenis Usaha yang Cocok',
+          // Field Kavling/Tanah
+          'landSize': 'Luas Tanah',
+          'certificateStatus': 'Status Sertifikat'
+        };
+        return `• ${fieldNames[field] || field}: ${message}`;
+      });
+      
+      // Tampilkan error yang lebih spesifik
+      const errorText = `Mohon lengkapi field berikut:\n${errorMessages.join('\n')}`;
+      notify.error(errorText);
+      
+      // Scroll ke field pertama yang error
+      scrollToFirstError();
       return;
     }
+    
+    // Validasi galeri terpisah dengan feedback visual
     if (form.gallery.length === 0) {
+      setGalleryError("Minimal satu gambar harus diupload");
       notify.warning("Mohon upload minimal satu gambar.");
+      // Scroll ke bagian galeri
+      const gallerySection = document.querySelector('fieldset:has(legend)');
+      if (gallerySection) {
+        gallerySection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return;
     }
 
@@ -418,6 +583,54 @@ export default function PropertyFormPage({ propertyId = null }) {
     return () => clearTimeout(autoSaveTimer);
   }, [form, hasMultipleClusters, isEdit, propertyId, validateForm]); // Dependencies for auto-save
 
+  // Function to scroll to first error field
+  const scrollToFirstError = () => {
+    const firstErrorField = Object.keys(errors)[0];
+    if (firstErrorField) {
+      // Mapping field names to actual input selectors
+      const fieldSelectors = {
+        'name': 'input[name="name"]',
+        'startPrice': 'input[name="startPrice"]',
+        'developer': 'input[name="developer"]',
+        'location.city': 'input[name="location.city"]',
+        'location.area': 'input[name="location.area"]',
+        'assetType': 'select[name="assetType"]',
+        'marketStatus': 'select[name="marketStatus"]',
+        'listingStatus': 'select[name="listingStatus"]',
+        'description': '.w-md-editor',
+        // Field Apartemen
+        'buildingSize': 'input[name="buildingSize"]',
+        'unitFloor': 'input[name="unitFloor"]',
+        'bedrooms': 'select[name="bedrooms"]',
+        'bathrooms': 'select[name="bathrooms"]',
+        'furnishing': 'select[name="furnishing"]',
+        // Field Ruko
+        'totalUnits': 'input[name="totalUnits"]',
+        'yearBuilt': 'input[name="yearBuilt"]',
+        'buildingCondition': 'select[name="buildingCondition"]',
+        'businessSuitability': 'select[name="businessSuitability"]',
+        // Field Kavling/Tanah
+        'landSize': 'input[name="landSize"]',
+        'certificateStatus': 'select[name="certificateStatus"]'
+      };
+      
+      const selector = fieldSelectors[firstErrorField];
+      if (selector) {
+        const element = document.querySelector(selector);
+        if (element) {
+          element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+          // Focus the element if it's an input
+          if (element.tagName === 'INPUT' || element.tagName === 'SELECT') {
+            setTimeout(() => element.focus(), 500);
+          }
+        }
+      }
+    }
+  };
+
   if (isLoading) {
     return <FormSkeleton />;
   }
@@ -462,6 +675,58 @@ export default function PropertyFormPage({ propertyId = null }) {
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded-lg shadow-sm space-y-6"
       >
+        {/* Error Summary */}
+        {Object.keys(errors).length > 0 && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <FaInfoCircle className="h-5 w-5 text-red-400" />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">
+                  Mohon perbaiki {Object.keys(errors).length} kesalahan berikut:
+                </h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <ul className="list-disc pl-5 space-y-1">
+                    {Object.entries(errors).map(([field, message]) => {
+                      const fieldNames = {
+                        'name': 'Nama Properti',
+                        'startPrice': 'Harga Awal',
+                        'developer': 'Developer',
+                        'location.city': 'Kota',
+                        'location.area': 'Area',
+                        'assetType': 'Tipe Aset',
+                        'marketStatus': 'Status Pasar',
+                        'listingStatus': 'Status Ketersediaan',
+                        'description': 'Deskripsi',
+                        // Field Apartemen
+                        'buildingSize': 'Luas Bangunan',
+                        'unitFloor': 'Lantai Unit',
+                        'bedrooms': 'Jumlah Kamar Tidur',
+                        'bathrooms': 'Jumlah Kamar Mandi',
+                        'furnishing': 'Kondisi Furnishing',
+                        // Field Ruko
+                        'totalUnits': 'Jumlah Unit Ruko',
+                        'yearBuilt': 'Tahun Dibangun',
+                        'buildingCondition': 'Kondisi Bangunan',
+                        'businessSuitability': 'Jenis Usaha yang Cocok',
+                        // Field Kavling/Tanah
+                        'landSize': 'Luas Tanah',
+                        'certificateStatus': 'Status Sertifikat'
+                      };
+                      return (
+                        <li key={field}>
+                          <strong>{fieldNames[field] || field}:</strong> {message}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="md:col-span-2">
             <label className="block font-medium mb-1">
@@ -700,6 +965,8 @@ export default function PropertyFormPage({ propertyId = null }) {
                   !!(form.name && form.developer && form.location?.area)
                 }
                 templateData={getTemplateData()}
+                showTips={true}
+                showPreview={true}
               />
             </div>
           </fieldset>
@@ -707,9 +974,13 @@ export default function PropertyFormPage({ propertyId = null }) {
 
         {/* Galeri Gambar */}
         {selectedAssetTypeName && (
-          <fieldset className="border p-6 rounded-md shadow-sm">
-            <legend className="text-lg font-semibold px-2">
+          <fieldset className={`border p-6 rounded-md shadow-sm ${galleryError ? 'border-red-400 bg-red-50' : ''}`}>
+            <legend className="text-lg font-semibold px-2 flex items-center">
               Galeri Gambar
+              <span className="text-red-500 ml-1">*</span>
+              {galleryError && (
+                <span className="ml-2 text-sm text-red-500">({galleryError})</span>
+              )}
             </legend>
 
             {uploadProgress > 0 && (
