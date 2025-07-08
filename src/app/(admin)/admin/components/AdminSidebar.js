@@ -13,6 +13,7 @@ import {
   FaUsersCog,
   FaChartBar,
   FaCog,
+  FaGlobe,
 } from "react-icons/fa";
 import { useState } from "react";
 
@@ -54,6 +55,11 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
         { name: "Status Pasar", path: "/admin/manage-categories/market-status" },
         { name: "Status Listing", path: "/admin/manage-categories/listing-status" },
       ],
+    },
+    {
+      name: "Explore Cities",
+      path: "/admin/region-city-images",
+      icon: <FaGlobe />,
     },
     {
       name: "Manajemen Admin",

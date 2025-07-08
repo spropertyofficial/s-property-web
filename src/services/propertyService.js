@@ -36,11 +36,6 @@ export async function getAllProperties() {
   return Array.from(combinedDataMap.values());
 }
 
-/**
- * Mengambil SATU properti berdasarkan ID.
- * Menggunakan fetch karena ini bisa dipanggil dari KLIEN.
- * (Kode ini sudah benar dari perbaikan kita sebelumnya, tidak perlu diubah)
- */
 export async function getPropertyById(id) {
   try {
     const res = await fetch(
