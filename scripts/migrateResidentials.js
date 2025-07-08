@@ -306,11 +306,11 @@ async function migrateProperties() {
         gallery = await processPropertyGallery(propertyData);
       } else {
         // Fallback to original format if Cloudinary not configured
-        gallery = propertyData.gallery.map(img => ({
+        gallery = propertyData.gallery.map((img, index) => ({
           src: img.src,
           alt: img.alt,
           type: 'property',
-          publicId: null,
+          publicId: `legacy/${propertyData.id}/${index + 1}`, // Generate legacy publicId
           isLocal: true
         }));
       }
