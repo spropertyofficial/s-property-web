@@ -19,7 +19,9 @@ export async function getPropertiesData(filter = {}) {
     .populate("createdBy", "name")
     .populate("updatedBy", "name")
     .lean();
-  return properties;
+  
+  // Convert to plain objects to avoid ObjectId serialization issues
+  return JSON.parse(JSON.stringify(properties));
 }
 
 // Fungsi GET sekarang bisa membaca query parameter dari URL
