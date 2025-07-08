@@ -1,14 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import dynamic from "next/dynamic";
 import { FaInfoCircle, FaBold, FaEye, FaEdit, FaColumns } from "react-icons/fa";
-
-// Dynamic import untuk MD Editor
-const MDEditor = dynamic(() => import("@uiw/react-md-editor"), {
-  ssr: false,
-  loading: () => <div className="h-40 bg-gray-100 animate-pulse rounded"></div>,
-});
+import SafeRichTextEditor from "./SafeRichTextEditor";
 
 export default function RichTextEditor({
   value = "",
@@ -31,12 +25,14 @@ export default function RichTextEditor({
 
   // Function to count characters in markdown content
   const getTextLength = (markdownContent) => {
-    if (!markdownContent) return 0;
+    if (!markdownContent || typeof markdownContent !== 'string') return 0;
     // Remove markdown syntax untuk count karakter actual
-    return markdownContent
+    const cleanText = markdownContent
       .replace(/[#*_`\[\]()]/g, "") // Remove markdown syntax
-      .replace(/\n/g, " ") // Replace newlines
-      .trim().length;
+      .replace(/\n/g, " ") // Replace newlines with spaces
+      .trim();
+    
+    return cleanText.length;
   };
 
   // Update character count when value changes
@@ -45,9 +41,19 @@ export default function RichTextEditor({
   }, [value]);
 
   const handleContentChange = (content) => {
-    const textLength = getTextLength(content || "");
-    setCharCount(textLength);
-    onChange(content || "");
+    try {
+      const textLength = getTextLength(content || "");
+      setCharCount(textLength);
+      if (onChange) {
+        onChange(content || "");
+      }
+    } catch (error) {
+      console.warn("Error in handleContentChange:", error);
+      // Fallback: tetap update content meskipun ada error
+      if (onChange) {
+        onChange(content || "");
+      }
+    }
   };
 
   // Generate markdown template
@@ -120,19 +126,17 @@ ${
     if (charCount < minLength) {
       return {
         type: "warning",
-        message: `💡 Tambahkan minimal ${
-          minLength - charCount
-        } karakter lagi untuk deskripsi yang lebih informatif`,
+        message: `💡 Tambahkan ${minLength - charCount} karakter lagi untuk mencapai minimal ${minLength} karakter`,
       };
     } else if (charCount >= minLength && charCount < 200) {
       return {
         type: "success",
-        message: "✅ Deskripsi sudah cukup baik",
+        message: `✅ Deskripsi sudah cukup baik (${charCount} karakter)`,
       };
     } else if (charCount >= 200) {
       return {
         type: "success",
-        message: "✅ Deskripsi sangat detail dan informatif",
+        message: `✅ Deskripsi sangat detail dan informatif (${charCount} karakter)`,
       };
     }
   };
@@ -218,15 +222,12 @@ ${
             : "border-gray-300 hover:border-gray-400 focus-within:border-blue-500"
         }`}
       >
-        <MDEditor
+        <SafeRichTextEditor
           value={value}
           onChange={handleContentChange}
-          height={height}
-          preview={previewMode}
-          hideToolbar={previewMode === "preview"}
-          visibleDragBar={false}
-          data-color-mode="light"
           placeholder={placeholder}
+          height={height}
+          className=""
         />
       </div>
 

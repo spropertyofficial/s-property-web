@@ -6,6 +6,9 @@ import { verifyAdmin } from "@/lib/auth";
 import CategoryAssetType from "@/lib/models/CategoryAssetType";
 import CategoryMarketStatus from "@/lib/models/CategoryMarketStatus";
 import CategoryListingStatus from "@/lib/models/CategoryListingStatus";
+import Cluster from "@/lib/models/Cluster";
+import UnitType from "@/lib/models/UnitType";
+import mongoose from "mongoose";
 
 const slugify = (text) => {
   if (!text) return "";
@@ -22,7 +25,15 @@ const slugify = (text) => {
 export async function GET(req, { params }) {
   try {
     await connectDB();
-    const { id } = params;
+    const { id } = await params;
+
+    // Validasi ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { success: false, error: "ID properti tidak valid" },
+        { status: 400 }
+      );
+    }
 
     const property = await Property.findById(id)
       .populate("assetType", "name")
@@ -48,6 +59,7 @@ export async function GET(req, { params }) {
 
     return NextResponse.json({ success: true, property });
   } catch (error) {
+    console.error("Error in GET /api/properties/[id]:", error);
     return NextResponse.json(
       { success: false, error: "Gagal mengambil data properti" },
       { status: 500 }
