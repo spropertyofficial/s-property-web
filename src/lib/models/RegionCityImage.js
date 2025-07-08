@@ -12,11 +12,6 @@ const RegionCityImageSchema = new mongoose.Schema(
       required: true, 
       enum: ["region", "city"] 
     },
-    parentRegion: { 
-      type: String, 
-      required: function() { return this.type === "city"; },
-      index: true
-    },
     slug: { 
       type: String, 
       required: true,
@@ -30,10 +25,6 @@ const RegionCityImageSchema = new mongoose.Schema(
     isActive: { 
       type: Boolean, 
       default: true 
-    },
-    priority: { 
-      type: Number, 
-      default: 0 
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -50,15 +41,14 @@ const RegionCityImageSchema = new mongoose.Schema(
     timestamps: true,
     indexes: [
       { type: 1, isActive: 1 },
-      { parentRegion: 1, type: 1 },
-      { slug: 1 }
+      { slug: 1 },
+      { name: 1, type: 1 }
     ]
   }
 );
 
 // Index untuk query yang sering digunakan
-RegionCityImageSchema.index({ type: 1, isActive: 1, priority: -1 });
-RegionCityImageSchema.index({ parentRegion: 1, type: 1, isActive: 1 });
+RegionCityImageSchema.index({ type: 1, isActive: 1 });
 
 export default mongoose.models.RegionCityImage ||
   mongoose.model("RegionCityImage", RegionCityImageSchema);

@@ -22,7 +22,7 @@ export async function GET(req) {
     const images = await RegionCityImage.find(query)
       .populate("createdBy", "name")
       .populate("updatedBy", "name")
-      .sort({ type: 1, priority: -1, name: 1 })
+      .sort({ type: 1, name: 1 })
       .lean();
 
     return NextResponse.json({ 
@@ -50,7 +50,7 @@ export async function POST(req) {
     await connectDB();
     
     const body = await req.json();
-    const { name, type, parentRegion, image, priority = 0, isActive = true } = body;
+    const { name, type, image, isActive = true } = body;
 
     // Validasi input
     if (!name || !type || !image) {
@@ -60,21 +60,14 @@ export async function POST(req) {
       );
     }
 
-    if (type === "city" && !parentRegion) {
-      return NextResponse.json(
-        { success: false, error: "Parent region harus diisi untuk city" },
-        { status: 400 }
-      );
-    }
-
     // Generate slug
     const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^\w\-]+/g, "");
 
-    // Cek apakah slug sudah ada
-    const existingSlug = await RegionCityImage.findOne({ slug });
-    if (existingSlug) {
+    // Cek apakah kombinasi name+type sudah ada
+    const existing = await RegionCityImage.findOne({ name, type });
+    if (existing) {
       return NextResponse.json(
-        { success: false, error: "Nama sudah digunakan" },
+        { success: false, error: `${type === "region" ? "Region" : "City"} "${name}" sudah ada` },
         { status: 400 }
       );
     }
@@ -82,10 +75,8 @@ export async function POST(req) {
     const newImage = new RegionCityImage({
       name,
       type,
-      parentRegion: type === "city" ? parentRegion : undefined,
       slug,
       image,
-      priority,
       isActive,
       createdBy: admin._id,
       updatedBy: admin._id,
@@ -99,7 +90,7 @@ export async function POST(req) {
 
     return NextResponse.json({
       success: true,
-      message: `${type === "region" ? "Region" : "City"} berhasil ditambahkan`,
+      message: `Gambar ${type === "region" ? "region" : "city"} "${name}" berhasil ditambahkan`,
       image: populatedImage,
     });
   } catch (error) {
