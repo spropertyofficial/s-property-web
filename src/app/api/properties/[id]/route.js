@@ -22,7 +22,7 @@ const slugify = (text) => {
 export async function GET(req, { params }) {
   try {
     await connectDB();
-    const { id } = await params;
+    const { id } = params;
 
     const property = await Property.findById(id)
       .populate("assetType", "name")

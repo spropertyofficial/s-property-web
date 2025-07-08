@@ -35,6 +35,7 @@ export default async function PropertyDetailPageAdmin({ params }) {
     ) || plainProperty.clusters[0]; // Fallback ke cluster pertama jika tidak ada yang bernama "Cluster Default"
   }
 
+
   return (
     <div className="p-6">
       {/* Bagian Header Detail Properti */}
@@ -51,8 +52,6 @@ export default async function PropertyDetailPageAdmin({ params }) {
         {/* Anda bisa menambahkan lebih banyak detail properti di sini */}
       </div>
 
-      {/* Tampilkan ClusterManager untuk Perumahan dengan multiple clusters */}
-      {/* atau UnitTypeManager untuk Apartemen (single cluster) */}
       {isPerumahan && (
         <ClusterManager
           propertyId={plainProperty.id}
@@ -75,7 +74,6 @@ export default async function PropertyDetailPageAdmin({ params }) {
           />
         </div>
       )}
-
       {/* Anda bisa menambahkan komponen lain di sini untuk tipe properti yang berbeda */}
       {/* Contoh:
         {plainProperty.assetType?.name === 'Tanah' && <InformasiZonasi data={plainProperty.zoningInfo} />}

@@ -52,6 +52,7 @@ export default function PropertyListPage({
   const notify = useNotification();
 
   async function fetchData() {
+
     setLoading(true);
     try {
       const url = assetType

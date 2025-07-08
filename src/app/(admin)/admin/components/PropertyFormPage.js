@@ -55,6 +55,7 @@ export default function PropertyFormPage({ propertyId = null }) {
   const [hasMultipleClusters, setHasMultipleClusters] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState(""); // "", "saving", "saved", "error"
 
+
   const [categories, setCategories] = useState({
     assetTypes: [],
     marketStatuses: [],
@@ -331,6 +332,7 @@ export default function PropertyFormPage({ propertyId = null }) {
       setTimeout(() => {
         router.back();
       }, 1500);
+
     } catch (err) {
       notify.error(err.message || "Terjadi kesalahan saat menyimpan data");
     } finally {
@@ -625,8 +627,7 @@ export default function PropertyFormPage({ propertyId = null }) {
                   </p>
                 )}
               </div>
-              {/* Checkbox "Banyak Cluster" hanya muncul untuk Perumahan */}
-              {/* Apartemen otomatis menggunakan single cluster tersembunyi */}
+
               {categories.assetTypes.find((cat) => cat._id === form.assetType)
                 ?.name === "Perumahan" && (
                 <div className="col-span-1 md:col-span-3">
