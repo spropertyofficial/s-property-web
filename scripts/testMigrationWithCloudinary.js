@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Script untuk migrasi data residentials dari file statis ke database
- * Usage: node scripts/migrateResidentials.js
+ * Script untuk test migrasi 1 properti dengan upload Cloudinary
  */
 
 import path from 'path';
@@ -35,24 +34,16 @@ const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const CLOUDINARY_API_KEY = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
 const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
 
-/**
- * Generate Cloudinary signature for upload
- */
 function generateCloudinarySignature(params, apiSecret) {
-  // Sort parameters alphabetically
   const sortedParams = Object.keys(params)
     .sort()
     .map(key => `${key}=${params[key]}`)
     .join('&');
   
-  // Create signature
   const stringToSign = sortedParams + apiSecret;
   return crypto.createHash('sha1').update(stringToSign).digest('hex');
 }
 
-/**
- * Upload image to Cloudinary
- */
 async function uploadImageToCloudinary(imagePath, folder, publicId) {
   try {
     console.log(`     🔄 Preparing upload: ${path.basename(imagePath)}`);
@@ -104,16 +95,17 @@ async function uploadImageToCloudinary(imagePath, folder, publicId) {
   }
 }
 
-/**
- * Process and upload property gallery images
- */
 async function processPropertyGallery(propertyData) {
   const processedGallery = [];
   const publicPath = path.join(__dirname, '..', 'public');
   
   console.log(`   📸 Processing ${propertyData.gallery.length} images...`);
   
-  for (const [index, img] of propertyData.gallery.entries()) {
+  // Limit to first 3 images for testing
+  const imagesToProcess = propertyData.gallery.slice(0, 3);
+  console.log(`   🧪 Testing with first ${imagesToProcess.length} images only`);
+  
+  for (const [index, img] of imagesToProcess.entries()) {
     try {
       const imagePath = path.join(publicPath, img.src);
       
@@ -126,7 +118,7 @@ async function processPropertyGallery(propertyData) {
           src: img.src,
           alt: img.alt,
           type: 'property',
-          publicId: null, // No Cloudinary publicId
+          publicId: `legacy/${propertyData.id}/${index + 1}`,
           isLocal: true
         });
         continue;
@@ -136,7 +128,7 @@ async function processPropertyGallery(propertyData) {
       const propertySlug = propertyData.id;
       const folder = `s-property/perumahan/${propertySlug}`;
       const filename = path.basename(img.src, path.extname(img.src));
-      const publicId = `${filename}-${index + 1}`; // Remove folder from publicId to avoid duplication
+      const publicId = `${filename}-${index + 1}`;
       
       console.log(`     🔄 Uploading: ${img.src}`);
       
@@ -160,7 +152,7 @@ async function processPropertyGallery(propertyData) {
         src: img.src,
         alt: img.alt,
         type: 'property',
-        publicId: null,
+        publicId: `legacy/${propertyData.id}/${index + 1}`,
         isLocal: true
       });
     }
@@ -230,151 +222,88 @@ async function getOrCreateAdmin() {
     admin = await Admin.create({
       name: 'System Migration',
       email: 'admin@sproperty.com',
-      password: 'temporary', // This should be hashed in real scenario
-      role: 'superadmin'  // Changed from 'admin' to 'superadmin'
+      password: 'temporary',
+      role: 'superadmin'
     });
     console.log('✅ Created migration admin user');
   }
   return admin;
 }
 
-async function migrateClusters(propertyData, propertyId) {
-  const clusters = [];
-  
-  if (propertyData.clusters && propertyData.clusters.length > 0) {
-    for (const clusterName of propertyData.clusters) {
-      // Handle different cluster formats
-      let clustersList = [];
-      
-      if (typeof clusterName === 'string') {
-        clustersList = [clusterName];
-      } else if (typeof clusterName === 'object') {
-        // Handle cases like { premium_cluster: [...], deluxe_cluster: [...] }
-        Object.values(clusterName).forEach(subClusters => {
-          if (Array.isArray(subClusters)) {
-            clustersList.push(...subClusters);
-          }
-        });
-      }
-      
-      for (const name of clustersList) {
-        if (typeof name === 'string' && name.trim()) {
-          let cluster = await Cluster.findOne({ 
-            name: name,
-            property: propertyId 
-          });
-          
-          if (!cluster) {
-            cluster = await Cluster.create({
-              name: name,
-              slug: name.toLowerCase().replace(/\s+/g, '-'),
-              property: propertyId,
-              description: `Cluster ${name} di ${propertyData.name}`
-            });
-            console.log(`   ✅ Created cluster: ${name}`);
-          }
-          
-          clusters.push(cluster._id);
-        }
-      }
-    }
-  }
-  
-  return clusters;
-}
-
-async function migrateProperties() {
-  console.log('\n📦 Starting properties migration...');
+async function testMigrateOneProperty() {
+  console.log('\n📦 Starting TEST migration with Cloudinary upload...');
   
   const { assetType, marketStatus, listingStatus } = await ensureCategories();
   const admin = await getOrCreateAdmin();
   
-  let successCount = 0;
-  let errorCount = 0;
+  // Test with Terravia (first property)
+  const propertyData = residentialsData[0];
   
-  for (const propertyData of residentialsData) {
-    try {
-      console.log(`\n🏠 Migrating: ${propertyData.name}`);
-      
-      // Check if property already exists
-      const existingProperty = await Property.findOne({ id: propertyData.id });
-      if (existingProperty) {
-        console.log(`   ⚠️  Property ${propertyData.name} already exists, skipping...`);
-        continue;
-      }
-      
-      // Check Cloudinary configuration
-      if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
-        console.warn('   ⚠️  Cloudinary not configured, using local image URLs');
-      }
-      
-      // Process gallery images (upload to Cloudinary if configured)
-      let gallery = [];
-      if (CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET) {
-        gallery = await processPropertyGallery(propertyData);
-      } else {
-        // Fallback to original format if Cloudinary not configured
-        gallery = propertyData.gallery.map((img, index) => ({
-          src: img.src,
-          alt: img.alt,
-          type: 'property',
-          publicId: `legacy/${propertyData.id}/${index + 1}`, // Generate legacy publicId
-          isLocal: true
-        }));
-      }
-      
-      // Create property first (without clusters)
-      const property = await Property.create({
-        id: propertyData.id,
-        name: propertyData.name,
-        description: propertyData.description || `${propertyData.name} - Perumahan di ${propertyData.location.area}`,
-        startPrice: propertyData.startPrice,
-        developer: propertyData.developer,
-        location: {
-          region: propertyData.location.region,
-          city: propertyData.location.city,
-          area: propertyData.location.area,
-          address: propertyData.location.address,
-          mapsLink: propertyData.location.mapsLink
-        },
-        gallery: gallery,
-        assetType: assetType._id,
-        marketStatus: marketStatus._id,
-        listingStatus: listingStatus._id,
-        clusters: [], // Will be updated after cluster creation
-        createdBy: admin._id,
-        updatedBy: admin._id
-      });
-      
-      // Migrate clusters
-      const clusterIds = await migrateClusters(propertyData, property._id);
-      
-      // Update property with cluster references
-      if (clusterIds.length > 0) {
-        await Property.findByIdAndUpdate(property._id, {
-          clusters: clusterIds
-        });
-        console.log(`   ✅ Added ${clusterIds.length} clusters`);
-      }
-      
-      console.log(`   ✅ Successfully migrated: ${propertyData.name}`);
-      successCount++;
-      
-    } catch (error) {
-      console.error(`   ❌ Error migrating ${propertyData.name}:`, error.message);
-      errorCount++;
+  try {
+    console.log(`\n🏠 TEST Migrating: ${propertyData.name}`);
+    
+    // Check if property already exists
+    const existingProperty = await Property.findOne({ id: propertyData.id });
+    if (existingProperty) {
+      console.log(`   ⚠️  Property ${propertyData.name} already exists, deleting first...`);
+      await Property.findByIdAndDelete(existingProperty._id);
     }
+    
+    // Process gallery images (upload to Cloudinary)
+    let gallery = [];
+    if (CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET) {
+      gallery = await processPropertyGallery(propertyData);
+    } else {
+      console.warn('   ⚠️  Cloudinary not configured, using local image URLs');
+      gallery = propertyData.gallery.map((img, index) => ({
+        src: img.src,
+        alt: img.alt,
+        type: 'property',
+        publicId: `legacy/${propertyData.id}/${index + 1}`,
+        isLocal: true
+      }));
+    }
+    
+    // Create property
+    const property = await Property.create({
+      id: propertyData.id,
+      name: propertyData.name,
+      description: propertyData.description || `${propertyData.name} - Perumahan di ${propertyData.location.area}`,
+      startPrice: propertyData.startPrice,
+      developer: propertyData.developer,
+      location: {
+        region: propertyData.location.region,
+        city: propertyData.location.city,
+        area: propertyData.location.area,
+        address: propertyData.location.address,
+        mapsLink: propertyData.location.mapsLink
+      },
+      gallery: gallery,
+      assetType: assetType._id,
+      marketStatus: marketStatus._id,
+      listingStatus: listingStatus._id,
+      clusters: [],
+      createdBy: admin._id,
+      updatedBy: admin._id
+    });
+    
+    console.log(`   ✅ Successfully migrated: ${propertyData.name} with ${gallery.length} images`);
+    
+    // Show uploaded images
+    console.log('\n📷 Uploaded Images:');
+    gallery.forEach((img, index) => {
+      if (!img.isLocal) {
+        console.log(`   ${index + 1}. ${img.src}`);
+      }
+    });
+    
+  } catch (error) {
+    console.error(`   ❌ Error migrating ${propertyData.name}:`, error.message);
   }
-  
-  console.log(`\n📊 Migration Summary:`);
-  console.log(`✅ Success: ${successCount} properties`);
-  console.log(`❌ Errors: ${errorCount} properties`);
-  console.log(`📝 Total: ${residentialsData.length} properties in source data`);
 }
 
 async function main() {
-  console.log('🚀 Starting Residential Data Migration...');
-  console.log(`📂 Found ${residentialsData.length} properties to migrate\n`);
+  console.log('🚀 Starting TEST Residential Data Migration with Cloudinary Upload...');
   console.log('🔧 Environment check:');
   console.log(`  - MongoDB URI: ${process.env.MONGODB_URI ? '✅' : '❌'}`);
   console.log(`  - Cloudinary Cloud Name: ${CLOUDINARY_CLOUD_NAME ? '✅' : '❌'}`);
@@ -386,11 +315,11 @@ async function main() {
     await connectDB();
     console.log('✅ Database connected successfully\n');
     
-    console.log('🏗️  Starting migration process...');
-    await migrateProperties();
+    console.log('🏗️  Starting TEST migration process...');
+    await testMigrateOneProperty();
     
-    console.log('\n🎉 Migration completed successfully!');
-    console.log('🔍 You can verify the data in your admin panel or database');
+    console.log('\n🎉 TEST Migration completed successfully!');
+    console.log('🔍 Check Cloudinary dashboard to see uploaded images');
     
   } catch (error) {
     console.error('\n💥 Migration failed:', error);
@@ -402,9 +331,4 @@ async function main() {
   }
 }
 
-// Run migration
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
-}
-
-export { migrateProperties, ensureCategories };
+main();
