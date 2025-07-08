@@ -8,24 +8,22 @@ import {
   FaSignOutAlt,
   FaBars,
   FaTimes,
-  FaChevronDown, // Ikon untuk submenu
-  FaTags, // Ikon baru untuk Kategori
-  FaUsersCog, // Ikon baru untuk Manajemen Admin
+  FaChevronDown,
+  FaTags,
+  FaUsersCog,
+  FaChartBar,
+  FaCog,
 } from "react-icons/fa";
 import { useState } from "react";
 
-export default function AdminSidebar({ handleLogout }) {
+export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
   const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  // State untuk melacak submenu mana yang sedang terbuka
   const [openSubMenus, setOpenSubMenus] = useState({});
 
-  // Fungsi untuk toggle submenu
   const toggleSubMenu = (name) => {
     setOpenSubMenus((prev) => ({ ...prev, [name]: !prev[name] }));
   };
 
-  // Struktur navigasi baru dengan dukungan submenu
   const navItems = [
     {
       name: "Dashboard",
@@ -33,11 +31,15 @@ export default function AdminSidebar({ handleLogout }) {
       icon: <FaTachometerAlt />,
     },
     {
-      // Menu baru yang bisa diciutkan
+      name: "Analytics",
+      path: "/admin/analytics",
+      icon: <FaChartBar />,
+    },
+    {
       name: "Properti",
       icon: <FaBuilding />,
       subItems: [
-        { name: "Perumahan", path: "/admin/perumahan" }, // Ganti dari /residential
+        { name: "Perumahan", path: "/admin/perumahan" },
         { name: "Ruko", path: "/admin/ruko" },
         { name: "Apartemen", path: "/admin/apartemen" },
         { name: "Tanah", path: "/admin/tanah" },
@@ -45,18 +47,12 @@ export default function AdminSidebar({ handleLogout }) {
       ],
     },
     {
-      name: "Manajemen Kategori",
+      name: "Kategori",
       icon: <FaTags />,
       subItems: [
         { name: "Tipe Aset", path: "/admin/manage-categories/asset-types" },
-        {
-          name: "Status Pasar",
-          path: "/admin/manage-categories/market-status",
-        },
-        {
-          name: "Status Ketersediaan",
-          path: "/admin/manage-categories/listing-status",
-        },
+        { name: "Status Pasar", path: "/admin/manage-categories/market-status" },
+        { name: "Status Listing", path: "/admin/manage-categories/listing-status" },
       ],
     },
     {
@@ -64,74 +60,81 @@ export default function AdminSidebar({ handleLogout }) {
       path: "/admin/manage-users",
       icon: <FaUsersCog />,
     },
+    {
+      name: "Pengaturan",
+      path: "/admin/settings",
+      icon: <FaCog />,
+    },
   ];
 
   return (
     <div
-      className={`bg-white shadow-md fixed h-full z-20 transition-all duration-300 ${
-        sidebarOpen ? "w-64" : "w-20"
+      className={`bg-white shadow-lg fixed h-full z-20 transition-all duration-300 border-r border-gray-200 ${
+        isOpen ? "w-64" : "w-16"
       }`}
     >
       <div className="flex flex-col h-full">
         {/* Sidebar Header */}
-        <div className="p-4 border-b flex items-center justify-between h-16">
-          {sidebarOpen && (
-            <h2 className="text-xl font-bold text-gray-700">S-Property</h2>
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between h-16">
+          {isOpen && (
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">SP</span>
+              </div>
+              <h2 className="text-lg font-bold text-gray-900">S-Property</h2>
+            </div>
           )}
           <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-md hover:bg-gray-100"
+            onClick={onToggle}
+            className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
           >
-            {sidebarOpen ? <FaTimes /> : <FaBars />}
+            {isOpen ? <FaTimes className="text-sm" /> : <FaBars className="text-sm" />}
           </button>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 py-4 overflow-y-auto">
-          <ul>
+          <ul className="space-y-1 px-3">
             {navItems.map((item) => {
-              const isActive = item.path && pathname.startsWith(item.path);
+              const isActive = item.path && pathname === item.path;
               const isSubMenuActive =
                 item.subItems &&
                 item.subItems.some((sub) => pathname.startsWith(sub.path));
 
               return (
-                <li key={item.name} className="px-4 mb-1">
+                <li key={item.name}>
                   {item.subItems ? (
-                    // Jika item punya submenu, buat jadi tombol collapsible
                     <div>
                       <button
                         onClick={() => toggleSubMenu(item.name)}
-                        className={`w-full flex items-center justify-between py-2.5 px-4 rounded-md transition-colors ${
+                        className={`w-full flex items-center justify-between py-3 px-3 rounded-lg transition-all ${
                           isSubMenuActive
-                            ? "bg-blue-50 text-blue-600"
-                            : "text-gray-500 hover:bg-gray-100"
+                            ? "bg-blue-50 text-blue-700 border border-blue-200"
+                            : "text-gray-700 hover:bg-gray-50"
                         }`}
                       >
                         <div className="flex items-center">
                           <span className="text-lg mr-3">{item.icon}</span>
-                          {sidebarOpen && <span>{item.name}</span>}
+                          {isOpen && <span className="font-medium">{item.name}</span>}
                         </div>
-                        {sidebarOpen && (
+                        {isOpen && (
                           <FaChevronDown
-                            className={`transition-transform duration-200 ${
+                            className={`transition-transform duration-200 text-xs ${
                               openSubMenus[item.name] ? "rotate-180" : ""
                             }`}
-                            size={12}
                           />
                         )}
                       </button>
-                      {/* Tampilkan submenu jika terbuka */}
-                      {openSubMenus[item.name] && sidebarOpen && (
-                        <ul className="mt-2 pl-8 border-l-2 border-gray-200">
+                      {openSubMenus[item.name] && isOpen && (
+                        <ul className="mt-2 ml-6 space-y-1">
                           {item.subItems.map((subItem) => (
                             <li key={subItem.path}>
                               <Link
                                 href={subItem.path}
-                                className={`block py-2 text-sm ${
+                                className={`block py-2 px-3 text-sm rounded-md transition-colors ${
                                   pathname === subItem.path
-                                    ? "text-blue-600 font-semibold"
-                                    : "text-gray-500 hover:text-gray-800"
+                                    ? "text-blue-700 bg-blue-50 font-medium"
+                                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                                 }`}
                               >
                                 {subItem.name}
@@ -142,17 +145,16 @@ export default function AdminSidebar({ handleLogout }) {
                       )}
                     </div>
                   ) : (
-                    // Jika tidak punya submenu, render sebagai Link biasa
                     <Link
                       href={item.path}
-                      className={`flex items-center py-2.5 px-4 rounded-md transition-colors ${
+                      className={`flex items-center py-3 px-3 rounded-lg transition-all ${
                         isActive
-                          ? "bg-blue-50 text-blue-600 font-bold"
-                          : "text-gray-500 hover:bg-gray-100"
+                          ? "bg-blue-50 text-blue-700 border border-blue-200 font-medium"
+                          : "text-gray-700 hover:bg-gray-50"
                       }`}
                     >
                       <span className="text-lg mr-3">{item.icon}</span>
-                      {sidebarOpen && <span>{item.name}</span>}
+                      {isOpen && <span className="font-medium">{item.name}</span>}
                     </Link>
                   )}
                 </li>
@@ -160,27 +162,26 @@ export default function AdminSidebar({ handleLogout }) {
             })}
           </ul>
         </nav>
+
         {/* Logout Button */}
-        <div className="p-4 border-t">
+        <div className="p-3 border-t border-gray-200">
           <button
-            onClick={handleLogout}
-            className="flex items-center w-full py-2 px-4 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+            onClick={onLogout}
+            className="flex items-center w-full py-3 px-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
           >
             <FaSignOutAlt className="mr-3" />
-            {sidebarOpen && <span>Logout</span>}
+            {isOpen && <span className="font-medium">Logout</span>}
           </button>
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t">
-          {sidebarOpen ? (
-            <div className="text-sm text-gray-300">
-              &copy; {new Date().getFullYear()} S-Property
+        {isOpen && (
+          <div className="p-3 border-t border-gray-200">
+            <div className="text-xs text-gray-500 text-center">
+              &copy; {new Date().getFullYear()} S-Property Admin
             </div>
-          ) : (
-            <div className="text-center text-gray-300">&copy;</div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

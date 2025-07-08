@@ -1,8 +1,9 @@
 // src/app/(admin)/admin/page.js
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import useNotification from "@/hooks/useNotification";
 import Swal from "sweetalert2";
 import QuickActions from "./components/QuickActions";
 import RecentActivity from "./components/RecentActivity";
@@ -12,6 +13,7 @@ import CalendarWidget from "./components/CalendarWidget";
 import RecentListings from "./components/RecentListings";
 import AdminFooter from "./components/AdminFooter";
 import StatsOverview from "./components/StatsOverview";
+import "./styles/dashboard.css";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -20,91 +22,92 @@ export default function AdminDashboard() {
     units: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const router = useRouter();
+  const notify = useNotification();
 
   useEffect(() => {
-    fetchStats();
-  }, []);
+    // Fetch stats only once when component mounts
+    const loadStats = async () => {
+      try {
+        // Only fetch data once, no dependencies that could cause re-renders
+        const response = await fetch("/api/properties");
+        if (response.ok) {
+          const data = await response.json();
+          setStats({
+            residentials: data.properties?.length || 0,
+            clusters: 0, 
+            units: 0, 
+          });
+        }
+      } catch (error) {
+        console.error("Error loading stats:", error);
+        // Use simple fallback without notification dependency
+        setStats({
+          residentials: 0,
+          clusters: 0,
+          units: 0,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchStats = async () => {
-    setLoading(true);
-    try {
-      // Fetch residential stats
-      const resResidentials = await fetch("/api/residential");
-      const residentialsData = await resResidentials.json();
+    loadStats();
+  }, []); // Empty dependency - runs only once
 
-      // In a real app, you would fetch clusters and units data from their respective endpoints
-      // For now, we'll use placeholder data
-
-      setStats({
-        residentials: residentialsData.residentials?.length || 0,
-        clusters: 0, // Placeholder
-        units: 0, // Placeholder
-      });
-    } catch (error) {
-      console.error("Error fetching stats:", error);
-      Swal.fire({
-        title: "Error!",
-        text: "Gagal mengambil data statistik",
-        icon: "error",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#131414",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    await fetch("/api/admin/logout", { method: "POST" });
-    router.push("/admin/login");
+  const testNotifications = () => {
+    notify.success("Ini adalah notifikasi sukses!");
+    setTimeout(() => {
+      notify.warning("Ini adalah notifikasi peringatan!");  
+    }, 1000);
+    setTimeout(() => {
+      notify.error("Ini adalah notifikasi error!");
+    }, 2000);
+    setTimeout(() => {
+      notify.info("Ini adalah notifikasi info!");
+    }, 3000);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="space-y-6">
+      {/* Stats Overview */}
+      <StatsOverview stats={stats} loading={loading} />
 
-      {/* Main Content */}
-      <div
-        className={`flex-1 transition-all duration-300
-        }`}
-      >
-        <div className="p-6">
-          {/* Header */}
-          <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-gray-500">Dashboard</h1>
-              <div className="text-sm text-gray-300">
-                Selamat datang di Panel Admin S-Property
-              </div>
-            </div>
-          </div>
+      {/* Notification Test Section */}
+      <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Test Notification System</h3>
+        <button
+          onClick={testNotifications}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Test All Notifications
+        </button>
+      </section>
 
-          {/* Stats Overview */}
-          <StatsOverview stats={stats} loading={loading} />
+      {/* Quick Actions */}
+      <section>
+        <QuickActions />
+      </section>
 
-          {/* Quick Actions */}
-          <QuickActions />
-
-          {/* Recent Activity and Analytics Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <RecentActivity loading={loading} />
-            <AnalyticsOverview loading={loading} />
-          </div>
-
-          {/* Upcoming Tasks */}
-          <UpcomingTasks loading={loading} />
-
-          {/* Calendar and Recent Listings */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <CalendarWidget loading={loading} />
-            <RecentListings loading={loading} />
-          </div>
-
-          {/* Footer */}
-          <AdminFooter />
-        </div>
+      {/* Analytics and Activity Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <RecentActivity loading={loading} />
+        <AnalyticsOverview loading={loading} />
       </div>
+
+      {/* Tasks and Calendar Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2">
+          <UpcomingTasks loading={loading} />
+        </div>
+        <CalendarWidget loading={loading} />
+      </div>
+
+      {/* Recent Listings */}
+      <RecentListings loading={loading} />
+
+      {/* Footer */}
+      <AdminFooter />
     </div>
   );
 }

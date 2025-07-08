@@ -1,16 +1,28 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import useNotification from "@/hooks/useNotification";
 import Swal from "sweetalert2";
-import { FaUpload, FaTrash, FaSpinner } from "react-icons/fa";
+import {
+  FaUpload,
+  FaTrash,
+  FaSpinner,
+  FaInfoCircle,
+  FaSave,
+} from "react-icons/fa";
 import Image from "next/image";
 import { handleImageUpload as uploadImage } from "@/utils/handleImagesUpload";
 import { generateId } from "@/utils/generateSlug";
 import { toCapitalCase } from "@/utils/toCapitalcase";
+import SpesificForms from "../properties/components/SpesificForms";
+import RichTextEditor from "./RichTextEditor";
+import FormSkeleton from "./FormSkeleton";
+import { Asset } from "next/font/google";
 
 export default function PropertyFormPage({ propertyId = null }) {
   const router = useRouter();
   const fileInputRef = useRef(null);
+  const notify = useNotification();
   const isEdit = !!propertyId;
   const initialFormState = {
     id: "",
@@ -41,6 +53,7 @@ export default function PropertyFormPage({ propertyId = null }) {
   const [isUploading, setIsUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(isEdit);
   const [hasMultipleClusters, setHasMultipleClusters] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState(""); // "", "saving", "saved", "error"
 
   const [categories, setCategories] = useState({
     assetTypes: [],
@@ -67,13 +80,15 @@ export default function PropertyFormPage({ propertyId = null }) {
           listingStatuses: listingData.listingStatus || [],
         });
       } catch (error) {
-        Swal.fire("Error", "Gagal memuat data kategori.", "error");
+        console.error("Error loading categories:", error);
+        notify.error("Gagal memuat data kategori. Silakan refresh halaman.");
       } finally {
         setLoadingCategories(false);
       }
     };
     fetchCategories();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Remove notify from dependency to prevent loop
 
   // Fetch property data if editing
   useEffect(() => {
@@ -105,18 +120,27 @@ export default function PropertyFormPage({ propertyId = null }) {
             setPreviewImages(existingImages);
           }
         } catch (error) {
-          Swal.fire("Error", error.message, "error").then(() => {
-            router.push("/admin/properties");
-          });
+          console.error("Error loading property:", error);
+          notify.error(error.message || "Gagal memuat data properti");
+          router.push("/admin/properties");
         } finally {
           setIsLoading(false);
         }
       };
       fetchProperty();
     }
-  }, [isEdit, propertyId, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEdit, propertyId]); // Remove router, notify from dependency to prevent loop
 
-  const validateForm = () => {
+  // Function to get text length from HTML (for validation)
+  const getTextLength = (htmlContent) => {
+    if (!htmlContent) return 0;
+    const div = document.createElement("div");
+    div.innerHTML = htmlContent;
+    return (div.textContent || div.innerText || "").length;
+  };
+
+  const validateForm = useCallback(() => {
     const newErrors = {};
     if (!form.name.trim()) newErrors.name = "Nama properti wajib diisi";
     if (!form.startPrice) newErrors.startPrice = "Harga awal wajib diisi";
@@ -138,9 +162,19 @@ export default function PropertyFormPage({ propertyId = null }) {
     ) {
       newErrors.startPrice = "Harga harus berupa angka positif";
     }
+
+    // Validasi description untuk rich text
+    const textContent = getTextLength(form.description);
+    if (textContent.trim().length > 0 && textContent.trim().length < 50) {
+      newErrors.description = "Deskripsi minimal 50 karakter jika diisi";
+    }
+    if (textContent.length > 1000) {
+      newErrors.description = "Deskripsi maksimal 1000 karakter";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [form]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -170,6 +204,19 @@ export default function PropertyFormPage({ propertyId = null }) {
     }
   };
 
+  const handleDescriptionChange = (content) => {
+    setForm((prev) => ({ ...prev, description: content }));
+
+    // Clear error jika ada
+    if (errors.description) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.description;
+        return newErrors;
+      });
+    }
+  };
+
   const handleImageUpload = (e) => {
     const selectedAssetType = categories.assetTypes.find(
       (cat) => cat._id === form.assetType
@@ -187,6 +234,19 @@ export default function PropertyFormPage({ propertyId = null }) {
   };
 
   const removeImage = async (index) => {
+    const confirm = await Swal.fire({
+      title: "Hapus Gambar?",
+      text: "Gambar akan dihapus permanen dari server",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (!confirm.isConfirmed) return;
+
     try {
       const imageToRemove = previewImages[index];
 
@@ -223,28 +283,22 @@ export default function PropertyFormPage({ propertyId = null }) {
         newGallery.splice(index, 1);
         return { ...prev, gallery: newGallery };
       });
+
+      notify.success("Gambar berhasil dihapus");
     } catch (error) {
-      Swal.fire({
-        title: "Error",
-        text: "Gagal menghapus gambar. " + error.message,
-        icon: "error",
-        confirmButtonText: "OK",
-      });
+      console.error("Error removing image:", error);
+      notify.error("Gagal menghapus gambar: " + error.message);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
-      Swal.fire("Validasi Gagal", "Mohon periksa kembali form Anda", "error");
+      notify.error("Mohon periksa kembali form Anda");
       return;
     }
     if (form.gallery.length === 0) {
-      Swal.fire(
-        "Gambar belum diupload",
-        "Mohon upload minimal satu gambar.",
-        "warning"
-      );
+      notify.warning("Mohon upload minimal satu gambar.");
       return;
     }
 
@@ -269,42 +323,120 @@ export default function PropertyFormPage({ propertyId = null }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal menyimpan data");
 
-      Swal.fire({
-        title: "Berhasil!",
-        text: `Properti berhasil ${isEdit ? "diperbarui" : "ditambahkan"}`,
-        icon: "success",
-        timer: 1500,
-        showConfirmButton: false,
-      }).then(() => {
+      notify.success(
+        `Properti berhasil ${isEdit ? "diperbarui" : "ditambahkan"}!`
+      );
+
+      // Delay untuk memberikan waktu user melihat notifikasi
+      setTimeout(() => {
         router.back();
-      });
+      }, 1500);
     } catch (err) {
-      Swal.fire("Error", err.message || "Terjadi kesalahan", "error");
+      notify.error(err.message || "Terjadi kesalahan saat menyimpan data");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-600">Memuat data properti...</span>
-        </div>
-      </div>
+  // Prepare template data
+  const getTemplateData = () => {
+    const selectedAssetType = categories.assetTypes.find(
+      (cat) => cat._id === form.assetType
     );
+
+    return {
+      title: form.name,
+      type: selectedAssetType?.name || "Properti",
+      location:
+        form.location.area && form.location.city
+          ? `${form.location.area}, ${form.location.city}`
+          : "",
+      developer: form.developer,
+      features: [], // Bisa diisi dengan data spesifik per tipe
+      facilities: [], // Bisa diisi dengan data spesifik per tipe
+    };
+  };
+
+  // Auto-save functionality
+  useEffect(() => {
+    if (!form.name || !isEdit) return; // Only auto-save when editing existing property
+
+    const autoSaveTimer = setTimeout(async () => {
+      if (validateForm()) {
+        setAutoSaveStatus("saving");
+        try {
+          const formattedData = {
+            ...form,
+            name: toCapitalCase(form.name),
+            hasMultipleClusters: hasMultipleClusters,
+          };
+
+          const res = await fetch(`/api/properties/${propertyId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...formattedData, autoSave: true }),
+          });
+
+          if (res.ok) {
+            setAutoSaveStatus("saved");
+            setTimeout(() => setAutoSaveStatus(""), 2000);
+          } else {
+            throw new Error("Auto-save failed");
+          }
+        } catch (error) {
+          console.error("Auto-save error:", error);
+          setAutoSaveStatus("error");
+          setTimeout(() => setAutoSaveStatus(""), 3000);
+        }
+      }
+    }, 3000); // Auto-save after 3 seconds of no changes
+
+    return () => clearTimeout(autoSaveTimer);
+  }, [form, hasMultipleClusters, isEdit, propertyId, validateForm]); // Dependencies for auto-save
+
+  if (isLoading) {
+    return <FormSkeleton />;
   }
+  const selectedAssetType = categories.assetTypes.find(
+    (cat) => cat._id === form.assetType
+  );
+  const selectedAssetTypeName = selectedAssetType ? selectedAssetType.name : "";
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold">
-        {isEdit ? "Edit Properti" : "Tambah Properti Baru"}
-      </h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">
+          {isEdit ? "Edit Properti" : "Tambah Properti Baru"}
+        </h1>
+
+        {/* Auto-save status indicator */}
+        {isEdit && (
+          <div className="flex items-center gap-2">
+            {autoSaveStatus === "saving" && (
+              <div className="flex items-center text-blue-600 text-sm">
+                <FaSpinner className="animate-spin mr-1" size={12} />
+                Menyimpan...
+              </div>
+            )}
+            {autoSaveStatus === "saved" && (
+              <div className="flex items-center text-green-600 text-sm">
+                <FaSave className="mr-1" size={12} />
+                Tersimpan otomatis
+              </div>
+            )}
+            {autoSaveStatus === "error" && (
+              <div className="flex items-center text-red-600 text-sm">
+                <FaInfoCircle className="mr-1" size={12} />
+                Gagal menyimpan otomatis
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-lg shadow-sm space-y-6 mt-6"
+        className="bg-white p-6 rounded-lg shadow-sm space-y-6"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="md:col-span-2">
@@ -493,6 +625,8 @@ export default function PropertyFormPage({ propertyId = null }) {
                   </p>
                 )}
               </div>
+              {/* Checkbox "Banyak Cluster" hanya muncul untuk Perumahan */}
+              {/* Apartemen otomatis menggunakan single cluster tersembunyi */}
               {categories.assetTypes.find((cat) => cat._id === form.assetType)
                 ?.name === "Perumahan" && (
                 <div className="col-span-1 md:col-span-3">
@@ -504,191 +638,150 @@ export default function PropertyFormPage({ propertyId = null }) {
                       className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                     <span className="text-sm text-gray-700">
-                      Banyak Cluster?
+                      Memiliki beberapa cluster?
                     </span>
                   </label>
-                </div>
-              )}
-            </div>
-          )}
-        </fieldset>
-
-        {/* Detail Lokasi */}
-        <fieldset className="border p-6 rounded-md shadow-sm">
-          <legend className="text-lg font-semibold px-2">Detail Lokasi</legend>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-            <div>
-              <label className="block font-medium mb-1">Region</label>
-              <input
-                name="location.region"
-                value={form.location.region}
-                onChange={handleChange}
-                className="input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Contoh: Jawa Barat"
-              />
-            </div>
-
-            <div>
-              <label className="block font-medium mb-1">
-                Kota <span className="text-red-500">*</span>
-              </label>
-              <input
-                name="location.city"
-                value={form.location.city}
-                onChange={handleChange}
-                className={`input w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors["location.city"] ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder="Contoh: Tangerang Selatan"
-              />
-              {errors["location.city"] && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors["location.city"]}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block font-medium mb-1">
-                Area <span className="text-red-500">*</span>
-              </label>
-              <input
-                name="location.area"
-                value={form.location.area}
-                onChange={handleChange}
-                className={`input w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors["location.area"] ? "border-red-500" : "border-gray-300"
-                }`}
-                placeholder="Contoh: BSD City"
-              />
-              {errors["location.area"] && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors["location.area"]}
-                </p>
-              )}
-            </div>
-
-            <div className="col-span-2">
-              <label className="block font-medium mb-1">Alamat Lengkap</label>
-              <input
-                name="location.address"
-                value={form.location.address}
-                onChange={handleChange}
-                className="input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Contoh: Jl. BSD Raya Utama, Pagedangan, Kec. Pagedangan"
-              />
-            </div>
-
-            <div className="col-span-2">
-              <label className="block font-medium mb-1">Link Google Maps</label>
-              <input
-                name="location.mapsLink"
-                value={form.location.mapsLink}
-                onChange={handleChange}
-                className="input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Contoh: https://maps.app.goo.gl/..."
-              />
-            </div>
-          </div>
-        </fieldset>
-
-        {/* Galeri Gambar */}
-        <fieldset className="border p-6 rounded-md shadow-sm">
-          <legend className="text-lg font-semibold px-2">Galeri Gambar</legend>
-
-          {uploadProgress > 0 && (
-            <div className="mb-4">
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div
-                  className="bg-blue-600 h-2.5 rounded-full"
-                  style={{ width: `${uploadProgress}%` }}
-                ></div>
-              </div>
-              <p className="text-sm text-gray-500 mt-1">
-                Mengupload gambar... {uploadProgress}%
-              </p>
-            </div>
-          )}
-
-          <div className="mb-4">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImageUpload}
-              multiple
-              accept="image/*"
-              className="hidden"
-            />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current.click()}
-              className="flex items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors"
-              disabled={isSubmitting || isUploading}
-            >
-              <FaUpload className="mr-2" />
-              {isUploading ? "Sedang Mengupload..." : "Pilih Gambar"}
-            </button>
-            <p className="text-xs text-gray-500 mt-1">
-              Format yang didukung: JPG, PNG, WebP. Maksimal Ukuran: 10MB.
-            </p>
-          </div>
-
-          {previewImages.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-              {previewImages.map((image, index) => (
-                <div key={index} className="relative group">
-                  <div
-                    className={`aspect-video bg-gray-100 rounded-md overflow-hidden ${
-                      image.error
-                        ? "border-2 border-red-500"
-                        : image.uploaded
-                        ? "border-2 border-green-500"
-                        : ""
-                    }`}
-                  >
-                    <Image
-                      src={image.url}
-                      alt={image.name}
-                      width={300}
-                      height={200}
-                      className="w-full h-full object-cover"
-                    />
-                    {image.uploaded && (
-                      <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                        Terupload
-                      </div>
-                    )}
-                    {image.error && (
-                      <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                        Gagal
-                      </div>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Hapus gambar"
-                    disabled={isUploading}
-                  >
-                    <FaTrash size={12} />
-                  </button>
-                  <p className="text-xs text-gray-500 truncate mt-1">
-                    {image.name}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Centang jika perumahan ini memiliki beberapa cluster/fase
                   </p>
                 </div>
-              ))}
+              )}
             </div>
           )}
-
-          {previewImages.length === 0 && (
-            <div className="text-center py-8 bg-gray-50 rounded-md border border-dashed border-gray-300">
-              <p className="text-gray-400">Belum ada gambar yang diunggah</p>
-            </div>
-          )}
-          <p className="text-xs text-gray-500 mt-1">Maksimal 10 Gambar.</p>
         </fieldset>
 
+        <SpesificForms
+          assetTypeName={selectedAssetTypeName}
+          form={form}
+          handleChange={handleChange}
+          errors={errors}
+        />
+
+        {selectedAssetTypeName && (
+          <fieldset className="border border-gray-200 p-6 rounded-lg shadow-sm bg-gray-50">
+            <legend className="text-lg font-semibold px-3 text-gray-800 bg-white/50 flex items-center">
+              Deskripsi Properti
+            </legend>
+
+            <div className="mt-4">
+              <RichTextEditor
+                value={form.description}
+                onChange={handleDescriptionChange}
+                placeholder="Deskripsikan properti secara detail dengan formatting yang menarik..."
+                maxLength={1000}
+                minLength={50}
+                label="Deskripsi Lengkap"
+                required={false}
+                error={errors.description}
+                showTemplate={
+                  !!(form.name && form.developer && form.location.area)
+                }
+                templateData={getTemplateData()}
+              />
+            </div>
+          </fieldset>
+        )}
+
+        {/* Galeri Gambar */}
+        {selectedAssetTypeName && (
+          <fieldset className="border p-6 rounded-md shadow-sm">
+            <legend className="text-lg font-semibold px-2">
+              Galeri Gambar
+            </legend>
+
+            {uploadProgress > 0 && (
+              <div className="mb-4">
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div
+                    className="bg-blue-600 h-2.5 rounded-full"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  Mengupload gambar... {uploadProgress}%
+                </p>
+              </div>
+            )}
+
+            <div className="mb-4">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                multiple
+                accept="image/*"
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current.click()}
+                className="flex items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors"
+                disabled={isSubmitting || isUploading}
+              >
+                <FaUpload className="mr-2" />
+                {isUploading ? "Sedang Mengupload..." : "Pilih Gambar"}
+              </button>
+              <p className="text-xs text-gray-500 mt-1">
+                Format yang didukung: JPG, PNG, WebP. Maksimal Ukuran: 10MB.
+              </p>
+            </div>
+
+            {previewImages.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                {previewImages.map((image, index) => (
+                  <div key={index} className="relative group">
+                    <div
+                      className={`aspect-video bg-gray-100 rounded-md overflow-hidden ${
+                        image.error
+                          ? "border-2 border-red-500"
+                          : image.uploaded
+                          ? "border-2 border-green-500"
+                          : ""
+                      }`}
+                    >
+                      <Image
+                        src={image.url}
+                        alt={image.name}
+                        width={300}
+                        height={200}
+                        className="w-full h-full object-cover"
+                      />
+                      {image.uploaded && (
+                        <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                          Terupload
+                        </div>
+                      )}
+                      {image.error && (
+                        <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                          Gagal
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Hapus gambar"
+                      disabled={isUploading}
+                    >
+                      <FaTrash size={12} />
+                    </button>
+                    <p className="text-xs text-gray-500 truncate mt-1">
+                      {image.name}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {previewImages.length === 0 && (
+              <div className="text-center py-8 bg-gray-50 rounded-md border border-dashed border-gray-300">
+                <p className="text-gray-400">Belum ada gambar yang diunggah</p>
+              </div>
+            )}
+            <p className="text-xs text-gray-500 mt-1">Maksimal 10 Gambar.</p>
+          </fieldset>
+        )}
         <div className="flex justify-end gap-4 mt-6">
           <button
             type="button"
