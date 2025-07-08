@@ -103,11 +103,17 @@ export default function PropertyFormPage({ propertyId = null }) {
           const data = await res.json();
           const property = data.property;
 
+          // Safe merge dengan default values untuk mencegah undefined
           setForm({
+            ...initialFormState,
             ...property,
             assetType: property.assetType?._id || "",
             marketStatus: property.marketStatus?._id || "",
             listingStatus: property.listingStatus?._id || "",
+            location: {
+              ...initialFormState.location,
+              ...property.location,
+            },
           });
 
           // Set preview images dari gallery yang sudah ada dengan struktur yang sesuai response API
@@ -135,21 +141,30 @@ export default function PropertyFormPage({ propertyId = null }) {
 
   // Function to get text length from HTML (for validation)
   const getTextLength = (htmlContent) => {
-    if (!htmlContent) return 0;
-    const div = document.createElement("div");
-    div.innerHTML = htmlContent;
-    return (div.textContent || div.innerText || "").length;
+    if (!htmlContent || typeof htmlContent !== 'string') return 0;
+    try {
+      const div = document.createElement("div");
+      div.innerHTML = htmlContent;
+      return (div.textContent || div.innerText || "").length;
+    } catch (error) {
+      console.error('Error getting text length:', error);
+      return 0;
+    }
   };
 
   const validateForm = useCallback(() => {
     const newErrors = {};
-    if (!form.name.trim()) newErrors.name = "Nama properti wajib diisi";
+    
+    // Pastikan nilai adalah string sebelum memanggil trim()
+    const safeTrim = (value) => (value || "").toString().trim();
+    
+    if (!safeTrim(form.name)) newErrors.name = "Nama properti wajib diisi";
     if (!form.startPrice) newErrors.startPrice = "Harga awal wajib diisi";
-    if (!form.developer.trim())
+    if (!safeTrim(form.developer))
       newErrors.developer = "Nama developer wajib diisi";
-    if (!form.location.city.trim())
+    if (!safeTrim(form.location?.city))
       newErrors["location.city"] = "Kota wajib diisi";
-    if (!form.location.area.trim())
+    if (!safeTrim(form.location?.area))
       newErrors["location.area"] = "Area wajib diisi";
     if (!form.assetType) newErrors.assetType = "Tipe Aset wajib dipilih";
     if (!form.marketStatus)
@@ -166,7 +181,8 @@ export default function PropertyFormPage({ propertyId = null }) {
 
     // Validasi description untuk rich text
     const textContent = getTextLength(form.description);
-    if (textContent.trim().length > 0 && textContent.trim().length < 50) {
+    const safeTextContent = safeTrim(textContent);
+    if (safeTextContent.length > 0 && safeTextContent.length < 50) {
       newErrors.description = "Deskripsi minimal 50 karakter jika diisi";
     }
     if (textContent.length > 1000) {
@@ -180,6 +196,9 @@ export default function PropertyFormPage({ propertyId = null }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    // Safe guard untuk memastikan value adalah string
+    const safeValue = value || "";
+
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -192,13 +211,16 @@ export default function PropertyFormPage({ propertyId = null }) {
       const key = name.split(".")[1];
       setForm((prev) => ({
         ...prev,
-        location: { ...prev.location, [key]: value },
+        location: { 
+          ...prev.location, 
+          [key]: safeValue 
+        },
       }));
     } else {
       setForm((prev) => {
-        const updatedForm = { ...prev, [name]: value };
-        if (name === "name" && !isEdit) {
-          updatedForm.id = generateId(value);
+        const updatedForm = { ...prev, [name]: safeValue };
+        if (name === "name" && !isEdit && safeValue.trim()) {
+          updatedForm.id = generateId(safeValue);
         }
         return updatedForm;
       });
@@ -307,8 +329,8 @@ export default function PropertyFormPage({ propertyId = null }) {
     try {
       const formattedData = {
         ...form,
-        name: toCapitalCase(form.name),
-        id: isEdit ? form.id : generateId(form.name),
+        name: toCapitalCase(form.name || ""),
+        id: isEdit ? form.id : generateId(form.name || ""),
         hasMultipleClusters: hasMultipleClusters,
       };
 
@@ -347,13 +369,13 @@ export default function PropertyFormPage({ propertyId = null }) {
     );
 
     return {
-      title: form.name,
+      title: form.name || "",
       type: selectedAssetType?.name || "Properti",
       location:
-        form.location.area && form.location.city
+        form.location?.area && form.location?.city
           ? `${form.location.area}, ${form.location.city}`
           : "",
-      developer: form.developer,
+      developer: form.developer || "",
       features: [], // Bisa diisi dengan data spesifik per tipe
       facilities: [], // Bisa diisi dengan data spesifik per tipe
     };
@@ -369,7 +391,7 @@ export default function PropertyFormPage({ propertyId = null }) {
         try {
           const formattedData = {
             ...form,
-            name: toCapitalCase(form.name),
+            name: toCapitalCase(form.name || ""),
             hasMultipleClusters: hasMultipleClusters,
           };
 
@@ -675,7 +697,7 @@ export default function PropertyFormPage({ propertyId = null }) {
                 required={false}
                 error={errors.description}
                 showTemplate={
-                  !!(form.name && form.developer && form.location.area)
+                  !!(form.name && form.developer && form.location?.area)
                 }
                 templateData={getTemplateData()}
               />
