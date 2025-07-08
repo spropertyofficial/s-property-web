@@ -25,6 +25,7 @@ export async function getPropertiesData(filter = {}) {
 // Fungsi GET sekarang bisa membaca query parameter dari URL
 export async function GET(req) {
   try {
+    await connectDB();
     const { searchParams } = new URL(req.url);
     const assetTypeName = searchParams.get("assetType");
 
@@ -89,11 +90,15 @@ export async function POST(req) {
     const property = new Property(newPropertyPayload);
     await property.save();
 
-    if (assetTypeName === "Perumahan" && hasMultipleClusters === false) {
-      console.log(`Membuat cluster default untuk perumahan: ${property.name}`);
+    // Auto-create Cluster Default untuk Apartemen atau Perumahan sederhana
+    if (
+      assetTypeName === "Apartemen" || 
+      (assetTypeName === "Perumahan" && hasMultipleClusters === false)
+    ) {
+      console.log(`Membuat cluster default untuk ${assetTypeName}: ${property.name}`);
       const defaultCluster = new Cluster({
-        name: `Tipe Unit - ${property.name}`, // Nama cluster default
-        description: `Cluster utama untuk perumahan ${property.name}`,
+        name: `Cluster Default`, // Nama cluster default yang tersembunyi
+        description: `Cluster default untuk ${assetTypeName.toLowerCase()} ${property.name}`,
         property: property._id, // Hubungkan ke properti yang baru dibuat
       });
       await defaultCluster.save();

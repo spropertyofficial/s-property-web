@@ -39,10 +39,16 @@ const PropertySchema = new mongoose.Schema(
       required: true,
     },
 
-    // --- Relasi ke Cluster (Untuk masa depan) ---
     clusters: [{ type: mongoose.Schema.Types.ObjectId, ref: "Cluster" }],
 
-    // --- Jejak Audit ---
+    landSize: { type: Number },
+    pricePerSqM: { type: Number },
+    landLength: { type: Number },
+    landWidth: { type: Number },
+    certificateStatus: {
+      type: String,
+      enum: ["SHM", "HGB", "Girik", "Lainnya"],
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin",

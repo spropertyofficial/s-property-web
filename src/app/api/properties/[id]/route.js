@@ -2,7 +2,10 @@ import connectDB from "@/lib/mongodb";
 import Property from "@/lib/models/Property"; // Gunakan model Property yang baru
 import cloudinary from "@/lib/cloudinary";
 import { NextResponse } from "next/server";
-import { verifyAdmin } from "@/lib/auth"; // Impor helper verifikasi
+import { verifyAdmin } from "@/lib/auth";
+import CategoryAssetType from "@/lib/models/CategoryAssetType";
+import CategoryMarketStatus from "@/lib/models/CategoryMarketStatus";
+import CategoryListingStatus from "@/lib/models/CategoryListingStatus";
 
 const slugify = (text) => {
   if (!text) return "";
@@ -15,7 +18,7 @@ const slugify = (text) => {
     .replace(/^-+/, "")
     .replace(/-+$/, "");
 };
-// GET: Mengambil satu properti berdasarkan ID
+
 export async function GET(req, { params }) {
   try {
     await connectDB();
@@ -27,7 +30,13 @@ export async function GET(req, { params }) {
       .populate("listingStatus", "name")
       .populate("createdBy", "name")
       .populate("updatedBy", "name")
-      .populate("clusters")
+      .populate({
+        path: "clusters",
+        populate: {
+          path: "unitTypes",
+          model: "UnitType"
+        }
+      })
       .lean();
 
     if (!property) {
@@ -54,7 +63,7 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ message: "Akses Ditolak" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
 
     const updateData = {
@@ -95,7 +104,7 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ message: "Akses Ditolak" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     await connectDB();
 
     // 2. PERUBAHAN: Gunakan model 'Property' dan tambahkan .populate()

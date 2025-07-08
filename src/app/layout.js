@@ -1,4 +1,5 @@
 import Providers from "@/components/common/ProgressBarProvider";
+import NotificationSystem from "@/components/ui/NotificationSystem";
 import "@/styles/globals.css";
 import { Provider } from "react-redux";
 export const metadata = {
@@ -11,6 +12,7 @@ export default function RootLayout({ children }) {
     <html lang="id">
       <body>
         <Providers>{children}</Providers>
+        <NotificationSystem />
       </body>
     </html>
   );
