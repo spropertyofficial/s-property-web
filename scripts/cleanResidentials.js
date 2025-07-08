@@ -6,15 +6,20 @@
  * Usage: node scripts/cleanResidentials.js
  */
 
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { config } from 'dotenv';
+import mongoose from 'mongoose';
+import readline from 'readline';
 
-const mongoose = require('mongoose');
-const readline = require('readline');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+config({ path: path.join(__dirname, '..', '.env.local') });
 
 // Import models
-const Property = require('../src/lib/models/Property');
-const Cluster = require('../src/lib/models/Cluster');
+import Property from '../src/lib/models/Property.js';
+import Cluster from '../src/lib/models/Cluster.js';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -87,8 +92,8 @@ async function main() {
   }
 }
 
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
 
-module.exports = { cleanData };
+export { cleanData };

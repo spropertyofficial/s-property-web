@@ -10,7 +10,8 @@
     "lint": "next lint",
     "create-admin": "node scripts/create-admin.js",
     "migrate:residentials": "node scripts/migrateResidentials.js",
-    "clean:residentials": "node scripts/cleanResidentials.js"
+    "clean:residentials": "node scripts/cleanResidentials.js",
+    "clean:migrated": "node scripts/cleanMigratedResidentials.js"
   },
   "dependencies": {
     "@bprogress/core": "^1.3.4",
