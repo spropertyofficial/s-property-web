@@ -11,15 +11,36 @@ import { verifyAdmin } from "@/lib/auth";
 
 // Fungsi ini sekarang bisa menerima filter
 export async function getPropertiesData(filter = {}) {
-  await connectDB();
-  const properties = await Property.find(filter) // <-- Terapkan filter di sini
-    .populate("assetType", "name")
-    .populate("marketStatus", "name")
-    .populate("listingStatus", "name")
-    .populate("createdBy", "name")
-    .populate("updatedBy", "name")
-    .lean();
-  return properties;
+  try {
+    await connectDB();
+    
+    const properties = await Property.find(filter)
+      .populate("assetType", "name")
+      .populate("marketStatus", "name")
+      .populate("listingStatus", "name")
+      .populate("createdBy", "name")
+      .populate("updatedBy", "name")
+      .lean();
+    
+    // Convert to plain objects and map fields to match frontend expectations
+    const serialized = JSON.parse(JSON.stringify(properties));
+    
+    // Transform database fields to match frontend expectations
+    const transformed = serialized.map(property => ({
+      ...property,
+      // Map database fields to expected frontend fields
+      title: property.name,
+      price: property.startPrice,
+      // Keep original fields for compatibility
+      name: property.name,
+      startPrice: property.startPrice
+    }));
+    
+    return transformed;
+  } catch (error) {
+    console.error("Error fetching properties:", error);
+    return [];
+  }
 }
 
 // Fungsi GET sekarang bisa membaca query parameter dari URL
@@ -48,7 +69,7 @@ export async function GET(req) {
     const properties = await getPropertiesData(filter);
     return NextResponse.json({ properties });
   } catch (err) {
-    console.error("GET properties error:", err);
+    console.error("Error fetching properties:", err);
     return NextResponse.json(
       { error: "Gagal mengambil data" },
       { status: 500 }
