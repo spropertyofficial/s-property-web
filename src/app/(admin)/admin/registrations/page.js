@@ -10,11 +10,14 @@ import {
   FaUserCheck,
   FaUserTimes,
   FaClock,
-  FaUsers
+  FaUsers,
+  FaTrash
 } from "react-icons/fa";
 import Swal from "sweetalert2";
+import { useAdmin } from "@/hooks/useAdmin";
 
 export default function RegistrationsPage() {
+  const { admin } = useAdmin();
   const [registrations, setRegistrations] = useState([]);
   const [filteredRegistrations, setFilteredRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,6 +40,38 @@ export default function RegistrationsPage() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+
+  const applyFilters = useCallback(() => {
+    let filtered = [...registrations];
+
+    // Filter by status
+    if (filters.status) {
+      filtered = filtered.filter(reg => reg.status === filters.status);
+    }
+
+    // Filter by search (name, email, phone)
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(reg => 
+        reg.personalData.fullName.toLowerCase().includes(searchLower) ||
+        reg.personalData.email.toLowerCase().includes(searchLower) ||
+        reg.personalData.phone.includes(filters.search)
+      );
+    }
+
+    // Filter by date range
+    if (filters.startDate && filters.endDate) {
+      filtered = filtered.filter(reg => {
+        const regDate = new Date(reg.submittedAt);
+        const start = new Date(filters.startDate);
+        const end = new Date(filters.endDate);
+        return regDate >= start && regDate <= end;
+      });
+    }
+
+    setFilteredRegistrations(filtered);
+    setCurrentPage(1); // Reset to first page when filtering
+  }, [registrations, filters]);
 
   useEffect(() => {
     fetchRegistrations();
@@ -82,38 +117,6 @@ export default function RegistrationsPage() {
     }
   };
 
-  const applyFilters = useCallback(() => {
-    let filtered = [...registrations];
-
-    // Filter by status
-    if (filters.status) {
-      filtered = filtered.filter(reg => reg.status === filters.status);
-    }
-
-    // Filter by search (name, email, phone)
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      filtered = filtered.filter(reg => 
-        reg.personalData.fullName.toLowerCase().includes(searchLower) ||
-        reg.personalData.email.toLowerCase().includes(searchLower) ||
-        reg.personalData.phone.includes(filters.search)
-      );
-    }
-
-    // Filter by date range
-    if (filters.startDate && filters.endDate) {
-      filtered = filtered.filter(reg => {
-        const regDate = new Date(reg.submittedAt);
-        const start = new Date(filters.startDate);
-        const end = new Date(filters.endDate);
-        return regDate >= start && regDate <= end;
-      });
-    }
-
-    setFilteredRegistrations(filtered);
-    setCurrentPage(1); // Reset to first page when filtering
-  }, [registrations, filters]);
-
   const handleStatusUpdate = async (id, newStatus) => {
     const result = await Swal.fire({
       title: "Update Status",
@@ -138,6 +141,40 @@ export default function RegistrationsPage() {
         
         if (data.success) {
           Swal.fire("Berhasil!", "Status berhasil diperbarui", "success");
+          fetchRegistrations();
+          fetchStats();
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        Swal.fire("Error!", error.message, "error");
+      }
+    }
+  };
+
+  const handleDelete = async (id, fullName) => {
+    const result = await Swal.fire({
+      title: "Hapus Registrasi",
+      text: `Apakah Anda yakin ingin menghapus registrasi "${fullName}"? Tindakan ini tidak dapat dibatalkan.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`/api/admin/registrations/${id}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          Swal.fire("Berhasil!", "Registrasi berhasil dihapus", "success");
           fetchRegistrations();
           fetchStats();
         } else {
@@ -423,6 +460,16 @@ export default function RegistrationsPage() {
                           <FaUserTimes />
                         </button>
                       </>
+                    )}
+                    {/* Delete button - only for superadmin */}
+                    {admin?.role === "superadmin" && (
+                      <button
+                        onClick={() => handleDelete(registration._id, registration.personalData.fullName)}
+                        className="text-red-600 hover:text-red-900"
+                        title="Hapus Registrasi"
+                      >
+                        <FaTrash />
+                      </button>
                     )}
                   </td>
                 </tr>

@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Registration from "@/lib/models/Registration";
+import { verifyAdminWithRole } from "@/lib/auth";
 import * as XLSX from "xlsx";
 
 export async function GET(request) {
   try {
+    // Verify admin with export permission (superadmin and editor only)
+    const authResult = await verifyAdminWithRole(request, ["superadmin", "editor"]);
+    if (authResult.error) {
+      return authResult.error;
+    }
+
     await dbConnect();
 
     const { searchParams } = new URL(request.url);

@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Registration from "@/lib/models/Registration";
+import { verifyAdminWithRole } from "@/lib/auth";
 
-export async function GET() {
+export async function GET(request) {
   try {
+    // Verify admin with read permission (all roles can read)
+    const authResult = await verifyAdminWithRole(request, ["superadmin", "editor", "viewer"]);
+    if (authResult.error) {
+      return authResult.error;
+    }
+
     await dbConnect();
 
     const registrations = await Registration.find({})
