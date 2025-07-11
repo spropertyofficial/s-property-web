@@ -5,6 +5,14 @@ import Admin from "./models/Admin";
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
+export function verifyJWT(token) {
+  try {
+    return jwt.verify(token, JWT_SECRET);
+  } catch {
+    return null;
+  }
+}
+
 export function verifyToken(req) {
   const token = req.cookies.get("token")?.value;
   if (!token) return null;
