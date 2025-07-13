@@ -24,6 +24,9 @@ export default function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
   
+  // Generate unique registration ID once per session
+  const [registrationId] = useState(() => `reg_${Date.now()}`);
+  
   // Use custom file upload hook
   const { uploadFile, getUploadState, resetUploadState } = useFileUpload();
 
@@ -257,8 +260,7 @@ export default function RegisterForm() {
     try {
       setErrors(prev => ({ ...prev, [fileType]: null }));
       
-      // Generate unique registration ID and pass applicant name
-      const registrationId = `reg_${Date.now()}`;
+      // Use consistent registration ID for the session
       const options = {
         applicantName: formData.fullName || "unknown",
         registrationId: registrationId
@@ -284,7 +286,7 @@ export default function RegisterForm() {
         text: error.message,
       });
     }
-  }, [uploadFile, formData.fullName]);
+  }, [uploadFile, formData.fullName, registrationId]);
 
   // Reset file upload
   const handleFileReset = useCallback((fileType) => {
