@@ -16,6 +16,8 @@ export async function POST(request) {
     const applicantName = formData.get("applicantName") || "unknown";
     const registrationId = formData.get("registrationId") || Date.now().toString();
 
+
+
     if (!file) {
       return NextResponse.json(
         { success: false, message: "No file provided" },
@@ -62,6 +64,8 @@ export async function POST(request) {
     const timestamp = Date.now();
     const folderPath = `s-property/registrations/${sanitizedName}-${registrationId}`;
     const publicId = `${folderPath}/${fileType}`;
+
+
 
     // Upload to Cloudinary
     const uploadResponse = await new Promise((resolve, reject) => {

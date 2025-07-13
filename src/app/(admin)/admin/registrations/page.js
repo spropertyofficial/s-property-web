@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { 
   FaEye, 
   FaDownload, 
@@ -11,7 +12,8 @@ import {
   FaUserTimes,
   FaClock,
   FaUsers,
-  FaTrash
+  FaTrash,
+  FaSync
 } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -21,6 +23,8 @@ export default function RegistrationsPage() {
   const [registrations, setRegistrations] = useState([]);
   const [filteredRegistrations, setFilteredRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reloading, setReloading] = useState(false);
+  const [autoReload, setAutoReload] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
@@ -73,16 +77,7 @@ export default function RegistrationsPage() {
     setCurrentPage(1); // Reset to first page when filtering
   }, [registrations, filters]);
 
-  useEffect(() => {
-    fetchRegistrations();
-    fetchStats();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [registrations, filters, applyFilters]);
-
-  const fetchRegistrations = async () => {
+  const fetchRegistrations = useCallback(async () => {
     try {
       const response = await fetch("/api/admin/registrations");
       const data = await response.json();
@@ -94,17 +89,20 @@ export default function RegistrationsPage() {
       }
     } catch (error) {
       console.error("Error fetching registrations:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Gagal memuat data registrasi",
-      });
+      if (!reloading) {
+        // Only show error if not a reload operation
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Gagal memuat data registrasi",
+        });
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [reloading]);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const response = await fetch("/api/admin/registrations/stats");
       const data = await response.json();
@@ -114,6 +112,52 @@ export default function RegistrationsPage() {
       }
     } catch (error) {
       console.error("Error fetching stats:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchRegistrations();
+    fetchStats();
+  }, [fetchRegistrations, fetchStats]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [registrations, filters, applyFilters]);
+
+  // Auto-reload effect
+  useEffect(() => {
+    if (!autoReload) return;
+
+    const interval = setInterval(() => {
+      if (!reloading) {
+        setReloading(true);
+        Promise.all([fetchRegistrations(), fetchStats()])
+          .finally(() => setReloading(false));
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [autoReload, reloading, fetchRegistrations, fetchStats]);
+
+  const reloadData = async () => {
+    setReloading(true);
+    try {
+      await Promise.all([fetchRegistrations(), fetchStats()]);
+      Swal.fire({
+        icon: "success",
+        title: "Data Diperbarui",
+        text: "Data registrasi berhasil dimuat ulang",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Gagal memuat ulang data",
+      });
+    } finally {
+      setReloading(false);
     }
   };
 
@@ -141,8 +185,8 @@ export default function RegistrationsPage() {
         
         if (data.success) {
           Swal.fire("Berhasil!", "Status berhasil diperbarui", "success");
-          fetchRegistrations();
-          fetchStats();
+          // Use reloadData instead of separate fetches
+          reloadData();
         } else {
           throw new Error(data.message);
         }
@@ -175,8 +219,8 @@ export default function RegistrationsPage() {
         
         if (data.success) {
           Swal.fire("Berhasil!", "Registrasi berhasil dihapus", "success");
-          fetchRegistrations();
-          fetchStats();
+          // Use reloadData instead of separate fetches
+          reloadData();
         } else {
           throw new Error(data.message);
         }
@@ -262,63 +306,119 @@ export default function RegistrationsPage() {
           <h1 className="text-2xl font-bold text-gray-900">Data Registrasi Partner</h1>
           <p className="text-gray-600">Kelola pendaftaran partner S-Property</p>
         </div>
-        <button
-          onClick={handleExport}
-          className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-        >
-          <FaDownload className="mr-2" />
-          Export Excel
-        </button>
+        <div className="flex items-center gap-3">
+          {/* Auto-reload toggle */}
+          <div className="flex items-center">
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={autoReload}
+                onChange={(e) => setAutoReload(e.target.checked)}
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+              <span className="ml-3 text-sm font-medium text-gray-700">
+                Auto-reload (30s)
+              </span>
+            </label>
+          </div>
+          
+          <button
+            onClick={reloadData}
+            disabled={reloading}
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <FaSync className={`mr-2 ${reloading ? 'animate-spin' : ''}`} />
+            {reloading ? 'Memuat...' : 'Reload'}
+          </button>
+          <button
+            onClick={handleExport}
+            className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <FaDownload className="mr-2" />
+            Export Excel
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow border-l-4 border-blue-500">
+        <div className={`bg-white p-4 rounded-lg shadow border-l-4 border-blue-500 ${reloading ? 'opacity-70' : ''}`}>
           <div className="flex items-center">
             <FaUsers className="text-blue-500 text-2xl mr-3" />
             <div>
               <p className="text-sm text-gray-600">Total</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {reloading ? (
+                  <span className="animate-pulse">...</span>
+                ) : (
+                  stats.total
+                )}
+              </p>
             </div>
           </div>
         </div>
         
-        <div className="bg-white p-4 rounded-lg shadow border-l-4 border-yellow-500">
+        <div className={`bg-white p-4 rounded-lg shadow border-l-4 border-yellow-500 ${reloading ? 'opacity-70' : ''}`}>
           <div className="flex items-center">
             <FaClock className="text-yellow-500 text-2xl mr-3" />
             <div>
               <p className="text-sm text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {reloading ? (
+                  <span className="animate-pulse">...</span>
+                ) : (
+                  stats.pending
+                )}
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-lg shadow border-l-4 border-blue-500">
+        <div className={`bg-white p-4 rounded-lg shadow border-l-4 border-blue-500 ${reloading ? 'opacity-70' : ''}`}>
           <div className="flex items-center">
             <FaEye className="text-blue-500 text-2xl mr-3" />
             <div>
               <p className="text-sm text-gray-600">Reviewed</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.reviewed}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {reloading ? (
+                  <span className="animate-pulse">...</span>
+                ) : (
+                  stats.reviewed
+                )}
+              </p>
             </div>
           </div>
         </div>
         
-        <div className="bg-white p-4 rounded-lg shadow border-l-4 border-green-500">
+        <div className={`bg-white p-4 rounded-lg shadow border-l-4 border-green-500 ${reloading ? 'opacity-70' : ''}`}>
           <div className="flex items-center">
             <FaUserCheck className="text-green-500 text-2xl mr-3" />
             <div>
               <p className="text-sm text-gray-600">Approved</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.approved}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {reloading ? (
+                  <span className="animate-pulse">...</span>
+                ) : (
+                  stats.approved
+                )}
+              </p>
             </div>
           </div>
         </div>
         
-        <div className="bg-white p-4 rounded-lg shadow border-l-4 border-red-500">
+        <div className={`bg-white p-4 rounded-lg shadow border-l-4 border-red-500 ${reloading ? 'opacity-70' : ''}`}>
           <div className="flex items-center">
             <FaUserTimes className="text-red-500 text-2xl mr-3" />
             <div>
               <p className="text-sm text-gray-600">Rejected</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.rejected}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {reloading ? (
+                  <span className="animate-pulse">...</span>
+                ) : (
+                  stats.rejected
+                )}
+              </p>
             </div>
           </div>
         </div>
@@ -388,7 +488,15 @@ export default function RegistrationsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow overflow-hidden relative">
+        {reloading && (
+          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+            <div className="flex items-center">
+              <FaSync className="animate-spin text-blue-500 text-xl mr-2" />
+              <span className="text-gray-600">Memuat ulang data...</span>
+            </div>
+          </div>
+        )}
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -435,42 +543,44 @@ export default function RegistrationsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {formatDate(registration.submittedAt)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <button
-                      onClick={() => window.open(`/admin/registrations/${registration._id}`, '_blank')}
-                      className="text-blue-600 hover:text-blue-900"
-                      title="Lihat Detail"
-                    >
-                      <FaEye />
-                    </button>
-                    {registration.status === "pending" && (
-                      <>
-                        <button
-                          onClick={() => handleStatusUpdate(registration._id, "approved")}
-                          className="text-green-600 hover:text-green-900"
-                          title="Approve"
-                        >
-                          <FaUserCheck />
-                        </button>
-                        <button
-                          onClick={() => handleStatusUpdate(registration._id, "rejected")}
-                          className="text-red-600 hover:text-red-900"
-                          title="Reject"
-                        >
-                          <FaUserTimes />
-                        </button>
-                      </>
-                    )}
-                    {/* Delete button - only for superadmin */}
-                    {admin?.role === "superadmin" && (
-                      <button
-                        onClick={() => handleDelete(registration._id, registration.personalData.fullName)}
-                        className="text-red-600 hover:text-red-900"
-                        title="Hapus Registrasi"
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex items-center space-x-2">
+                      <Link
+                        href={`/admin/registrations/${registration._id}`}
+                        className="inline-flex items-center justify-center w-8 h-8 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-full transition-colors"
+                        title="Lihat Detail"
                       >
-                        <FaTrash />
-                      </button>
-                    )}
+                        <FaEye />
+                      </Link>
+                      {registration.status === "pending" && (
+                        <>
+                          <button
+                            onClick={() => handleStatusUpdate(registration._id, "approved")}
+                            className="inline-flex items-center justify-center w-8 h-8 text-green-600 hover:text-green-900 hover:bg-green-50 rounded-full transition-colors"
+                            title="Approve"
+                          >
+                            <FaUserCheck />
+                          </button>
+                          <button
+                            onClick={() => handleStatusUpdate(registration._id, "rejected")}
+                            className="inline-flex items-center justify-center w-8 h-8 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-full transition-colors"
+                            title="Reject"
+                          >
+                            <FaUserTimes />
+                          </button>
+                        </>
+                      )}
+                      {/* Delete button - only for superadmin */}
+                      {admin?.role === "superadmin" && (
+                        <button
+                          onClick={() => handleDelete(registration._id, registration.personalData.fullName)}
+                          className="inline-flex items-center justify-center w-8 h-8 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-full transition-colors"
+                          title="Hapus Registrasi"
+                        >
+                          <FaTrash />
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

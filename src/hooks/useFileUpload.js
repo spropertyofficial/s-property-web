@@ -48,6 +48,8 @@ export const useFileUpload = () => {
       formData.append("applicantName", applicantName);
       formData.append("registrationId", registrationId);
 
+
+
       // Upload file
       const response = await fetch("/api/upload/cloudinary", {
         method: "POST",

@@ -12,10 +12,13 @@ const FileUpload = ({
   uploadState,
   onReset,
   className = "",
+  disabled = false,
 }) => {
   const fileInputRef = useRef(null);
 
   const handleFileSelect = (event) => {
+    if (disabled) return;
+    
     const file = event.target.files[0];
     if (file && onFileSelect) {
       onFileSelect(file, fileType);
@@ -51,6 +54,9 @@ const FileUpload = ({
   };
 
   const getStatusColor = () => {
+    if (disabled) {
+      return "border-gray-200 bg-gray-100";
+    }
     if (uploadState.isUploading) {
       return "border-blue-300 bg-blue-50";
     }
@@ -77,14 +83,20 @@ const FileUpload = ({
           type="file"
           accept={accept}
           onChange={handleFileSelect}
-          disabled={uploadState.isUploading}
+          disabled={uploadState.isUploading || disabled}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
         />
 
-        <div className="text-center">
+        <div className={`text-center ${disabled ? 'opacity-50' : ''}`}>
           <div className="mb-2 flex justify-center">
             {getStatusIcon()}
           </div>
+
+          {disabled && (
+            <p className="text-sm text-gray-500">
+              Silakan isi nama lengkap terlebih dahulu
+            </p>
+          )}
 
           {uploadState.isUploading && (
             <div className="mb-2">
@@ -141,7 +153,7 @@ const FileUpload = ({
             </div>
           )}
 
-          {!uploadState.isUploading && !uploadState.isSuccess && !uploadState.error && (
+          {!uploadState.isUploading && !uploadState.isSuccess && !uploadState.error && !disabled && (
             <div>
               <p className="text-sm text-gray-600">
                 Klik untuk upload file
