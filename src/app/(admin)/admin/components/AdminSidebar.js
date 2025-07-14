@@ -14,6 +14,7 @@ import {
   FaChartBar,
   FaCog,
   FaGlobe,
+  FaUserPlus,
 } from "react-icons/fa";
 import { useState } from "react";
 
@@ -35,6 +36,11 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
       name: "Analytics",
       path: "/admin/analytics",
       icon: <FaChartBar />,
+    },
+    {
+      name: "Registrasi",
+      path: "/admin/registrations",
+      icon: <FaUserPlus />,
     },
     {
       name: "Properti",
