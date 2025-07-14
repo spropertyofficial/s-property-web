@@ -28,16 +28,16 @@ const cardVariants = {
   },
 };
 
-// Function to fetch all residentials from API
-async function fetchAllResidentials() {
+// Function to fetch hierarchical data from API
+async function fetchExploreCitiesData() {
   try {
-    const res = await fetch("/api/properties/all-residentials");
-    if (!res.ok) return [];
+    const res = await fetch("/api/explore-cities");
+    if (!res.ok) return {};
     const data = await res.json();
-    return data.residentials || [];
+    return data.success ? data.data : {};
   } catch (error) {
-    console.error("Failed to fetch all residentials for ExploreCities", error);
-    return [];
+    console.error("Failed to fetch explore cities data", error);
+    return {};
   }
 }
 
@@ -51,46 +51,10 @@ export default function ExploreCities() {
     const processData = async () => {
       setIsLoading(true);
       try {
-        const allProperties = await fetchAllResidentials();
-
-        const data = {};
-        allProperties.forEach((property) => {
-          const region = property.location?.region;
-          const city = property.location?.city;
-
-          if (region && city) {
-            // Initialize region if it doesn't exist
-            if (!data[region]) {
-              data[region] = {
-                name: region,
-                propertyCount: 0,
-                imageUrl: `/images/Regions/${region
-                  .toLowerCase()
-                  .replace(/\s+/g, "-")}.webp`,
-                cities: {},
-              };
-            }
-
-            // Initialize city if it doesn't exist
-            if (!data[region].cities[city]) {
-              data[region].cities[city] = {
-                name: city,
-                propertyCount: 0,
-                imageUrl: `/images/Cities/${city
-                  .toLowerCase()
-                  .replace(/\s+/g, "-")}.webp`,
-              };
-            }
-
-            // Increment counters
-            data[region].propertyCount += 1;
-            data[region].cities[city].propertyCount += 1;
-          }
-        });
-
+        const data = await fetchExploreCitiesData();
         setHierarchicalData(data);
       } catch (error) {
-        console.error("Error processing residential data:", error);
+        console.error("Error processing explore cities data:", error);
       } finally {
         setIsLoading(false);
       }

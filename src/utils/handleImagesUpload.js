@@ -127,6 +127,9 @@ export const handleImageUpload = async (
         } else {
           throw new Error("Nama tipe unit harus diisi.");
         }
+      } else if (uploadType === "region" || uploadType === "city") {
+        // Upload untuk explore cities
+        folder = `s-property/explore-cities/${uploadType}s`;
       } else {
         throw new Error("Tipe upload tidak valid.");
       }

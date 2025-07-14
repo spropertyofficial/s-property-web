@@ -4,6 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import AdminSidebar from "@/app/(admin)/admin/components/AdminSidebar";
+import { AdminProvider } from "@/hooks/useAdmin";
 import { FaBell, FaUser, FaSignOutAlt } from "react-icons/fa";
 import "./AdminLayout.css";
 
@@ -149,7 +150,9 @@ export default function AdminLayout({ children }) {
 
         {/* Page Content */}
         <main className="p-6 content-fade-in">
-          {children}
+          <AdminProvider>
+            {children}
+          </AdminProvider>
         </main>
       </div>
 
@@ -168,6 +171,7 @@ export default function AdminLayout({ children }) {
 function getPageTitle(pathname) {
   const routes = {
     '/admin': 'Dashboard',
+    '/admin/registrations': 'Manajemen Registrasi',
     '/admin/perumahan': 'Manajemen Perumahan',
     '/admin/ruko': 'Manajemen Ruko',
     '/admin/apartemen': 'Manajemen Apartemen',
@@ -187,6 +191,7 @@ function getPageTitle(pathname) {
 function getPageDescription(pathname) {
   const descriptions = {
     '/admin': 'Selamat datang di Panel Admin S-Property',
+    '/admin/registrations': 'Kelola data registrasi calon agen properti',
     '/admin/perumahan': 'Kelola data perumahan dan properti residensial',
     '/admin/ruko': 'Kelola data ruko dan properti komersial',
     '/admin/apartemen': 'Kelola data apartemen dan kondominium',

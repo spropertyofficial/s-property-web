@@ -17,7 +17,6 @@ import { toCapitalCase } from "@/utils/toCapitalcase";
 import SpesificForms from "../properties/components/SpesificForms";
 import RichTextEditor from "./RichTextEditor";
 import FormSkeleton from "./FormSkeleton";
-import { Asset } from "next/font/google";
 
 export default function PropertyFormPage({ propertyId = null }) {
   const router = useRouter();

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   User,
   Mail,
@@ -14,6 +14,8 @@ import Link from "next/link";
 import Swal from "sweetalert2";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
+import { useFileUpload } from "@/hooks/useFileUpload";
+import FileUpload from "@/components/common/FileUpload";
 
 export default function RegisterForm() {
   const [notyf, setNotyf] = useState(null);
@@ -21,26 +23,14 @@ export default function RegisterForm() {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [files, setFiles] = useState({
-    ktpFile: null,
-    npwpFile: null,
-    bankBookFile: null,
-  });
+  
+  // Generate unique registration ID once per session
+  const [registrationId] = useState(() => `reg_${Date.now()}`);
+  
+  // Use custom file upload hook
+  const { uploadFile, getUploadState, resetUploadState } = useFileUpload();
 
-  // State untuk status upload
-  const [uploadStatus, setUploadStatus] = useState({
-    ktpFile: false,
-    npwpFile: false,
-    bankBookFile: false,
-  });
-
-  // State untuk menandai sedang proses upload
-  const [isUploading, setIsUploading] = useState({
-    ktpFile: false,
-    npwpFile: false,
-    bankBookFile: false,
-  });
-
+  // Form data state
   const [formData, setFormData] = useState({
     fullName: "",
     birthPlace: "",
@@ -54,6 +44,13 @@ export default function RegisterForm() {
     accountNumber: "",
     bankName: "",
     accountHolder: "",
+  });
+
+  // File data state
+  const [fileData, setFileData] = useState({
+    ktpFile: null,
+    npwpFile: null,
+    bankBookFile: null,
   });
 
   const handleChange = (e) => {
@@ -258,98 +255,45 @@ export default function RegisterForm() {
     }
   };
 
-  // Fungsi untuk memproses file dengan progress visual dan validasi
-  const handleFileChange = (e, fileType) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // Referensi ke elemen input file untuk direset jika perlu
-    const fileInput = e.target;
-
-    // Validasi ukuran file (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      Swal.fire({
-        icon: "warning",
-        title: "Ukuran File Terlalu Besar",
-        text: "Maksimal ukuran file 2MB. Silakan kompres terlebih dahulu.",
-      });
-      setErrors((prev) => ({
+  // File upload handler
+  const handleFileUpload = useCallback(async (file, fileType) => {
+    try {
+      setErrors(prev => ({ ...prev, [fileType]: null }));
+      
+      // Use consistent registration ID for the session
+      const options = {
+        applicantName: formData.fullName || "unknown",
+        registrationId: registrationId
+      };
+      
+      const result = await uploadFile(file, fileType, options);
+      
+      setFileData(prev => ({
         ...prev,
-        [fileType]: "Ukuran file terlalu besar (max 2MB)",
+        [fileType]: {
+          url: result.url,
+          publicId: result.publicId,
+        }
       }));
 
-      // Reset input file agar nama file tidak muncul
-      fileInput.value = "";
-      return;
-    }
-
-    // Validasi tipe file
-    const validTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/jpg",
-      "application/pdf",
-    ];
-    if (!validTypes.includes(file.type)) {
-      Swal.fire({
-        icon: "warning",
-        title: "Format File Tidak Didukung",
-        text: "Hanya file JPG, PNG, dan PDF yang didukung.",
-      });
-      setErrors((prev) => ({
-        ...prev,
-        [fileType]: "Format file tidak didukung (JPG, PNG, PDF)",
-      }));
-
-      // Reset input file agar nama file tidak muncul
-      fileInput.value = "";
-      return;
-    }
-
-    // Hapus error jika ada
-    if (errors[fileType]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[fileType];
-        return newErrors;
-      });
-    }
-
-    // Set isUploading to true
-    setIsUploading((prev) => ({ ...prev, [fileType]: true }));
-
-    // Baca file dengan FileReader
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-      // Store the file data
-      setFiles((prev) => ({
-        ...prev,
-        [fileType]: event.target.result,
-      }));
-
-      // Set upload status to true
-      setUploadStatus((prev) => ({ ...prev, [fileType]: true }));
-
-      // Set isUploading to false
-      setIsUploading((prev) => ({ ...prev, [fileType]: false }));
-    };
-
-    reader.onerror = () => {
+    } catch (error) {
+      console.error(`Error uploading ${fileType}:`, error);
+      setErrors(prev => ({ ...prev, [fileType]: error.message }));
+      
       Swal.fire({
         icon: "error",
-        title: "Proses File Gagal",
-        text: "Terjadi kesalahan saat memproses file. Silakan coba lagi.",
+        title: "Upload Gagal",
+        text: error.message,
       });
-      setErrors((prev) => ({ ...prev, [fileType]: "Gagal memproses file" }));
-      setIsUploading((prev) => ({ ...prev, [fileType]: false }));
+    }
+  }, [uploadFile, formData.fullName, registrationId]);
 
-      // Reset input file agar nama file tidak muncul
-      fileInput.value = "";
-    };
-
-    reader.readAsDataURL(file);
-  };
+  // Reset file upload
+  const handleFileReset = useCallback((fileType) => {
+    resetUploadState(fileType);
+    setFileData(prev => ({ ...prev, [fileType]: null }));
+    setErrors(prev => ({ ...prev, [fileType]: null }));
+  }, [resetUploadState]);
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
@@ -435,20 +379,20 @@ export default function RegisterForm() {
           stepErrors.idNumber = "Nomor NIK harus terdiri dari 16 digit angka";
         }
 
-        if (!files.ktpFile) {
+        if (!fileData.ktpFile) {
           stepErrors.ktpFile = "File KTP wajib diupload";
         }
 
         if (!formData.npwpNumber || formData.npwpNumber.trim() === "") {
           stepErrors.npwpNumber = "Nomor NPWP wajib diisi";
         } else if (
-          !/^\d{16}$/.test(formData.npwpNumber.replace(/[.\-]/g, ""))
+          !/^\d{15,16}$/.test(formData.npwpNumber.replace(/[.\-]/g, ""))
         ) {
           stepErrors.npwpNumber =
-            "Nomor NPWP harus terdiri dari 15 digit angka";
+            "Nomor NPWP harus terdiri dari 15-16 digit angka";
         }
 
-        if (!files.npwpFile) {
+        if (!fileData.npwpFile) {
           stepErrors.npwpFile = "File NPWP wajib diupload";
         }
         break;
@@ -474,7 +418,7 @@ export default function RegisterForm() {
           stepErrors.accountHolder = "Nama pemilik rekening minimal 3 karakter";
         }
 
-        if (!files.bankBookFile) {
+        if (!fileData.bankBookFile) {
           stepErrors.bankBookFile = "File buku tabungan wajib diupload";
         }
         break;
@@ -504,7 +448,7 @@ export default function RegisterForm() {
   };
 
   const handleSubmit = async () => {
-    // Validasi step
+    // Validasi step terakhir
     if (!validateStep(3)) {
       Swal.fire({
         icon: "error",
@@ -514,10 +458,18 @@ export default function RegisterForm() {
       return;
     }
 
-    // Aktifkan loading state
+    // Validasi semua file sudah terupload
+    if (!fileData.ktpFile || !fileData.npwpFile || !fileData.bankBookFile) {
+      Swal.fire({
+        icon: "error",
+        title: "File Belum Lengkap",
+        text: "Pastikan semua dokumen sudah berhasil diupload",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
-    // Tampilkan loading indicator dengan progress
     const submitToast = Swal.fire({
       title: "Sedang Mendaftar",
       html: "Mempersiapkan data...",
@@ -530,83 +482,116 @@ export default function RegisterForm() {
     });
 
     try {
-      // Persiapkan payload
-      const formPayload = {
-        ...formData,
-        ktpFile: files.ktpFile,
-        npwpFile: files.npwpFile,
-        bankBookFile: files.bankBookFile,
+      // Persiapkan payload untuk API baru
+      const registrationData = {
+        personalData: {
+          fullName: formData.fullName,
+          birthPlace: formData.birthPlace,
+          birthDate: formData.birthDate,
+          phone: formData.phone,
+          email: formData.email,
+          referralPhone: formData.referralPhone || null,
+        },
+        documents: {
+          city: formData.city,
+          nik: formData.idNumber,
+          npwp: formData.npwpNumber,
+          ktpFile: fileData.ktpFile,
+          npwpFile: fileData.npwpFile,
+        },
+        bankAccount: {
+          accountNumber: formData.accountNumber,
+          bankName: formData.bankName,
+          accountHolder: formData.accountHolder,
+          bankBookFile: fileData.bankBookFile,
+        },
       };
 
-      // Hitung perkiraan ukuran payload
-      const payloadSize = JSON.stringify(formPayload).length;
-      const maxPayloadSize = 5 * 1024 * 1024; // 5MB (batas di API Anda)
-
-      if (payloadSize > maxPayloadSize) {
-        throw new Error(
-          "Ukuran data terlalu besar. Silakan kompres file gambar dengan ukuran lebih kecil."
-        );
-      }
-
-      // Update status loading
       submitToast.update({
         html: "Mengirim data ke server...",
       });
 
-      // Kirim data
-      const response = await fetch("/api/submit-form", {
+      // Kirim ke API registrasi baru
+      const response = await fetch("/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formPayload),
+        body: JSON.stringify(registrationData),
       });
 
       const result = await response.json();
 
-      // Nonaktifkan loading state
       setIsLoading(false);
+      submitToast.close();
 
-      // Selalu tampilkan pesan sukses dan lanjut ke step berikutnya
-      Swal.fire({
-        icon: "success",
-        title: "Pendaftaran Berhasil",
-        text:
-          result.message ||
-          "Data Anda telah berhasil dikirim dan sedang diproses.",
-        confirmButtonText: "Lanjutkan",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          nextStep(); // Pindah ke halaman sukses
+      if (result.success) {
+        await Swal.fire({
+          icon: "success",
+          title: "Pendaftaran Berhasil!",
+          html: `
+            <p class="mb-3">${result.message}</p>
+            <div class="bg-green-50 p-3 rounded-lg">
+              <p class="text-sm text-green-700">
+                <strong>ID Registrasi:</strong> ${result.data.registrationId}<br/>
+                <strong>Status:</strong> ${result.data.status}<br/>
+                <strong>Tanggal:</strong> ${new Date(result.data.submittedAt).toLocaleString('id-ID')}
+              </p>
+            </div>
+          `,
+          confirmButtonText: "Lanjutkan",
+        });
+        
+        nextStep(); // Pindah ke halaman sukses
+      } else {
+        // Handle error dengan pesan spesifik
+        await Swal.fire({
+          icon: "error",
+          title: "Pendaftaran Gagal",
+          text: result.message || "Terjadi kesalahan saat memproses pendaftaran",
+        });
+        
+        // Highlight field yang error jika ada
+        if (result.field) {
+          setErrors(prev => ({ ...prev, [result.field]: result.message }));
         }
-      });
+      }
+
     } catch (error) {
-      // Nonaktifkan loading state
+      console.error("Registration error:", error);
       setIsLoading(false);
+      submitToast.close();
 
-      // Tetap tampilkan pesan sukses meskipun terjadi error
-      Swal.fire({
-        icon: "success",
-        title: "Pendaftaran Berhasil",
-        text: "Data Anda telah berhasil dikirim dan sedang diproses.",
-        confirmButtonText: "Lanjutkan",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          nextStep(); // Pindah ke halaman sukses
-        }
+      await Swal.fire({
+        icon: "error",
+        title: "Kesalahan Jaringan",
+        text: "Terjadi kesalahan koneksi. Silakan coba lagi.",
       });
     }
   };
 
-  // Helper untuk memeriksa apakah sedang ada upload yang berlangsung pada step tertentu
-  const isUploadingInStep = (stepNum) => {
+  // Helper untuk mengecek upload status per step
+  const isUploadingInStep = useCallback((stepNum) => {
     if (stepNum === 2) {
-      return isUploading.ktpFile || isUploading.npwpFile;
+      const ktpState = getUploadState("ktpFile");
+      const npwpState = getUploadState("npwpFile");
+      return ktpState.isUploading || npwpState.isUploading;
     } else if (stepNum === 3) {
-      return isUploading.bankBookFile;
+      const bankBookState = getUploadState("bankBookFile");
+      return bankBookState.isUploading;
     }
     return false;
-  };
+  }, [getUploadState]);
+
+  // Helper untuk mengecek apakah semua file di step sudah berhasil diupload
+  const isStepFilesComplete = useCallback((stepNum) => {
+    if (stepNum === 2) {
+      return fileData.ktpFile && fileData.npwpFile;
+    } else if (stepNum === 3) {
+      return fileData.bankBookFile;
+    }
+    return true;
+  }, [fileData]);
 
   return (
     <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
@@ -822,34 +807,18 @@ export default function RegisterForm() {
             )}
           </div>
 
-          <div>
-            <label className="flex text-green-200 items-center mb-1">
-              <FileText size={16} className="mr-2" />
-              Upload Foto KTP *
-            </label>
-            <div
-              className={`border ${
-                errors.ktpFile ? "border-red-500" : "border-dashed"
-              } rounded p-4`}
-            >
-              <input
-                type="file"
-                accept="image/*,.pdf"
-                onChange={(e) => handleFileChange(e, "ktpFile")}
-                className="w-full"
-              />
-
-              {files.ktpFile && uploadStatus.ktpFile && (
-                <div className="mt-2 text-sm text-green-600">
-                  ✓ File KTP berhasil diupload
-                </div>
-              )}
-
-              {errors.ktpFile && !isUploading.ktpFile && (
-                <p className="text-red-500 text-xs mt-1">{errors.ktpFile}</p>
-              )}
-            </div>
-          </div>
+          <FileUpload
+            fileType="ktpFile"
+            label="Upload Foto KTP"
+            accept="image/*,.pdf"
+            required={true}
+            onFileSelect={handleFileUpload}
+            uploadState={getUploadState("ktpFile")}
+            onReset={handleFileReset}
+          />
+          {errors.ktpFile && (
+            <p className="text-red-500 text-xs mt-1">{errors.ktpFile}</p>
+          )}
 
           <div>
             <label className="flex text-green-200 items-center mb-1">
@@ -873,48 +842,18 @@ export default function RegisterForm() {
             )}
           </div>
 
-          <div>
-            <label className="flex text-green-200 items-center mb-1">
-              <FileText size={16} className="mr-2" />
-              Upload Foto NPWP *
-            </label>
-            <div
-              className={`border ${
-                errors.npwpFile ? "border-red-500" : "border-dashed"
-              } rounded p-4`}
-            >
-              <input
-                type="file"
-                accept="image/*,.pdf"
-                onChange={(e) => handleFileChange(e, "npwpFile")}
-                className="w-full"
-              />
-
-              {/* Progress bar untuk NPWP */}
-              {isUploading.npwpFile && (
-                <div className="mt-2">
-                  <div className="flex justify-between text-xs mb-1">
-                    <span>Uploading...</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                    ></div>
-                  </div>
-                </div>
-              )}
-
-              {files.npwpFile && uploadStatus.npwpFile && (
-                <div className="mt-2 text-sm text-green-600">
-                  ✓ File NPWP berhasil diupload
-                </div>
-              )}
-
-              {errors.npwpFile && !isUploading.npwpFile && (
-                <p className="text-red-500 text-xs mt-1">{errors.npwpFile}</p>
-              )}
-            </div>
-          </div>
+          <FileUpload
+            fileType="npwpFile"
+            label="Upload Foto NPWP"
+            accept="image/*,.pdf"
+            required={true}
+            onFileSelect={handleFileUpload}
+            uploadState={getUploadState("npwpFile")}
+            onReset={handleFileReset}
+          />
+          {errors.npwpFile && (
+            <p className="text-red-500 text-xs mt-1">{errors.npwpFile}</p>
+          )}
 
           <div className="flex gap-4">
             <button
@@ -1015,36 +954,18 @@ export default function RegisterForm() {
             )}
           </div>
 
-          <div>
-            <label className="flex text-green-200 items-center mb-1">
-              <FileText size={16} className="mr-2" />
-              Upload Foto Buku Tabungan *
-            </label>
-            <div
-              className={`border ${
-                errors.bankBookFile ? "border-red-500" : "border-dashed"
-              } rounded p-4`}
-            >
-              <input
-                type="file"
-                accept="image/*,.pdf"
-                onChange={(e) => handleFileChange(e, "bankBookFile")}
-                className="w-full"
-              />
-
-              {files.bankBookFile && uploadStatus.bankBookFile && (
-                <div className="mt-2 text-sm text-green-600">
-                  ✓ File Buku Tabungan berhasil diupload
-                </div>
-              )}
-
-              {errors.bankBookFile && !isUploading.bankBookFile && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.bankBookFile}
-                </p>
-              )}
-            </div>
-          </div>
+          <FileUpload
+            fileType="bankBookFile"
+            label="Upload Foto Buku Tabungan"
+            accept="image/*,.pdf"
+            required={true}
+            onFileSelect={handleFileUpload}
+            uploadState={getUploadState("bankBookFile")}
+            onReset={handleFileReset}
+          />
+          {errors.bankBookFile && (
+            <p className="text-red-500 text-xs mt-1">{errors.bankBookFile}</p>
+          )}
 
           <div className="flex gap-4">
             <button
