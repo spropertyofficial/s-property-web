@@ -220,6 +220,12 @@ export default function RegistrationDetailPage() {
               <label className="text-sm font-medium text-gray-500">Nama Lengkap</label>
               <p className="text-gray-900">{registration.personalData.fullName}</p>
             </div>
+            <div>
+              <label className="text-sm font-medium text-gray-500  mb-4">Tipe Pendaftar</label>
+              <p className="text-blue-700 bg-blue-50 px-2 py-1 rounded-full block font-semibold w-fit">
+                {registration.personalData.category && registration.personalData.category.replace(/-/g, " ")}
+              </p>
+            </div>
             
             <div>
               <label className="text-sm font-medium text-gray-500">Tempat, Tanggal Lahir</label>

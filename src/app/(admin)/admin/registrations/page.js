@@ -505,6 +505,9 @@ export default function RegistrationsPage() {
                   Pendaftar
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tipe
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Kontak
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -530,6 +533,13 @@ export default function RegistrationsPage() {
                         {registration.documents.city}
                       </div>
                     </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {registration.personalData.category && (
+                      <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-semibold text-xs">
+                        {registration.personalData.category.replace(/-/g, " ")}
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{registration.personalData.email}</div>

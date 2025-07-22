@@ -18,6 +18,7 @@ export async function POST(request) {
     // Validate required fields
     const requiredFields = [
       "personalData.fullName",
+      "personalData.category",
       "personalData.birthPlace", 
       "personalData.birthDate",
       "personalData.phone",
@@ -99,6 +100,7 @@ export async function POST(request) {
     const registrationData = {
       personalData: {
         fullName: data.personalData.fullName.trim(),
+        category: data.personalData.category,
         birthPlace: data.personalData.birthPlace.trim(),
         birthDate: new Date(data.personalData.birthDate),
         phone: data.personalData.phone.trim(),
