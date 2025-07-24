@@ -49,10 +49,21 @@ export const AuthProvider = ({ children }) => {
 
       if (response.ok) {
         setUser(data.user);
-        console.log("User:", user);
-        return { success: true, message: data.message };
+        // Simpan token ke localStorage jika perlu
+        if (typeof window !== "undefined" && data.token) {
+          localStorage.setItem("auth-token", data.token);
+        }
+        return {
+          success: true,
+          message: data.message,
+          requirePasswordChange: !!data.requirePasswordChange,
+        };
       } else {
-        return { success: false, message: data.message };
+        return {
+          success: false,
+          message: data.message,
+          requirePasswordChange: !!data.requirePasswordChange,
+        };
       }
     } catch (error) {
       return { success: false, message: "Login failed. Please try again." };

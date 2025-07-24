@@ -5,13 +5,24 @@ import ExploreCities from "@/components/sections/Home/ExploreCities";
 import SearchSection from "@/components/sections/Home/SearchSection";
 import PropertyListing from "@/components/common/PropertyListing";
 import KPRSimulator from "@/components/sections/SimulasiKPR/KPRSimulator";
+
 import { useGetResidentialsQuery } from "@/store/api/residentialsApi";
 import { useAuth } from "@/context/AuthContext";
 import LoadingLogo from "@/components/common/LoadingWrapper/components/LoadingLogo";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const { data: properties, isLoading, error } = useGetResidentialsQuery();
   const { user, loading: authLoading, isAgent } = useAuth();
+  const router = useRouter();
+  console.log("User:", user);
+  // Jika user wajib ganti password, redirect ke /change-password
+  useEffect(() => {
+    if (!authLoading && user && user.forcePasswordChange) {
+      router.replace("/change-password");
+    }
+  }, [authLoading, user, router]);
 
   // Filter properties for agents only
   const masterLeadProjects = properties?.filter(

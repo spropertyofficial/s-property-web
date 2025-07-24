@@ -168,6 +168,20 @@ const RegistrationSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+
+    // Link to created user account (if approved)
+    userAccount: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    // Store plaintext password for admin display (only after approval)
+    generatedPassword: {
+      type: String,
+      default: null,
+      select: false, // Hide by default, must be selected explicitly
+    },
   },
   {
     timestamps: true,

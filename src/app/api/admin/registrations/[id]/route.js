@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Registration from "@/lib/models/Registration";
+import User from "@/lib/models/User";
 import { verifyAdminWithRole } from "@/lib/auth";
+import bcrypt from "bcryptjs";
+import { generateRandomPassword } from "@/lib/utils/password";
 
 export async function GET(request, { params }) {
   try {
@@ -12,9 +15,11 @@ export async function GET(request, { params }) {
     }
 
     await dbConnect();
-    
     const { id } = await params;
-    const registration = await Registration.findById(id).lean();
+    const registration = await Registration.findById(id)
+      .populate("userAccount")
+      .select("-__v +generatedPassword")
+      .lean();
 
     if (!registration) {
       return NextResponse.json(
@@ -29,6 +34,8 @@ export async function GET(request, { params }) {
     return NextResponse.json({
       success: true,
       registration,
+      generatedPassword: registration.generatedPassword || null,
+      user: registration.userAccount || null,
     });
 
   } catch (error) {
@@ -69,7 +76,8 @@ export async function PUT(request, { params }) {
       );
     }
 
-    const registration = await Registration.findById(id);
+    // Always select generatedPassword and userAccount for logic
+    const registration = await Registration.findById(id).select("+generatedPassword userAccount personalData status");
     if (!registration) {
       return NextResponse.json(
         {
@@ -80,13 +88,57 @@ export async function PUT(request, { params }) {
       );
     }
 
-    // Update registration status
+    // If approving and not yet linked to user, create user and store password
+    let userCreated = null;
+    let generatedPassword = registration.generatedPassword;
+    if (
+      status === "approved" &&
+      !registration.userAccount &&
+      !registration.generatedPassword
+    ) {
+      // Generate password
+      generatedPassword = generateRandomPassword(10);
+      const hashedPassword = await bcrypt.hash(generatedPassword, 12);
+
+      // Determine user type mapping
+      let userType = "user";
+      if (["agent", "semi-agent", "sales-inhouse"].includes(registration.personalData.category)) {
+        userType = registration.personalData.category;
+      }
+
+      // Create user
+      const user = await User.create({
+        email: registration.personalData.email,
+        password: hashedPassword,
+        name: registration.personalData.fullName,
+        phone: registration.personalData.phone,
+        type: userType,
+        isActive: true,
+        forcePasswordChange: true, // user wajib ganti password saat login pertama
+      });
+      registration.userAccount = user._id;
+      registration.generatedPassword = generatedPassword;
+      userCreated = user;
+    }
+
+    // Update registration status and review info
     await registration.updateStatus(status, reviewNotes, authResult.admin._id);
+    // Save userAccount and generatedPassword if set
+    if (userCreated) {
+      await registration.save();
+    }
+
+    // Always return registration with userAccount and generatedPassword (if admin)
+    const updatedRegistration = await Registration.findById(id)
+      .populate("userAccount")
+      .select("-__v +generatedPassword");
 
     return NextResponse.json({
       success: true,
       message: "Status registrasi berhasil diperbarui",
-      registration: registration.toObject(),
+      registration: updatedRegistration,
+      generatedPassword: updatedRegistration.generatedPassword || null,
+      user: updatedRegistration.userAccount || null,
     });
 
   } catch (error) {

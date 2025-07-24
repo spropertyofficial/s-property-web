@@ -19,13 +19,33 @@ export default function RegistrationDetailPage() {
   const { id } = useParams();
   const [registration, setRegistration] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [userInfo, setUserInfo] = useState(null);
+
+  // Always run hooks before any early return
+  useEffect(() => {
+    if (registration && registration.status === "approved" && registration.userAccount) {
+      // Fetch again to get generatedPassword and user info
+      fetch(`/api/admin/registrations/${id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.user && data.generatedPassword) {
+            setUserInfo({
+              email: data.user.email,
+              password: data.generatedPassword,
+            });
+          }
+        });
+    } else {
+      setUserInfo(null);
+    }
+  }, [registration, id]);
 
   const fetchRegistration = useCallback(async () => {
     try {
       const response = await fetch(`/api/admin/registrations/${id}`);
       const data = await response.json();
-      
       if (data.success) {
+        // If registration is approved, fetch again to get user/password
         setRegistration(data.registration);
       } else {
         throw new Error(data.message);
@@ -149,7 +169,6 @@ export default function RegistrationDetailPage() {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -338,23 +357,20 @@ export default function RegistrationDetailPage() {
         </div>
       </div>
 
-      {/* Metadata */}
+      {/* Metadata & User Info */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Informasi Registrasi</h2>
-        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="text-sm font-medium text-gray-500">Tanggal Daftar</label>
             <p className="text-gray-900">{formatDate(registration.submittedAt)}</p>
           </div>
-          
           {registration.reviewedAt && (
             <div>
               <label className="text-sm font-medium text-gray-500">Tanggal Review</label>
               <p className="text-gray-900">{formatDate(registration.reviewedAt)}</p>
             </div>
           )}
-          
           {registration.reviewNotes && (
             <div className="md:col-span-2">
               <label className="text-sm font-medium text-gray-500">Catatan Review</label>
@@ -362,6 +378,26 @@ export default function RegistrationDetailPage() {
             </div>
           )}
         </div>
+
+        {/* User Account Info (shown if approved) */}
+        {registration.status === "approved" && userInfo && (
+          <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <h3 className="text-md font-semibold text-green-800 mb-2 flex items-center">
+              <FaUserCheck className="mr-2" /> Akun User Otomatis
+            </h3>
+            <div className="flex flex-col md:flex-row md:space-x-8 space-y-2 md:space-y-0">
+              <div>
+                <label className="text-sm font-medium text-gray-500">Email</label>
+                <p className="text-gray-900 font-mono select-all">{userInfo.email}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">Password</label>
+                <p className="text-gray-900 font-mono select-all">{userInfo.password}</p>
+                <span className="text-xs text-gray-500">(Tampilkan ke user secara manual)</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Registration from "@/lib/models/Registration";
+import User from "@/lib/models/User";
 
 export async function POST(request) {
   try {
@@ -80,11 +81,23 @@ export async function POST(request) {
       );
     }
 
+    // Check for duplicate email in User collection
+    const existingUser = await User.findOne({ email: data.personalData.email.toLowerCase().trim() });
+    if (existingUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Email sudah terdaftar sebagai user. Silakan gunakan email lain.",
+          field: "personalData.email",
+        },
+        { status: 400 }
+      );
+    }
+
     // Check for duplicate NIK
     const existingNikRegistration = await Registration.findOne({
       "documents.nik": data.documents.nik,
     });
-    
     if (existingNikRegistration) {
       return NextResponse.json(
         {
