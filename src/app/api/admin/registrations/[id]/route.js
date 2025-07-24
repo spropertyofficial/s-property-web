@@ -134,12 +134,12 @@ export async function PUT(request, { params }) {
         let subject = status === "approved" ? "Pendaftaran Anda Disetujui" : "Pendaftaran Anda Ditolak";
         let heading = status === "approved" ? "Selamat, Pendaftaran Anda Disetujui!" : "Mohon Maaf, Pendaftaran Anda Ditolak";
         let message = status === "approved"
-          ? `<p style='font-size:16px;color:#222;margin-bottom:16px;'>Akun Anda telah disetujui oleh admin S-Property. Silakan login menggunakan email dan password yang dikirimkan (jika ada).</p>`
+          ? `<p style='font-size:16px;color:#222;margin-bottom:16px;'>Akun Anda telah disetujui oleh admin S-Property.<br>Silakan login menggunakan informasi di bawah ini.<br><b>Catatan Penting:</b> Password sementara hanya berlaku untuk login pertama, dan Anda wajib langsung menggantinya setelah berhasil login.</p>`
           : `<p style='font-size:16px;color:#222;margin-bottom:16px;'>Pendaftaran Anda tidak dapat kami proses. Silakan cek catatan berikut dan lakukan pendaftaran ulang jika diperlukan.</p>`;
         let notes = reviewNotes ? `<div style='background:#f6f8fa;border-radius:8px;padding:16px;margin-bottom:16px;'><b>Catatan Admin:</b><br>${reviewNotes}</div>` : "";
-        let passwordInfo = "";
-        if (status === "approved" && generatedPassword) {
-          passwordInfo = `<div style='background:#e0f7fa;border-radius:8px;padding:16px;margin-bottom:16px;'><b>Password Sementara:</b> <span style='font-family:monospace;'>${generatedPassword}</span><br><span style='font-size:13px;color:#666;'>Silakan login dan segera ganti password Anda.</span></div>`;
+        let accountInfo = "";
+        if (status === "approved" && updatedRegistration.userAccount && generatedPassword) {
+          accountInfo = `<div style='background:#e0f7fa;border-radius:8px;padding:16px;margin-bottom:16px;'><b>Email:</b> <span style='font-family:monospace;'>${updatedRegistration.userAccount.email}</span><br><b>Password Sementara:</b> <span style='font-family:monospace;'>${generatedPassword}</span><br><span style='font-size:13px;color:#666;'>Password ini hanya dapat digunakan satu kali untuk login pertama.<br>Setelah login, Anda <b>wajib langsung mengganti password</b> demi keamanan akun Anda.</span></div>`;
         }
         await sendMail({
           to: registration.personalData.email,
@@ -153,7 +153,7 @@ export async function PUT(request, { params }) {
                 </div>
                 ${message}
                 ${notes}
-                ${passwordInfo}
+                ${accountInfo}
                 <hr style='margin:32px 0;border:none;border-top:1px solid #eee;' />
                 <div style='text-align:center;font-size:13px;color:#aaa;'>&copy; ${new Date().getFullYear()} S-Property. All rights reserved.</div>
               </div>

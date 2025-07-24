@@ -162,40 +162,46 @@ export default function RegistrationsPage() {
   };
 
   const handleStatusUpdate = async (id, newStatus) => {
-    const { value: reviewNotes } = await Swal.fire({
-      title: `Update Status ke \"${newStatus}\"`,
-      input: "textarea",
-      inputLabel: "Catatan Review (opsional)",
-      inputPlaceholder: "Masukkan catatan untuk perubahan status ini...",
-      showCancelButton: true,
-      confirmButtonText: "Update Status",
-      cancelButtonText: "Batal",
-    });
-
-    if (reviewNotes !== undefined) {
-      try {
-        const response = await fetch(`/api/admin/registrations/${id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ 
-            status: newStatus,
-            reviewNotes: reviewNotes || ""
-          }),
-        });
-
-        const data = await response.json();
-        
-        if (data.success) {
-          Swal.fire("Berhasil!", "Status berhasil diperbarui", "success");
-          reloadData();
-        } else {
-          throw new Error(data.message);
+    let reviewNotes = "";
+    if (newStatus === "rejected") {
+      const result = await Swal.fire({
+        title: `Update Status ke \"${newStatus}\"`,
+        input: "textarea",
+        inputLabel: "Catatan Review (wajib diisi)",
+        inputPlaceholder: "Masukkan alasan penolakan...",
+        showCancelButton: true,
+        confirmButtonText: "Update Status",
+        cancelButtonText: "Batal",
+        inputValidator: (value) => {
+          if (!value) return "Catatan review wajib diisi untuk penolakan.";
         }
-      } catch (error) {
-        Swal.fire("Error!", error.message, "error");
+      });
+      if (result.isConfirmed) {
+        reviewNotes = result.value || "";
+      } else {
+        return;
       }
+    }
+    try {
+      const response = await fetch(`/api/admin/registrations/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          status: newStatus,
+          reviewNotes: reviewNotes
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        Swal.fire("Berhasil!", "Status berhasil diperbarui", "success");
+        reloadData();
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (error) {
+      Swal.fire("Error!", error.message, "error");
     }
   };
 
