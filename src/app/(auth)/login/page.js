@@ -184,9 +184,9 @@ export default function LoginPage() {
                 </label>
                 <Link
                   href="/forgot-password"
-                  className="text-sm text-tosca-600 hover:text-tosca-700 transition-colors"
+                  className="text-sm text-blue-600 hover:text-blue-700 transition-colors underline"
                 >
-                  Forgot password?
+                  Lupa password?
                 </Link>
               </div>
 
