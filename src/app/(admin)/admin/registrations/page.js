@@ -162,30 +162,33 @@ export default function RegistrationsPage() {
   };
 
   const handleStatusUpdate = async (id, newStatus) => {
-    const result = await Swal.fire({
-      title: "Update Status",
-      text: `Ubah status menjadi "${newStatus}"?`,
-      icon: "question",
+    const { value: reviewNotes } = await Swal.fire({
+      title: `Update Status ke \"${newStatus}\"`,
+      input: "textarea",
+      inputLabel: "Catatan Review (opsional)",
+      inputPlaceholder: "Masukkan catatan untuk perubahan status ini...",
       showCancelButton: true,
-      confirmButtonText: "Ya, Update",
+      confirmButtonText: "Update Status",
       cancelButtonText: "Batal",
     });
 
-    if (result.isConfirmed) {
+    if (reviewNotes !== undefined) {
       try {
         const response = await fetch(`/api/admin/registrations/${id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ status: newStatus }),
+          body: JSON.stringify({ 
+            status: newStatus,
+            reviewNotes: reviewNotes || ""
+          }),
         });
 
         const data = await response.json();
         
         if (data.success) {
           Swal.fire("Berhasil!", "Status berhasil diperbarui", "success");
-          // Use reloadData instead of separate fetches
           reloadData();
         } else {
           throw new Error(data.message);

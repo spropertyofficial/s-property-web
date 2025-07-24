@@ -128,6 +128,43 @@ export async function PUT(request, { params }) {
       await registration.save();
     }
 
+    // Kirim email notifikasi ke user jika status approved atau rejected
+    try {
+      if (["approved", "rejected"].includes(status)) {
+        let subject = status === "approved" ? "Pendaftaran Anda Disetujui" : "Pendaftaran Anda Ditolak";
+        let heading = status === "approved" ? "Selamat, Pendaftaran Anda Disetujui!" : "Mohon Maaf, Pendaftaran Anda Ditolak";
+        let message = status === "approved"
+          ? `<p style='font-size:16px;color:#222;margin-bottom:16px;'>Akun Anda telah disetujui oleh admin S-Property. Silakan login menggunakan email dan password yang dikirimkan (jika ada).</p>`
+          : `<p style='font-size:16px;color:#222;margin-bottom:16px;'>Pendaftaran Anda tidak dapat kami proses. Silakan cek catatan berikut dan lakukan pendaftaran ulang jika diperlukan.</p>`;
+        let notes = reviewNotes ? `<div style='background:#f6f8fa;border-radius:8px;padding:16px;margin-bottom:16px;'><b>Catatan Admin:</b><br>${reviewNotes}</div>` : "";
+        let passwordInfo = "";
+        if (status === "approved" && generatedPassword) {
+          passwordInfo = `<div style='background:#e0f7fa;border-radius:8px;padding:16px;margin-bottom:16px;'><b>Password Sementara:</b> <span style='font-family:monospace;'>${generatedPassword}</span><br><span style='font-size:13px;color:#666;'>Silakan login dan segera ganti password Anda.</span></div>`;
+        }
+        await sendMail({
+          to: registration.personalData.email,
+          subject: subject + " - S-Property",
+          html: `
+            <div style='font-family:Segoe UI,Arial,sans-serif;background:#f6f8fa;padding:32px;'>
+              <div style='max-width:480px;margin:auto;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.07);padding:32px;'>
+                <div style='text-align:center;margin-bottom:24px;'>
+                  <img src='https://res.cloudinary.com/s-property-cms/image/upload/v1753347712/logo_xqhge3.png' alt='S-Property Logo' width='120' />
+                  <h2 style='color:#0e7490;font-size:22px;font-weight:bold;margin-top:8px;margin-bottom:8px;'>${heading}</h2>
+                </div>
+                ${message}
+                ${notes}
+                ${passwordInfo}
+                <hr style='margin:32px 0;border:none;border-top:1px solid #eee;' />
+                <div style='text-align:center;font-size:13px;color:#aaa;'>&copy; ${new Date().getFullYear()} S-Property. All rights reserved.</div>
+              </div>
+            </div>
+          `,
+        });
+      }
+    } catch (err) {
+      console.error("Gagal mengirim email notifikasi status registrasi:", err);
+    }
+
     // Always return registration with userAccount and generatedPassword (if admin)
     const updatedRegistration = await Registration.findById(id)
       .populate("userAccount")
