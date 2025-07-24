@@ -49,13 +49,18 @@ export async function POST(req) {
       { expiresIn: "7d" }
     );
 
-    // Remove password from response
+    // Remove password from response, tapi pastikan forcePasswordChange tetap ada
     const { password: _, ...userWithoutPassword } = user.toObject();
+    // Pastikan forcePasswordChange tetap ada di userWithoutPassword
+    if (typeof user.forcePasswordChange !== "undefined") {
+      userWithoutPassword.forcePasswordChange = user.forcePasswordChange;
+    }
 
     const response = NextResponse.json({
-      message: "Login successful",
+      message: user.forcePasswordChange ? "Password change required" : "Login successful",
       user: userWithoutPassword,
       token,
+      requirePasswordChange: !!user.forcePasswordChange,
     });
 
     // Set HTTP-only cookie

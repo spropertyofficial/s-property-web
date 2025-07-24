@@ -15,11 +15,7 @@ export default function LoginPage() {
   const { login, user } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (user) {
-      router.push("/");
-    }
-  }, [user, router]);
+  // Jangan auto-redirect ke '/' hanya karena user ada. Redirect dihandle oleh hasil login saja.
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,9 +24,18 @@ export default function LoginPage() {
 
     try {
       const result = await login(email, password);
+      console.log("Login result:", result);
+      console.log("User from context after login:", user);
 
       if (result.success) {
-        router.push("/");
+        if (result.requirePasswordChange) {
+          router.push("/change-password");
+        } else {
+          router.push("/");
+        }
+      } else if (result.requirePasswordChange) {
+        // Jika login gagal tapi requirePasswordChange true (misal password default), tetap redirect
+        router.push("/change-password");
       } else {
         setError(result.message || "Login failed");
       }
@@ -179,9 +184,9 @@ export default function LoginPage() {
                 </label>
                 <Link
                   href="/forgot-password"
-                  className="text-sm text-tosca-600 hover:text-tosca-700 transition-colors"
+                  className="text-sm text-blue-600 hover:text-blue-700 transition-colors underline"
                 >
-                  Forgot password?
+                  Lupa password?
                 </Link>
               </div>
 

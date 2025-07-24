@@ -26,7 +26,7 @@ const UserSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["agent", "user"],
+      enum: ["agent", "user", "semi-agent", "sales-inhouse"],
       default: "user",
     },
     isActive: {
@@ -37,6 +37,22 @@ const UserSchema = new mongoose.Schema(
       type: String,
       unique: true,
       sparse: true, // Only required for agents
+    },
+
+    // Force user to change password on first login (for auto-created users)
+    forcePasswordChange: {
+      type: Boolean,
+      default: false,
+    },
+
+    // Untuk fitur lupa password
+    resetPasswordToken: {
+      type: String,
+      default: null,
+    },
+    resetPasswordExpires: {
+      type: Date,
+      default: null,
     },
   },
   {

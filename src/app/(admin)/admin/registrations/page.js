@@ -162,37 +162,46 @@ export default function RegistrationsPage() {
   };
 
   const handleStatusUpdate = async (id, newStatus) => {
-    const result = await Swal.fire({
-      title: "Update Status",
-      text: `Ubah status menjadi "${newStatus}"?`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "Ya, Update",
-      cancelButtonText: "Batal",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        const response = await fetch(`/api/admin/registrations/${id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ status: newStatus }),
-        });
-
-        const data = await response.json();
-        
-        if (data.success) {
-          Swal.fire("Berhasil!", "Status berhasil diperbarui", "success");
-          // Use reloadData instead of separate fetches
-          reloadData();
-        } else {
-          throw new Error(data.message);
+    let reviewNotes = "";
+    if (newStatus === "rejected") {
+      const result = await Swal.fire({
+        title: `Update Status ke \"${newStatus}\"`,
+        input: "textarea",
+        inputLabel: "Catatan Review (wajib diisi)",
+        inputPlaceholder: "Masukkan alasan penolakan...",
+        showCancelButton: true,
+        confirmButtonText: "Update Status",
+        cancelButtonText: "Batal",
+        inputValidator: (value) => {
+          if (!value) return "Catatan review wajib diisi untuk penolakan.";
         }
-      } catch (error) {
-        Swal.fire("Error!", error.message, "error");
+      });
+      if (result.isConfirmed) {
+        reviewNotes = result.value || "";
+      } else {
+        return;
       }
+    }
+    try {
+      const response = await fetch(`/api/admin/registrations/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          status: newStatus,
+          reviewNotes: reviewNotes
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        Swal.fire("Berhasil!", "Status berhasil diperbarui", "success");
+        reloadData();
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (error) {
+      Swal.fire("Error!", error.message, "error");
     }
   };
 
@@ -505,6 +514,9 @@ export default function RegistrationsPage() {
                   Pendaftar
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tipe
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Kontak
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -530,6 +542,13 @@ export default function RegistrationsPage() {
                         {registration.documents.city}
                       </div>
                     </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {registration.personalData.category && (
+                      <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-semibold text-xs">
+                        {registration.personalData.category.replace(/-/g, " ")}
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{registration.personalData.email}</div>

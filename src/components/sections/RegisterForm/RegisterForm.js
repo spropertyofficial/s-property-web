@@ -23,10 +23,10 @@ export default function RegisterForm() {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  
+
   // Generate unique registration ID once per session
   const [registrationId] = useState(() => `reg_${Date.now()}`);
-  
+
   // Use custom file upload hook
   const { uploadFile, getUploadState, resetUploadState } = useFileUpload();
 
@@ -37,6 +37,7 @@ export default function RegisterForm() {
     birthDate: "",
     phone: "",
     email: "",
+    category: "", // Tipe Pendaftar
     referralPhone: "",
     city: "",
     idNumber: "",
@@ -57,9 +58,30 @@ export default function RegisterForm() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Hapus error saat user mulai mengetik
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: null }));
+    // Realtime validation for phone and referralPhone
+    if (name === "phone") {
+      const phoneRegex = /^\+62[8][0-9]{8,11}$/;
+      if (!phoneRegex.test(value.replace(/[-\s]/g, ""))) {
+        setErrors((prev) => ({ ...prev, phone: "Format nomor handphone tidak valid. Gunakan format +6281234567890" }));
+      } else {
+        setErrors((prev) => ({ ...prev, phone: null }));
+      }
+    } else if (name === "referralPhone") {
+      if (value && value.trim() !== "") {
+        const phoneRegex = /^\+62[8][0-9]{8,11}$/;
+        if (!phoneRegex.test(value.replace(/[-\s]/g, ""))) {
+          setErrors((prev) => ({ ...prev, referralPhone: "Format nomor handphone tidak valid. Gunakan format +6281234567890" }));
+        } else {
+          setErrors((prev) => ({ ...prev, referralPhone: null }));
+        }
+      } else {
+        setErrors((prev) => ({ ...prev, referralPhone: null }));
+      }
+    } else {
+      // Hapus error saat user mulai mengetik untuk field lain
+      if (errors[name]) {
+        setErrors((prev) => ({ ...prev, [name]: null }));
+      }
     }
   };
 
@@ -256,44 +278,49 @@ export default function RegisterForm() {
   };
 
   // File upload handler
-  const handleFileUpload = useCallback(async (file, fileType) => {
-    try {
-      setErrors(prev => ({ ...prev, [fileType]: null }));
-      
-      // Use consistent registration ID for the session
-      const options = {
-        applicantName: formData.fullName || "unknown",
-        registrationId: registrationId
-      };
-      
-      const result = await uploadFile(file, fileType, options);
-      
-      setFileData(prev => ({
-        ...prev,
-        [fileType]: {
-          url: result.url,
-          publicId: result.publicId,
-        }
-      }));
+  const handleFileUpload = useCallback(
+    async (file, fileType) => {
+      try {
+        setErrors((prev) => ({ ...prev, [fileType]: null }));
 
-    } catch (error) {
-      console.error(`Error uploading ${fileType}:`, error);
-      setErrors(prev => ({ ...prev, [fileType]: error.message }));
-      
-      Swal.fire({
-        icon: "error",
-        title: "Upload Gagal",
-        text: error.message,
-      });
-    }
-  }, [uploadFile, formData.fullName, registrationId]);
+        // Use consistent registration ID for the session
+        const options = {
+          applicantName: formData.fullName || "unknown",
+          registrationId: registrationId,
+        };
+
+        const result = await uploadFile(file, fileType, options);
+
+        setFileData((prev) => ({
+          ...prev,
+          [fileType]: {
+            url: result.url,
+            publicId: result.publicId,
+          },
+        }));
+      } catch (error) {
+        console.error(`Error uploading ${fileType}:`, error);
+        setErrors((prev) => ({ ...prev, [fileType]: error.message }));
+
+        Swal.fire({
+          icon: "error",
+          title: "Upload Gagal",
+          text: error.message,
+        });
+      }
+    },
+    [uploadFile, formData.fullName, registrationId]
+  );
 
   // Reset file upload
-  const handleFileReset = useCallback((fileType) => {
-    resetUploadState(fileType);
-    setFileData(prev => ({ ...prev, [fileType]: null }));
-    setErrors(prev => ({ ...prev, [fileType]: null }));
-  }, [resetUploadState]);
+  const handleFileReset = useCallback(
+    (fileType) => {
+      resetUploadState(fileType);
+      setFileData((prev) => ({ ...prev, [fileType]: null }));
+      setErrors((prev) => ({ ...prev, [fileType]: null }));
+    },
+    [resetUploadState]
+  );
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
@@ -308,6 +335,11 @@ export default function RegisterForm() {
           stepErrors.fullName = "Nama lengkap wajib diisi";
         } else if (formData.fullName.length < 3) {
           stepErrors.fullName = "Nama lengkap minimal 3 karakter";
+        }
+
+        // Validasi tipe pendaftar
+        if (!formData.category) {
+          stepErrors.category = "Tipe pendaftar wajib dipilih";
         }
 
         if (!formData.birthPlace || formData.birthPlace.trim() === "") {
@@ -490,6 +522,7 @@ export default function RegisterForm() {
           birthDate: formData.birthDate,
           phone: formData.phone,
           email: formData.email,
+          category: formData.category, // Tipe Pendaftar
           referralPhone: formData.referralPhone || null,
         },
         documents: {
@@ -533,30 +566,34 @@ export default function RegisterForm() {
             <p class="mb-3">${result.message}</p>
             <div class="bg-green-50 p-3 rounded-lg">
               <p class="text-sm text-green-700">
-                <strong>ID Registrasi:</strong> ${result.data.registrationId}<br/>
+                <strong>ID Registrasi:</strong> ${
+                  result.data.registrationId
+                }<br/>
                 <strong>Status:</strong> ${result.data.status}<br/>
-                <strong>Tanggal:</strong> ${new Date(result.data.submittedAt).toLocaleString('id-ID')}
+                <strong>Tanggal:</strong> ${new Date(
+                  result.data.submittedAt
+                ).toLocaleString("id-ID")}
               </p>
             </div>
           `,
           confirmButtonText: "Lanjutkan",
         });
-        
+
         nextStep(); // Pindah ke halaman sukses
       } else {
         // Handle error dengan pesan spesifik
         await Swal.fire({
           icon: "error",
           title: "Pendaftaran Gagal",
-          text: result.message || "Terjadi kesalahan saat memproses pendaftaran",
+          text:
+            result.message || "Terjadi kesalahan saat memproses pendaftaran",
         });
-        
+
         // Highlight field yang error jika ada
         if (result.field) {
-          setErrors(prev => ({ ...prev, [result.field]: result.message }));
+          setErrors((prev) => ({ ...prev, [result.field]: result.message }));
         }
       }
-
     } catch (error) {
       console.error("Registration error:", error);
       setIsLoading(false);
@@ -571,27 +608,33 @@ export default function RegisterForm() {
   };
 
   // Helper untuk mengecek upload status per step
-  const isUploadingInStep = useCallback((stepNum) => {
-    if (stepNum === 2) {
-      const ktpState = getUploadState("ktpFile");
-      const npwpState = getUploadState("npwpFile");
-      return ktpState.isUploading || npwpState.isUploading;
-    } else if (stepNum === 3) {
-      const bankBookState = getUploadState("bankBookFile");
-      return bankBookState.isUploading;
-    }
-    return false;
-  }, [getUploadState]);
+  const isUploadingInStep = useCallback(
+    (stepNum) => {
+      if (stepNum === 2) {
+        const ktpState = getUploadState("ktpFile");
+        const npwpState = getUploadState("npwpFile");
+        return ktpState.isUploading || npwpState.isUploading;
+      } else if (stepNum === 3) {
+        const bankBookState = getUploadState("bankBookFile");
+        return bankBookState.isUploading;
+      }
+      return false;
+    },
+    [getUploadState]
+  );
 
   // Helper untuk mengecek apakah semua file di step sudah berhasil diupload
-  const isStepFilesComplete = useCallback((stepNum) => {
-    if (stepNum === 2) {
-      return fileData.ktpFile && fileData.npwpFile;
-    } else if (stepNum === 3) {
-      return fileData.bankBookFile;
-    }
-    return true;
-  }, [fileData]);
+  const isStepFilesComplete = useCallback(
+    (stepNum) => {
+      if (stepNum === 2) {
+        return fileData.ktpFile && fileData.npwpFile;
+      } else if (stepNum === 3) {
+        return fileData.bankBookFile;
+      }
+      return true;
+    },
+    [fileData]
+  );
 
   return (
     <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
@@ -626,6 +669,28 @@ export default function RegisterForm() {
       {/* Step 1: Informasi Dasar */}
       {step === 1 && (
         <div className="space-y-4">
+          <div>
+            <label className="flex text-green-200 items-center mb-1">
+              <User size={16} className="mr-2" />
+              Tipe Pendaftar *
+            </label>
+            <select
+              name="category"
+              className={`w-full p-2 border ${
+                errors.category ? "border-red-500" : "border-green-200"
+              } outline-none rounded focus:ring-2 focus:ring-green-200`}
+              onChange={handleChange}
+              value={formData.category || ""}
+            >
+              <option value="">Pilih Tipe Pendaftar</option>
+              <option value="semi-agent">Semi Agent</option>
+              <option value="agent">Agent</option>
+              <option value="sales-inhouse">Sales Inhouse</option>
+            </select>
+            {errors.category && (
+              <p className="text-red-500 text-xs mt-1">{errors.category}</p>
+            )}
+          </div>
           <div>
             <label className="flex text-green-200 items-center mb-1 ">
               <User size={16} className="mr-2" />
@@ -704,7 +769,9 @@ export default function RegisterForm() {
               onChange={handleChange}
               onBlur={handleBlur}
               value={formData.phone || ""}
+              placeholder="Contoh: +6281234567890"
             />
+            <p className="text-xs text-gray-400 mt-1">Contoh: +6281234567890</p>
             {errors.phone && (
               <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
             )}
@@ -756,7 +823,9 @@ export default function RegisterForm() {
               onChange={handleChange}
               onBlur={handleBlur}
               value={formData.referralPhone || ""}
+              placeholder="Contoh: +6281234567890"
             />
+            <p className="text-xs text-gray-400 mt-1">Contoh: +6281234567890</p>
             {errors.referralPhone && (
               <p className="text-red-500 text-xs mt-1">
                 {errors.referralPhone}

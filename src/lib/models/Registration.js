@@ -10,6 +10,11 @@ const RegistrationSchema = new mongoose.Schema(
         trim: true,
         minlength: 3,
       },
+      category: {
+        type: String,
+        required: true,
+        enum: ["semi-agent", "agent", "sales-inhouse"],
+      },
       birthPlace: {
         type: String,
         required: true,
@@ -23,7 +28,7 @@ const RegistrationSchema = new mongoose.Schema(
         type: String,
         required: true,
         trim: true,
-        match: /^(\+62|62|0)[8][0-9]{8,11}$/,
+        match: /^\+62[8][0-9]{8,11}$/,
       },
       email: {
         type: String,
@@ -35,7 +40,7 @@ const RegistrationSchema = new mongoose.Schema(
       referralPhone: {
         type: String,
         trim: true,
-        match: /^(\+62|62|0)[8][0-9]{8,11}$/,
+        match: /^\+62[8][0-9]{8,11}$/,
         default: null,
       },
     },
@@ -163,6 +168,20 @@ const RegistrationSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+
+    // Link to created user account (if approved)
+    userAccount: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    // Store plaintext password for admin display (only after approval)
+    generatedPassword: {
+      type: String,
+      default: null,
+      select: false, // Hide by default, must be selected explicitly
+    },
   },
   {
     timestamps: true,
@@ -173,7 +192,7 @@ const RegistrationSchema = new mongoose.Schema(
 // Indexes for better performance
 RegistrationSchema.index({ "personalData.email": 1 });
 RegistrationSchema.index({ "personalData.phone": 1 });
-RegistrationSchema.index({ "documents.nik": 1 });
+// RegistrationSchema.index({ "documents.nik": 1 }); // Dihapus, sudah ada unique di schema
 RegistrationSchema.index({ status: 1 });
 RegistrationSchema.index({ submittedAt: -1 });
 
