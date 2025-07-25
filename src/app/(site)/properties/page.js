@@ -169,7 +169,7 @@ function PropertiesPage() {
       else filtered = filtered.filter((p) => p.bathrooms === Number(bathrooms));
     }
     if (marketStatus !== "all") {
-      filtered = filtered.filter((p) => p.marketStatus?.name === marketStatus);
+      filtered = filtered.filter((p) => p.listingStatus?.name === marketStatus);
     }
     if (classification !== "all") {
       filtered = filtered.filter((p) => p.classification === classification);
