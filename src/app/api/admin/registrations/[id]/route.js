@@ -5,6 +5,7 @@ import User from "@/lib/models/User";
 import { verifyAdminWithRole } from "@/lib/auth";
 import bcrypt from "bcryptjs";
 import { generateRandomPassword } from "@/lib/utils/password";
+import { sendMail } from "@/lib/email/sendMail";
 
 export async function GET(request, { params }) {
   try {
@@ -138,8 +139,8 @@ export async function PUT(request, { params }) {
           : `<p style='font-size:16px;color:#222;margin-bottom:16px;'>Pendaftaran Anda tidak dapat kami proses. Silakan cek catatan berikut dan lakukan pendaftaran ulang jika diperlukan.</p>`;
         let notes = reviewNotes ? `<div style='background:#f6f8fa;border-radius:8px;padding:16px;margin-bottom:16px;'><b>Catatan Admin:</b><br>${reviewNotes}</div>` : "";
         let accountInfo = "";
-        if (status === "approved" && updatedRegistration.userAccount && generatedPassword) {
-          accountInfo = `<div style='background:#e0f7fa;border-radius:8px;padding:16px;margin-bottom:16px;'><b>Email:</b> <span style='font-family:monospace;'>${updatedRegistration.userAccount.email}</span><br><b>Password Sementara:</b> <span style='font-family:monospace;'>${generatedPassword}</span><br><span style='font-size:13px;color:#666;'>Password ini hanya dapat digunakan satu kali untuk login pertama.<br>Setelah login, Anda <b>wajib langsung mengganti password</b> demi keamanan akun Anda.</span></div>`;
+        if (status === "approved" && registration.userAccount && generatedPassword) {
+          accountInfo = `<div style='background:#e0f7fa;border-radius:8px;padding:16px;margin-bottom:16px;'><b>Email:</b> <span style='font-family:monospace;'>${registration.personalData.email}</span><br><b>Password Sementara:</b> <span style='font-family:monospace;'>${generatedPassword}</span></div>`;
         }
         await sendMail({
           to: registration.personalData.email,
@@ -214,22 +215,42 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    // TODO: Optionally delete files from Cloudinary
-    // const filesToDelete = [
-    //   registration.documents.ktp?.publicId,
-    //   registration.documents.npwp?.publicId,
-    //   registration.documents.bankBook?.publicId
-    // ].filter(Boolean);
-    
-    // if (filesToDelete.length > 0) {
-    //   await cloudinary.api.delete_resources(filesToDelete);
-    // }
+    // Hapus akun user jika ada userAccount
+    if (registration.userAccount) {
+      await User.findByIdAndDelete(registration.userAccount);
+    }
+
+        // Delete files from Cloudinary if present
+        const filesToDelete = [
+          registration.documents?.ktp?.publicId,
+          registration.documents?.npwp?.publicId,
+          registration.documents?.bankBook?.publicId
+        ].filter(Boolean);
+        if (filesToDelete.length > 0) {
+          try {
+            const cloudinary = require('cloudinary').v2;
+            const result = await cloudinary.api.delete_resources(filesToDelete);
+            if (result && result.deleted) {
+              Object.entries(result.deleted).forEach(([publicId, status]) => {
+                if (status === 'deleted') {
+                  console.log(`Cloudinary file deleted: ${publicId}`);
+                } else {
+                  console.warn(`Cloudinary file not deleted: ${publicId} (status: ${status})`);
+                }
+              });
+            } else {
+              console.warn('Cloudinary delete_resources did not return expected result:', result);
+            }
+          } catch (err) {
+            console.error('Gagal menghapus file Cloudinary:', err);
+          }
+        }
 
     await Registration.findByIdAndDelete(id);
 
     return NextResponse.json({
       success: true,
-      message: "Registrasi berhasil dihapus",
+      message: "Registrasi dan akun user berhasil dihapus",
     });
 
   } catch (error) {

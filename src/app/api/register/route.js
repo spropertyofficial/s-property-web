@@ -199,7 +199,7 @@ export async function POST(request) {
               </ul>
               <p style="font-size: 15px; color: #666;">Segera review pendaftaran ini di halaman admin.</p>
               <div style="text-align: center; margin: 24px 0;">
-                <a href="${process.env.NEXT_PUBLIC_BASE_URL}/admin/registrations/${registration._id}" style="display: inline-block; background: #0e7490; color: #fff; font-weight: bold; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-size: 15px;">Review Pendaftaran</a>
+                <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:4004'}/admin/registrations/${registration._id}" style="display: inline-block; background: #0e7490; color: #fff; font-weight: bold; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-size: 15px;">Review Pendaftaran</a>
               </div>
               <hr style="margin: 32px 0; border: none; border-top: 1px solid #eee;" />
               <div style="text-align: center; font-size: 13px; color: #aaa;">&copy; ${new Date().getFullYear()} S-Property. All rights reserved.</div>
