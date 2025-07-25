@@ -207,13 +207,13 @@ export default function RegistrationsPage() {
 
   const handleDelete = async (id, fullName) => {
     const result = await Swal.fire({
-      title: "Hapus Registrasi",
-      text: `Apakah Anda yakin ingin menghapus registrasi "${fullName}"? Tindakan ini tidak dapat dibatalkan.`,
+      title: "Hapus Registrasi & Akun User",
+      text: `Apakah Anda yakin ingin menghapus registrasi \"${fullName}\" beserta akun usernya? Tindakan ini tidak dapat dibatalkan.`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Ya, Hapus",
+      confirmButtonText: "Ya, Hapus Semua",
       cancelButtonText: "Batal",
     });
 
@@ -227,8 +227,7 @@ export default function RegistrationsPage() {
         const data = await response.json();
         
         if (data.success) {
-          Swal.fire("Berhasil!", "Registrasi berhasil dihapus", "success");
-          // Use reloadData instead of separate fetches
+          Swal.fire("Berhasil!", "Registrasi dan akun user berhasil dihapus", "success");
           reloadData();
         } else {
           throw new Error(data.message);
