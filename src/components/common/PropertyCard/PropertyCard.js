@@ -132,7 +132,7 @@ export default function PropertyCard({
     name,
     location,
     gallery,
-    id,
+    _id,
     startPrice,
     assetType,
     listingStatus,
@@ -205,7 +205,7 @@ export default function PropertyCard({
             </div>
             
             <Link
-              href={`/properties/${type}/${id}`}
+              href={`/properties/${type}/${_id}`}
               className="block w-full text-center bg-tosca-500 text-white py-1.5 px-3 rounded-lg hover:bg-tosca-600 transition-all duration-300 transform hover:scale-[1.02] font-medium text-sm shadow-lg hover:shadow-xl"
             >
               Lihat Detail
