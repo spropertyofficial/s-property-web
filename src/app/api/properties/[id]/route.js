@@ -27,7 +27,6 @@ export async function GET(req, { params }) {
     await connectDB();
     const { id } = await params;
 
-    // Validasi ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { success: false, error: "ID properti tidak valid" },
@@ -45,8 +44,8 @@ export async function GET(req, { params }) {
         path: "clusters",
         populate: {
           path: "unitTypes",
-          model: "UnitType"
-        }
+          model: "UnitType",
+        },
       })
       .lean();
 
