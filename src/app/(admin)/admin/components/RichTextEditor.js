@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { FaInfoCircle, FaBold, FaEye, FaEdit, FaColumns } from "react-icons/fa";
 import SafeRichTextEditor from "./SafeRichTextEditor";
+import { marked } from "marked";
+import parse from "html-react-parser";
 
 export default function RichTextEditor({
   value = "",
@@ -159,7 +161,6 @@ ${
           <span className={`text-xs ${getCharCountColor()}`}>
             {charCount}/{maxLength} karakter
           </span>
-          
           {/* Preview Mode Toggle */}
           {showPreview && value && (
             <div className="flex items-center border rounded-md">
@@ -201,7 +202,6 @@ ${
               </button>
             </div>
           )}
-          
           {canShowTemplate && (
             <button
               type="button"
@@ -214,7 +214,7 @@ ${
         </div>
       </div>
 
-      {/* Markdown Editor */}
+      {/* Markdown Editor & Preview */}
       <div
         className={`rounded-lg border-2 overflow-hidden ${
           error
@@ -222,13 +222,36 @@ ${
             : "border-gray-300 hover:border-gray-400 focus-within:border-blue-500"
         }`}
       >
-        <SafeRichTextEditor
-          value={value}
-          onChange={handleContentChange}
-          placeholder={placeholder}
-          height={height}
-          className=""
-        />
+        {previewMode === "edit" && (
+          <SafeRichTextEditor
+            value={value}
+            onChange={handleContentChange}
+            placeholder={placeholder}
+            height={height}
+            className=""
+          />
+        )}
+        {previewMode === "preview" && (
+          <div className="p-4 bg-gray-50 min-h-[200px] text-gray-800 prose prose-blue max-w-none">
+            {parse(marked(value || ""))}
+          </div>
+        )}
+        {previewMode === "split" && (
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <SafeRichTextEditor
+                value={value}
+                onChange={handleContentChange}
+                placeholder={placeholder}
+                height={height}
+                className=""
+              />
+            </div>
+            <div className="p-4 bg-gray-50 min-h-[200px] text-gray-800 prose prose-blue max-w-none">
+              {parse(marked(value || ""))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Error Message */}

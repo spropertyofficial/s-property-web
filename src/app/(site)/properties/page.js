@@ -1,132 +1,622 @@
-import { Suspense } from "react";
-import { getPropertiesData } from "@/app/api/properties/route";
-import PropertiesClient from "@/components/sections/Properties/PropertiesClient";
+"use client";
 
-// Loading component for properties
-function PropertiesLoading() {
-  return (
-    <div className="space-y-4 md:space-y-6">
-      {/* Search loading */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-6">
-        <div className="h-12 md:h-14 bg-gray-200 rounded-xl animate-pulse"></div>
+import { useState, useEffect, useMemo } from "react";
+import PropertyCard from "@/components/common/PropertyCard/PropertyCard";
+
+// Asset type options fetched from API
+function useAssetTypeOptions() {
+  const [options, setOptions] = useState([
+    { value: "all", label: "Semua Properti" },
+  ]);
+  useEffect(() => {
+    async function fetchOptions() {
+      try {
+        const res = await fetch("/api/categories/asset-types");
+        const data = await res.json();
+        if (Array.isArray(data.assetTypes)) {
+          const apiOptions = data.assetTypes.map((s) => ({
+            value: s.name,
+            label: s.name,
+          }));
+          setOptions([
+            { value: "all", label: "Semua Properti" },
+            ...apiOptions,
+          ]);
+        }
+      } catch {}
+    }
+    fetchOptions();
+  }, []);
+  return options;
+}
+
+// Market status options fetched from API
+function useMarketStatusOptions() {
+  const [options, setOptions] = useState([{ value: "all", label: "Semua" }]);
+  useEffect(() => {
+    async function fetchOptions() {
+      try {
+        const res = await fetch("/api/categories/listing-status");
+        const data = await res.json();
+        if (Array.isArray(data.listingStatus)) {
+          const apiOptions = data.listingStatus.map((s) => ({
+            value: s.name,
+            label: s.name,
+          }));
+          setOptions([{ value: "all", label: "Semua" }, ...apiOptions]);
+        }
+      } catch {}
+    }
+    fetchOptions();
+  }, []);
+  return options;
+}
+
+// Classification options fetched from API market-status
+function useClassificationOptions() {
+  const [options, setOptions] = useState([{ value: "all", label: "Semua" }]);
+  useEffect(() => {
+    async function fetchOptions() {
+      try {
+        const res = await fetch("/api/categories/market-status");
+        const data = await res.json();
+        if (Array.isArray(data.marketStatus)) {
+          const apiOptions = data.marketStatus.map((s) => ({
+            value: s.name,
+            label: s.name,
+          }));
+          setOptions([{ value: "all", label: "Semua" }, ...apiOptions]);
+        }
+      } catch {}
+    }
+    fetchOptions();
+  }, []);
+  return options;
+}
+
+function PropertiesPage() {
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Filter states
+  const [keyword, setKeyword] = useState("");
+  const [assetType, setAssetType] = useState("all");
+  const [city, setCity] = useState("all");
+  const assetTypeOptions = useAssetTypeOptions();
+  const marketStatusOptions = useMarketStatusOptions();
+  const classificationOptions = useClassificationOptions();
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [minLand, setMinLand] = useState("");
+  const [maxLand, setMaxLand] = useState("");
+  const [bedrooms, setBedrooms] = useState("");
+  const [bathrooms, setBathrooms] = useState("");
+  const [marketStatus, setMarketStatus] = useState("all");
+  const [classification, setClassification] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 16;
+
+  useEffect(() => {
+    async function fetchProperties() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("/api/properties");
+        const data = await res.json();
+        if (data) {
+          setProperties(data.properties || []);
+        } else {
+          setError(data.message || "Gagal memuat data properti");
+        }
+      } catch (err) {
+        setError("Gagal memuat data properti");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProperties();
+  }, []);
+
+  // Get unique cities for filter
+  const cityOptions = useMemo(() => {
+    const cities = [
+      ...new Set(properties.map((p) => p.location?.city).filter(Boolean)),
+    ];
+    return ["all", ...cities];
+  }, [properties]);
+
+  // Filtering logic
+  const filteredProperties = useMemo(() => {
+    let filtered = [...properties];
+    if (keyword) {
+      const kw = keyword.toLowerCase();
+      filtered = filtered.filter(
+        (p) =>
+          p.name?.toLowerCase().includes(kw) ||
+          p.location?.city?.toLowerCase().includes(kw) ||
+          p.location?.region?.toLowerCase().includes(kw)
+      );
+    }
+    if (assetType !== "all") {
+      filtered = filtered.filter((p) => p.assetType?.name === assetType);
+    }
+    if (city !== "all") {
+      filtered = filtered.filter((p) => p.location?.city === city);
+    }
+    if (minPrice) {
+      filtered = filtered.filter((p) => p.startPrice >= Number(minPrice));
+    }
+    if (maxPrice) {
+      filtered = filtered.filter((p) => p.startPrice <= Number(maxPrice));
+    }
+    if (minLand) {
+      filtered = filtered.filter((p) => p.landSize >= Number(minLand));
+    }
+    if (maxLand) {
+      filtered = filtered.filter((p) => p.landSize <= Number(maxLand));
+    }
+    if (bedrooms) {
+      if (bedrooms === "4+") filtered = filtered.filter((p) => p.bedrooms >= 4);
+      else filtered = filtered.filter((p) => p.bedrooms === Number(bedrooms));
+    }
+    if (bathrooms) {
+      if (bathrooms === "3+")
+        filtered = filtered.filter((p) => p.bathrooms >= 3);
+      else filtered = filtered.filter((p) => p.bathrooms === Number(bathrooms));
+    }
+    if (marketStatus !== "all") {
+      filtered = filtered.filter((p) => p.listingStatus?.name === marketStatus);
+    }
+    if (classification !== "all") {
+      filtered = filtered.filter((p) => p.classification === classification);
+    }
+    // Sorting
+    if (sortBy === "price-asc") {
+      filtered.sort((a, b) => a.startPrice - b.startPrice);
+    } else if (sortBy === "price-desc") {
+      filtered.sort((a, b) => b.startPrice - a.startPrice);
+    } else {
+      filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+    return filtered;
+  }, [
+    properties,
+    keyword,
+    assetType,
+    city,
+    minPrice,
+    maxPrice,
+    minLand,
+    maxLand,
+    bedrooms,
+    bathrooms,
+    marketStatus,
+    classification,
+    sortBy,
+  ]);
+
+  // Active filters for pill display
+  const activeFilters = useMemo(() => {
+    const pills = [];
+    if (assetType !== "all") pills.push({ key: "assetType", label: assetType });
+    if (city !== "all") pills.push({ key: "city", label: `Kota: ${city}` });
+    if (minPrice)
+      pills.push({ key: "minPrice", label: `Min Harga: Rp${minPrice}` });
+    if (maxPrice)
+      pills.push({ key: "maxPrice", label: `Maks Harga: Rp${maxPrice}` });
+    if (minLand)
+      pills.push({ key: "minLand", label: `Min Luas: ${minLand}m²` });
+    if (maxLand)
+      pills.push({ key: "maxLand", label: `Maks Luas: ${maxLand}m²` });
+    if (bedrooms) pills.push({ key: "bedrooms", label: `${bedrooms} KT` });
+    if (bathrooms) pills.push({ key: "bathrooms", label: `${bathrooms} KM` });
+    if (marketStatus !== "all")
+      pills.push({ key: "marketStatus", label: `Pasar: ${marketStatus}` });
+    if (classification !== "all")
+      pills.push({ key: "classification", label: `Klasifikasi: ${classification}` });
+    return pills;
+  }, [
+    assetType,
+    city,
+    minPrice,
+    maxPrice,
+    minLand,
+    maxLand,
+    bedrooms,
+    bathrooms,
+    marketStatus,
+    classification,
+  ]);
+
+  // Reset all filters
+  function resetFilters() {
+    setKeyword("");
+    setAssetType("all");
+    setCity("all");
+    setMinPrice("");
+    setMaxPrice("");
+    setMinLand("");
+    setMaxLand("");
+    setBedrooms("");
+    setBathrooms("");
+    setMarketStatus("all");
+    setClassification("all");
+    setSortBy("newest");
+  }
+
+  // Remove individual filter
+  function removeFilter(key) {
+    switch (key) {
+      case "assetType":
+        setAssetType("all");
+        break;
+      case "city":
+        setCity("all");
+        break;
+      case "minPrice":
+        setMinPrice("");
+        break;
+      case "maxPrice":
+        setMaxPrice("");
+        break;
+      case "minLand":
+        setMinLand("");
+        break;
+      case "maxLand":
+        setMaxLand("");
+        break;
+      case "bedrooms":
+        setBedrooms("");
+        break;
+      case "bathrooms":
+        setBathrooms("");
+        break;
+      case "marketStatus":
+        setMarketStatus("all");
+        break;
+      case "classification":
+        setClassification("all");
+        break;
+      default:
+        break;
+    }
+  }
+
+  // Mobile sidebar toggle
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Calculate paginated items
+  const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
+  const paginatedProperties = useMemo(() => {
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    return filteredProperties.slice(startIdx, startIdx + itemsPerPage);
+  }, [filteredProperties, currentPage, itemsPerPage]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    keyword,
+    assetType,
+    city,
+    minPrice,
+    maxPrice,
+    minLand,
+    maxLand,
+    bedrooms,
+    bathrooms,
+    marketStatus,
+    classification,
+    sortBy,
+  ]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-600"></div>
       </div>
-
-      {/* Filter loading */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-6">
-        <div className="flex flex-wrap gap-2 md:gap-3">
-          {[...Array(5)].map((_, i) => (
-            <div
-              key={i}
-              className="h-8 md:h-10 w-20 md:w-28 bg-gray-200 rounded-full animate-pulse"
-              style={{ animationDelay: `${i * 0.1}s` }}
-            ></div>
-          ))}
+    );
+  }
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-red-100 rounded-lg p-8 text-center">
+          <h2 className="text-xl font-bold mb-2 text-red-700">
+            Gagal memuat data properti
+          </h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            className="bg-teal-600 text-white px-4 py-2 rounded"
+            onClick={() => window.location.reload()}
+          >
+            Muat Ulang
+          </button>
         </div>
       </div>
+    );
+  }
 
-      {/* Advanced filter loading */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-6">
-        <div className="h-6 w-32 bg-gray-200 rounded animate-pulse mb-4"></div>
+  return (
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Mobile Filter Toggle */}
+      <div className="lg:hidden mb-4">
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="w-full flex items-center justify-center px-4 py-2 border border-slate-300 rounded-md bg-white text-slate-700 font-semibold"
+        >
+          <span className="mr-2">▼</span> Filter & Urutkan
+        </button>
       </div>
 
-      {/* Grid loading */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6">
-        {[...Array(10)].map((_, i) => (
-          <div
-            key={i}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-pulse group hover:shadow-lg transition-all duration-300"
-            style={{ animationDelay: `${i * 0.05}s` }}
-          >
-            <div className="aspect-[4/3] bg-gray-200 animate-pulse"></div>
-            <div className="p-4 md:p-5 space-y-3">
-              <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-3 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-              <div className="flex justify-between items-center">
-                <div className="h-3 bg-gray-200 rounded w-1/2 animate-pulse"></div>
-                <div className="h-6 w-16 bg-gray-200 rounded-full animate-pulse"></div>
+      <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-8">
+        {/* Filter Sidebar (Left Column) */}
+        <aside
+          className={`filter-sidebar fixed lg:sticky top-0 left-0 h-full lg:h-auto lg:top-8 bg-white lg:bg-transparent shadow-lg lg:shadow-none p-6 lg:p-0 z-50 lg:z-auto w-80 lg:w-auto ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } lg:translate-x-0`}
+        >
+          <div className="flex justify-between items-center lg:hidden mb-6">
+            <h2 className="text-xl font-bold">Filter Lanjutan</h2>
+            <button className="text-2xl" onClick={() => setSidebarOpen(false)}>
+              &times;
+            </button>
+          </div>
+          <div className="space-y-6">
+            {/* City Filter */}
+            <div>
+              <h3 className="font-semibold mb-2">Lokasi</h3>
+              <select
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="w-full p-2 border rounded-md"
+              >
+                {cityOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt === "all" ? "Semua Kota" : opt}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {/* Price Filter */}
+            <div>
+              <h3 className="font-semibold mb-2">Rentang Harga</h3>
+              <div className="space-y-2">
+                <input
+                  type="number"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  placeholder="Harga Minimum (Rp)"
+                  className="w-full p-2 border rounded-md"
+                />
+                <input
+                  type="number"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  placeholder="Harga Maksimum (Rp)"
+                  className="w-full p-2 border rounded-md"
+                />
               </div>
             </div>
+            {/* Land Size Filter */}
+            <div>
+              <h3 className="font-semibold mb-2">Luas Tanah (m²)</h3>
+              <div className="space-y-2">
+                <input
+                  type="number"
+                  value={minLand}
+                  onChange={(e) => setMinLand(e.target.value)}
+                  placeholder="Luas Minimum"
+                  className="w-full p-2 border rounded-md"
+                />
+                <input
+                  type="number"
+                  value={maxLand}
+                  onChange={(e) => setMaxLand(e.target.value)}
+                  placeholder="Luas Maksimum"
+                  className="w-full p-2 border rounded-md"
+                />
+              </div>
+            </div>
+            {/* Bedrooms Filter */}
+            <div>
+              <h3 className="font-semibold mb-2">Kamar Tidur</h3>
+              <div className="flex flex-wrap gap-2">
+                {["1", "2", "3", "4+"].map((val) => (
+                  <button
+                    key={val}
+                    onClick={() => setBedrooms(bedrooms === val ? "" : val)}
+                    className={`px-3 py-1 border rounded-full ${
+                      bedrooms === val
+                        ? "bg-teal-600 text-white border-teal-600"
+                        : ""
+                    }`}
+                  >
+                    {val}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Bathrooms Filter */}
+            <div>
+              <h3 className="font-semibold mb-2">Kamar Mandi</h3>
+              <div className="flex flex-wrap gap-2">
+                {["1", "2", "3+"].map((val) => (
+                  <button
+                    key={val}
+                    onClick={() => setBathrooms(bathrooms === val ? "" : val)}
+                    className={`px-3 py-1 border rounded-full ${
+                      bathrooms === val
+                        ? "bg-teal-600 text-white border-teal-600"
+                        : ""
+                    }`}
+                  >
+                    {val}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Market Status Filter */}
+            <div>
+              <h3 className="font-semibold mb-2">Status Pasar</h3>
+              <select
+                value={marketStatus}
+                onChange={(e) => setMarketStatus(e.target.value)}
+                className="w-full p-2 border rounded-md"
+              >
+                {marketStatusOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {/* Classification Filter */}
+            <div>
+              <h3 className="font-semibold mb-2">Klasifikasi</h3>
+              <select
+                value={classification}
+                onChange={(e) => setClassification(e.target.value)}
+                className="w-full p-2 border rounded-md"
+              >
+                {classificationOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              onClick={resetFilters}
+              className="w-full px-4 py-2 border border-slate-300 rounded-md text-slate-700 font-semibold hover:bg-slate-100"
+            >
+              Reset Filter
+            </button>
           </div>
-        ))}
+        </aside>
+
+        {/* Main Content (Right Column) */}
+        <main className="lg:col-span-3">
+          {/* Search and Sort Bar */}
+          <div className="bg-white p-4 rounded-xl shadow-md mb-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-grow">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  🔍
+                </span>
+                <input
+                  type="text"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  placeholder="Cari properti, lokasi, developer..."
+                  className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500"
+                />
+              </div>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="p-3 border rounded-lg"
+              >
+                <option value="newest">Terbaru</option>
+                <option value="price-asc">Harga Terendah</option>
+                <option value="price-desc">Harga Tertinggi</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Asset Type Filter Buttons */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {assetTypeOptions.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setAssetType(opt.value)}
+                className={`filter-button px-4 py-2 border rounded-full font-semibold transition-colors duration-150
+                  ${assetType === opt.value ? "bg-teal-600 text-white border-teal-600" : "bg-white text-slate-700 border-slate-300 hover:bg-teal-50"}
+                `}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Active Filters & Results Count */}
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-sm text-slate-600">
+              Menampilkan {filteredProperties.length} dari {properties.length}{" "}
+              properti
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {activeFilters.map((f) => (
+                <span
+                  key={f.key}
+                  className="bg-teal-100 text-teal-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center"
+                >
+                  <span>{f.label}</span>
+                  <button
+                    className="ml-1.5 text-teal-600 hover:text-teal-800"
+                    onClick={() => removeFilter(f.key)}
+                  >
+                    &times;
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Property Results Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {paginatedProperties.length === 0 ? (
+              <p className="col-span-full text-center text-slate-500 py-10">
+                Tidak ada properti yang ditemukan.
+              </p>
+            ) : (
+              paginatedProperties.map((p) => (
+                <PropertyCard key={p._id} type="residentials" data={p} />
+              ))
+            )}
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center mt-8 gap-2">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 rounded border bg-white text-slate-700 disabled:opacity-50"
+              >
+                &laquo; Prev
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i + 1}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`px-3 py-1 rounded border ${
+                    currentPage === i + 1
+                      ? "bg-teal-600 text-white"
+                      : "bg-white text-slate-700"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 rounded border bg-white text-slate-700 disabled:opacity-50"
+              >
+                Next &raquo;
+              </button>
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );
 }
 
-// Main Properties component
-async function Properties({ searchParams }) {
-  const { assetType: filterType, search } = (await searchParams) || {};
-
-  try {
-    // Fetch all properties (already serialized from the API function)
-    const allProperties = await getPropertiesData();
-
-    // Get unique asset types for filter
-    const assetTypes = [
-      ...new Set(allProperties.map((p) => p.assetType?.name).filter(Boolean)),
-    ].map((name) => ({ _id: name, name }));
-
-    // Get unique market statuses for filter
-    const marketStatuses = [
-      ...new Set(allProperties.map((p) => p.marketStatus?.name).filter(Boolean)),
-    ].map((name) => ({ _id: name, name }));
-
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
-          {/* Interactive Properties Section */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <Suspense fallback={<PropertiesLoading />}>
-              <PropertiesClient
-                properties={allProperties}
-                assetTypes={assetTypes}
-                marketStatuses={marketStatuses}
-              />
-            </Suspense>
-          </div>
-        </div>
-      </div>
-    );
-  } catch (error) {
-    console.error("Error fetching properties:", error);
-
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center max-w-md mx-auto">
-            <div className="bg-red-100 rounded-full p-6 w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-              <svg
-                className="w-12 h-12 text-red-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                />
-              </svg>
-            </div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
-              Terjadi Kesalahan
-            </h1>
-            <p className="text-gray-600 mb-8 leading-relaxed">
-              Tidak dapat memuat data properti. Periksa koneksi internet Anda
-              dan coba lagi.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-tosca-500 text-white px-8 py-3 rounded-xl hover:bg-tosca-600 transition-all duration-300 transform hover:scale-105 font-medium shadow-lg hover:shadow-xl"
-            >
-              Muat Ulang
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-}
-
-export default Properties;
+export default PropertiesPage;

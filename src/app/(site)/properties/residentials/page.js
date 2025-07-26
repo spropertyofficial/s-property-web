@@ -1,5 +1,5 @@
 import { residentialsData } from "@/data/residentials";
-import PropertyCard from "@/components/common/PropertyCard/PropertyCard";
+import PropertyCard from "@/components/common/PropertyCard";
 import { getResidentialsData } from "@/app/api/residential/route";
 
 export default async function ResidentialsPage({ searchParams }) {
