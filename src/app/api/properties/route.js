@@ -8,6 +8,7 @@ import CategoryMarketStatus from "@/lib/models/CategoryMarketStatus";
 import CategoryListingStatus from "@/lib/models/CategoryListingStatus";
 import Cluster from "@/lib/models/Cluster";
 import { verifyAdmin } from "@/lib/auth";
+import { logAgentActivity, ACTIVITY_TYPES } from "@/utils/activityLogger";
 
 // Fungsi ini sekarang bisa menerima filter
 export async function getPropertiesData(filter = {}) {
@@ -110,6 +111,22 @@ export async function POST(req) {
 
     const property = new Property(newPropertyPayload);
     await property.save();
+
+    // Log property creation activity
+    try {
+      await logAgentActivity(
+        admin._id, 
+        ACTIVITY_TYPES.PROPERTY_CREATED,
+        `Created property: ${property.name}`,
+        {
+          relatedProperty: property._id,
+          metadata: { propertyType: assetTypeName },
+          priority: "high"
+        }
+      );
+    } catch (error) {
+      console.error("Error logging property creation activity:", error);
+    }
 
     // Auto-create Cluster Default untuk Apartemen atau Perumahan sederhana
     if (

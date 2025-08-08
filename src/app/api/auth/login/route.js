@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import connectDB from "@/lib/mongodb";
 import User from "@/lib/models/User";
+import { logAgentActivity, ACTIVITY_TYPES } from "@/utils/activityLogger";
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
@@ -70,6 +71,23 @@ export async function POST(req) {
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60, // 7 days
     });
+
+    // Log login activity for agents
+    if (user.type === "agent" || user.type === "semi-agent" || user.type === "sales-inhouse") {
+      try {
+        await logAgentActivity(
+          user._id,
+          ACTIVITY_TYPES.LOGIN,
+          `User logged in successfully`,
+          {
+            metadata: { loginTime: new Date() },
+            priority: "low"
+          }
+        );
+      } catch (error) {
+        console.error("Error logging login activity:", error);
+      }
+    }
 
     return response;
   } catch (error) {
