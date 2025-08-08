@@ -5,7 +5,8 @@ const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
 export async function GET(req) {
   try {
-    const token = req.cookies.get("token");
+    // Try both cookie names for compatibility
+    const token = req.cookies.get("auth-token") || req.cookies.get("token");
 
     console.log("Verify API - Token found:", token ? "YES" : "NO"); // Debug log
 
@@ -18,13 +19,14 @@ export async function GET(req) {
 
     // Verify token
     const decoded = jwt.verify(token.value, JWT_SECRET);
-    console.log("Verify API - Token valid for user:", decoded.id); // Debug log
+    console.log("Verify API - Token valid for user:", decoded.userId || decoded.id); // Debug log
 
     return NextResponse.json({
       valid: true,
       user: {
-        id: decoded.id,
-        role: decoded.role,
+        id: decoded.userId || decoded.id,
+        role: decoded.role || decoded.type,
+        email: decoded.email
       },
     });
   } catch (error) {
