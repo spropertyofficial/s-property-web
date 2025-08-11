@@ -15,6 +15,7 @@ import {
   FaCog,
   FaGlobe,
   FaUserPlus,
+  FaIndustry,
 } from "react-icons/fa";
 import { useState } from "react";
 
@@ -36,6 +37,21 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
       name: "Analytics",
       path: "/admin/analytics",
       icon: <FaChartBar />,
+      subItems:[
+        { name: "Production", path: "/admin/kpi/production" },
+        { name: "Performance", path: "/admin/kpi/performance" },
+  { name: "Pengaturan KPI Produksi", path: "/admin/kpi/production/settings" },
+      ]
+    },
+    {
+      name: "Aktivitas & Skor",
+      path: "/admin/kpi/activity-types",
+      icon: <FaCog />,
+    },
+    {
+      name: "Log Activity",
+      path: "/admin/log-activity",
+      icon: <FaIndustry />,
     },
     {
       name: "Registrasi",
@@ -48,6 +64,7 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
       subItems: [
         { name: "Perumahan", path: "/admin/perumahan" },
         { name: "Ruko", path: "/admin/ruko" },
+  { name: "KPI Config", path: "/admin/kpi/config" },
         { name: "Apartemen", path: "/admin/apartemen" },
         { name: "Tanah", path: "/admin/tanah" },
         { name: "Kavling", path: "/admin/kavling" },

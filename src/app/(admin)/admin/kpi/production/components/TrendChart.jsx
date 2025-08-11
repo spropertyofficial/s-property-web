@@ -10,9 +10,8 @@ import {
   Title,
   Tooltip,
   Legend,
-  TimeScale,
 } from "chart.js";
-import "chartjs-adapter-date-fns";
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -20,17 +19,19 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend,
-  TimeScale
+  Legend
 );
 
 export default function TrendChart({ data }) {
+  const labels = Object.keys(data || {});
+  const values = Object.values(data || {});
+  
   const chartData = {
-    labels: Object.keys(data),
+    labels: labels,
     datasets: [
       {
-        label: "Total Aktivitas",
-        data: Object.values(data),
+        label: "Aktivitas",
+        data: values,
         borderColor: "#0d9488",
         backgroundColor: "rgba(13, 148, 136, 0.1)",
         fill: true,
@@ -38,15 +39,21 @@ export default function TrendChart({ data }) {
       },
     ],
   };
+
   const options = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
-      x: { type: "time", time: { unit: "day" } },
-      y: { beginAtZero: true },
+      y: {
+        beginAtZero: true,
+      },
     },
-    plugins: { legend: { display: false } },
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
   };
 
-  return <Line options={options} data={chartData} />;
+  return <Line data={chartData} options={options} />;
 }

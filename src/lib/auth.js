@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 import connectDB from "./mongodb";
 import Admin from "./models/Admin";
+import User from "./models/User";
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
@@ -103,6 +104,37 @@ export async function verifyAdmin(req) {
     return {
       success: false,
       error: "Terjadi kesalahan saat verifikasi admin.",
+    };
+  }
+}
+
+// Verify User (for agents and regular users)
+export async function verifyUser(req) {
+  await connectDB();
+
+  const token = req.cookies.get("auth-token")?.value;
+
+  if (!token) {
+    return {
+      success: false,
+      error: "Akses ditolak: Token tidak valid atau tidak ada.",
+    };
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await User.findById(decoded.userId).select("-password");
+
+    if (!user || !user.isActive) {
+      return { success: false, error: "User tidak ditemukan atau tidak aktif." };
+    }
+
+    return { success: true, user };
+  } catch (error) {
+    console.error("Verify user error:", error);
+    return {
+      success: false,
+      error: "Terjadi kesalahan saat verifikasi user.",
     };
   }
 }

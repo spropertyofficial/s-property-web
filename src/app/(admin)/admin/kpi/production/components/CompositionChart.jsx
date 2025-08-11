@@ -10,46 +10,40 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export default function CompositionChart({ data }) {
-  const topAgents = [...data]
-    .sort((a, b) => b.totalScore - a.totalScore)
-    .slice(0, 5);
-
+  const labels = Object.keys(data || {});
+  const values = Object.values(data || {});
+  
   const chartData = {
-    labels: topAgents.map((a) => a.name),
+    labels: labels,
     datasets: [
       {
-        label: "Listing Baru",
-        data: topAgents.map((a) => a.newListings),
-        backgroundColor: "#14b8a6",
-      },
-      {
-        label: "Survei Klien",
-        data: topAgents.map((a) => a.surveys),
-        backgroundColor: "#0891b2",
-      },
-      {
-        label: "Sesi Live",
-        data: topAgents.map((a) => a.liveSessions),
-        backgroundColor: "#6366f1",
+        label: "Aktivitas",
+        data: values,
+        backgroundColor: ["#14b8a6", "#0891b2", "#6366f1", "#8b5cf6", "#f59e0b"],
+        borderColor: ["#0d9488", "#0e7490", "#4f46e5", "#7c3aed", "#d97706"],
+        borderWidth: 1,
       },
     ],
   };
+
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
-    plugins: { legend: { position: "bottom" } },
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
   };
 
-  return <Bar options={options} data={chartData} />;
+  return <Bar data={chartData} options={options} />;
 }

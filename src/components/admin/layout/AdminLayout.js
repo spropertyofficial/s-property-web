@@ -182,6 +182,7 @@ function getPageTitle(pathname) {
     '/admin/manage-categories/listing-status': 'Status Listing',
     '/admin/manage-users': 'Manajemen Admin',
     '/admin/analytics': 'Analytics',
+    '/admin/kpi/production': 'KPI Production',
     '/admin/settings': 'Pengaturan',
   };
   
@@ -202,6 +203,7 @@ function getPageDescription(pathname) {
     '/admin/manage-categories/listing-status': 'Kelola status listing properti',
     '/admin/manage-users': 'Kelola pengguna dan administrator',
     '/admin/analytics': 'Lihat laporan dan analisis data',
+    '/admin/kpi/production': 'Monitor dan analisis KPI produksi tim',
     '/admin/settings': 'Pengaturan sistem dan konfigurasi',
   };
   
