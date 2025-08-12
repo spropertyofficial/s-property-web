@@ -3,6 +3,7 @@ import connectDB from "@/lib/mongodb";
 import { verifyAdminWithRole } from "@/lib/auth";
 import SaleRecord from "@/lib/models/SaleRecord";
 import CategoryAssetType from "@/lib/models/CategoryAssetType";
+import "@/lib/models/User";
 
 function toMonthRange(start, end) {
 	if (!start || !end) return null;

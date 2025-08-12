@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { verifyAdminWithRole } from "@/lib/auth";
 import SaleRecord from "@/lib/models/SaleRecord";
+// Register referenced models for populate on Vercel/Node runtime
+import "@/lib/models/Property";
+import "@/lib/models/User";
 
 // Ensure Node.js runtime and no static caching in Vercel
 export const runtime = "nodejs";
