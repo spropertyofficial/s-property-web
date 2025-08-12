@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { ChevronDown, User, LogOut, Shield } from "lucide-react";
+import { ChevronDown, User, LogOut, Shield, FileText } from "lucide-react";
+import Link from "next/link";
 
 export default function LogoutButton({
   className = "",
@@ -67,6 +68,17 @@ export default function LogoutButton({
             )}
           </div>
         )}
+        
+        {/* Agent-only menu items for mobile */}
+        {isAgent() && (
+          <Link
+            href="/log-activity"
+            className="w-full px-4 py-2 bg-tosca-100 hover:bg-tosca-200 text-white rounded-md transition-colors font-medium text-center block"
+          >
+            Log Aktivitas
+          </Link>
+        )}
+        
         <button
           onClick={handleLogout}
           disabled={isLoggingOut}
@@ -148,6 +160,20 @@ export default function LogoutButton({
               </div>
             </div>
           </div>
+
+          {/* Menu Items Section */}
+          {isAgent() && (
+            <div className="py-1">
+              <Link
+                href="/log-activity"
+                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3 transition-colors"
+                onClick={() => setIsDropdownOpen(false)}
+              >
+                <FileText size={16} className="text-gray-500" />
+                <span>Log Aktivitas</span>
+              </Link>
+            </div>
+          )}
 
           {/* Logout Section */}
           <div className="border-t border-gray-100 py-1">

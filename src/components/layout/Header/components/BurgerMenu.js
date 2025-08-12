@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function BurgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, loading } = useAuth();
+  const { user, loading, isAgent } = useAuth();
 
   const menuItems = [
     { label: "Home", href: "/" },
@@ -75,6 +75,17 @@ export default function BurgerMenu() {
                 {item.label}
               </Link>
             ))}
+
+            {/* Agent-only menu items */}
+            {user && isAgent() && (
+              <Link
+                href="/log-activity"
+                className="block text-white hover:text-white/50 transition-colors"
+                onClick={handleMenuItemClick}
+              >
+                Log Aktivitas
+              </Link>
+            )}
 
             {/* Auth Section */}
             <div className="pt-4 border-t border-white/20">

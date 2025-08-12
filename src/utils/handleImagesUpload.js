@@ -59,7 +59,8 @@ export const handleImageUpload = async (
   const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const API_KEY = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
 
-  if (!propertyName.trim()) {
+  // For non-activity uploads, require propertyName; for activity, allow empty
+  if (uploadType !== "activity" && !propertyName.trim()) {
     Swal.fire(
       "Nama Properti Kosong",
       "Harap isi Nama Properti terlebih dahulu sebelum mengunggah gambar.",
@@ -130,6 +131,12 @@ export const handleImageUpload = async (
       } else if (uploadType === "region" || uploadType === "city") {
         // Upload untuk explore cities
         folder = `s-property/explore-cities/${uploadType}s`;
+      } else if (uploadType === "activity") {
+        // Upload untuk log aktivitas user
+        const now = new Date();
+        const yyyy = now.getUTCFullYear();
+        const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
+        folder = `s-property/activity-logs/${yyyy}/${mm}`;
       } else {
         throw new Error("Tipe upload tidak valid.");
       }
