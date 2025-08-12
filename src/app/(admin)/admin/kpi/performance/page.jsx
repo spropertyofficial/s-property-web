@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Swal from "sweetalert2";
 import PerformanceTrendChart from "./components/PerformanceTrendChart";
 import PerformanceCompositionChart from "./components/PerformanceCompositionChart";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -179,10 +180,11 @@ export default function KpiPerformancePage() {
                 </div>
                 <div className="flex justify-end gap-2 mt-6">
                   <button className="px-4 py-2 border rounded" onClick={()=>setExportOpen(false)}>Batal</button>
-                  <button className="px-4 py-2 bg-emerald-600 text-white rounded" onClick={()=>{
+                  <button className="px-4 py-2 bg-emerald-600 text-white rounded" onClick={async ()=>{
                     const url = buildExportXlsxUrl();
                     window.open(url, '_blank');
                     setExportOpen(false);
+                    await Swal.fire({ title: "Export Dimulai", text: "File XLSX sedang diunduh.", icon: "success", timer: 1400, showConfirmButton: false });
                   }}>Unduh XLSX</button>
                 </div>
                 <p className="text-xs text-slate-500 mt-3">Catatan: Grafik Excel tidak otomatis dibuat. Anda bisa membuat chart dari sheet Rekap/Komposisi langsung di Excel.</p>

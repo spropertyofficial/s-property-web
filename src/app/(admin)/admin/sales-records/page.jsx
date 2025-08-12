@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Swal from "sweetalert2";
 import { useAdmin } from "@/hooks/useAdmin";
 
 function useCurrency() {
@@ -67,6 +68,18 @@ function SalesRecordForm({ open, onClose, onSaved, edit }) {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    // Confirm save
+    const result = await Swal.fire({
+      title: edit ? "Simpan Perubahan?" : "Simpan Data?",
+      text: edit ? "Perubahan akan disimpan." : "Data penjualan baru akan ditambahkan.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Ya, Simpan",
+      cancelButtonText: "Batal",
+      confirmButtonColor: "#2563eb",
+      cancelButtonColor: "#6b7280",
+    });
+    if (!result.isConfirmed) return;
     setLoading(true);
     try {
       const payload = {
@@ -88,10 +101,19 @@ function SalesRecordForm({ open, onClose, onSaved, edit }) {
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error || "Gagal menyimpan");
+      await Swal.fire({
+        title: "Berhasil",
+        text: edit ? "Perubahan tersimpan." : "Data berhasil ditambahkan.",
+        icon: "success",
+        toast: true,
+        position: "top-end",
+        timer: 1800,
+        showConfirmButton: false,
+      });
       onSaved?.();
       onClose?.();
     } catch (err) {
-      alert(err.message);
+      Swal.fire({ title: "Gagal", text: err.message, icon: "error" });
     } finally {
       setLoading(false);
     }
@@ -128,11 +150,12 @@ function SalesRecordForm({ open, onClose, onSaved, edit }) {
               className="w-full border rounded p-2"
               value={form.projectName}
               onChange={(e) => {
+                if (edit) return; // lock project editing
                 const val = e.target.value;
                 setForm((f) => ({ ...f, projectName: val, projectId: "" }));
                 if (projTypingTimer) clearTimeout(projTypingTimer);
                 const t = setTimeout(async () => {
-                  if (val && val.length >= 2) {
+                  if (!edit && val && val.length >= 2) {
                     try {
                       const r = await fetch(`/api/properties/suggest?q=${encodeURIComponent(val)}`);
                       const d = await r.json();
@@ -145,8 +168,9 @@ function SalesRecordForm({ open, onClose, onSaved, edit }) {
                 setProjTypingTimer(t);
               }}
               placeholder="Ketik nama proyek..."
+              readOnly={!!edit}
             />
-            {projOptions.length > 0 && (
+            {!edit && projOptions.length > 0 && (
               <div className="mt-1 border rounded max-h-56 overflow-auto bg-white shadow">
                 {projOptions.map((p) => (
                   <button
@@ -348,10 +372,23 @@ export default function SalesRecordsPage() {
                         <button
                           className="px-3 py-1 rounded border text-red-600"
                           onClick={async () => {
-                            if (!confirm("Hapus data ini?")) return;
+                            const result = await Swal.fire({
+                              title: "Hapus Data?",
+                              text: "Tindakan ini tidak dapat dibatalkan.",
+                              icon: "warning",
+                              showCancelButton: true,
+                              confirmButtonText: "Ya, Hapus",
+                              cancelButtonText: "Batal",
+                              confirmButtonColor: "#dc2626",
+                              cancelButtonColor: "#6b7280",
+                            });
+                            if (!result.isConfirmed) return;
                             const res = await fetch(`/api/sales-records/${r._id}`, { method: "DELETE" });
                             const d = await res.json();
-                            if (!d.success) return alert(d.error || "Gagal menghapus");
+                            if (!d.success) {
+                              return Swal.fire({ title: "Gagal", text: d.error || "Gagal menghapus", icon: "error" });
+                            }
+                            await Swal.fire({ title: "Terhapus", text: "Data berhasil dihapus.", icon: "success" });
                             fetchData();
                           }}
                         >

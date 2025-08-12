@@ -34,6 +34,18 @@ export default function ActivityTypesPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Confirm before create/update
+    const confirm = await Swal.fire({
+      title: editingId ? "Simpan Perubahan?" : "Tambah Aktivitas?",
+      text: editingId ? "Perubahan akan disimpan." : "Aktivitas baru akan ditambahkan.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: editingId ? "Ya, Simpan" : "Ya, Tambah",
+      cancelButtonText: "Batal",
+      confirmButtonColor: "#2563eb",
+      cancelButtonColor: "#6b7280",
+    });
+    if (!confirm.isConfirmed) return;
     setSaving(true);
     try {
       const url = editingId ? `/api/activity-types/${editingId}` : "/api/activity-types";
@@ -66,6 +78,21 @@ export default function ActivityTypesPage() {
   };
 
   const handleToggleActive = async (item) => {
+    // Confirm toggle active state
+    const willActivate = !item.isActive;
+    const confirm = await Swal.fire({
+      title: willActivate ? "Aktifkan Aktivitas?" : "Nonaktifkan Aktivitas?",
+      text: willActivate
+        ? `Aktivitas "${item.name}" akan diaktifkan dan bisa dipakai user.`
+        : `Aktivitas "${item.name}" akan dinonaktifkan dan tidak muncul di user.`,
+      icon: willActivate ? "question" : "warning",
+      showCancelButton: true,
+      confirmButtonText: willActivate ? "Ya, Aktifkan" : "Ya, Nonaktifkan",
+      cancelButtonText: "Batal",
+      confirmButtonColor: willActivate ? "#16a34a" : "#ef4444",
+      cancelButtonColor: "#6b7280",
+    });
+    if (!confirm.isConfirmed) return;
     try {
       const res = await fetch(`/api/activity-types/${item._id}`, {
         method: "PUT",
@@ -74,6 +101,7 @@ export default function ActivityTypesPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal mengubah status");
+      await Swal.fire("Berhasil", willActivate ? "Aktivitas diaktifkan" : "Aktivitas dinonaktifkan", "success");
       fetchItems();
     } catch (err) {
       Swal.fire("Gagal", err.message, "error");
@@ -95,6 +123,7 @@ export default function ActivityTypesPage() {
       const res = await fetch(`/api/activity-types/${item._id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal menonaktifkan");
+  await Swal.fire("Berhasil", "Aktivitas telah dinonaktifkan", "success");
       fetchItems();
     } catch (err) {
       Swal.fire("Gagal", err.message, "error");
