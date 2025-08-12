@@ -23,7 +23,7 @@ const SaleRecordSchema = new mongoose.Schema(
     block: { type: String, trim: true },
     unitType: { type: String, trim: true },
 
-    // Tanggal closing wajib bila status Closed
+  // Tanggal closing wajib bila status Closing/Closed
     tanggalClosing: { type: Date },
 
     // KPI memakai ini sebagai pendapatan
@@ -35,8 +35,9 @@ const SaleRecordSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["Closed", "Cancelled"],
-      default: "Closed",
+      // Keep "Closed" for backward-compat, new standard is "Closing"
+      enum: ["Closing", "Cancelled"],
+      default: "Closing",
       required: true,
     },
 
@@ -57,8 +58,8 @@ SaleRecordSchema.pre("validate", function (next) {
   if (!this.projectId && !this.projectName) {
     this.invalidate("projectName", "projectName wajib diisi jika projectId kosong");
   }
-  if (this.status === "Closed" && !this.tanggalClosing) {
-    this.invalidate("tanggalClosing", "tanggalClosing wajib untuk status Closed");
+  if ((this.status === "Closing") && !this.tanggalClosing) {
+    this.invalidate("tanggalClosing", "tanggalClosing wajib untuk status Closing");
   }
   next();
 });

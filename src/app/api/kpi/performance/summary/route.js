@@ -23,7 +23,7 @@ export async function GET(req) {
     const start = new Date(Date.UTC(y, m - 1, 1, 0, 0, 0, 0));
     const end = new Date(Date.UTC(y, m, 1, 0, 0, 0, 0));
 
-    const filter = { status: "Closed", tanggalClosing: { $gte: start, $lt: end } };
+  const filter = { status: { $in: ["Closing", "Closed"] }, tanggalClosing: { $gte: start, $lt: end } };
     if (agentId) filter.agentId = agentId;
     if (projectId) filter.projectId = projectId;
 

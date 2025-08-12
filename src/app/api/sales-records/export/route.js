@@ -43,7 +43,7 @@ export async function GET(req) {
 		const range = toMonthRange(start, end);
 		if (!range) return NextResponse.json({ success: false, error: "start/end tidak valid" }, { status: 400 });
 
-		const match = { status: "Closed", tanggalClosing: { $gte: range.s, $lt: range.e } };
+		const match = { status: "Closing", tanggalClosing: { $gte: range.s, $lt: range.e } };
 
 		if (type === "detail") {
 			const rows = await SaleRecord.find(match)
