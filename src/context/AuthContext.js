@@ -23,13 +23,20 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
+      console.log("🔍 Checking auth...");
       const response = await fetch("/api/auth/me");
+      console.log("📡 Auth response status:", response.status);
+
       if (response.ok) {
         const data = await response.json();
+        console.log("✅ Auth data received:", data);
         setUser(data.user);
+      } else {
+        const errorData = await response.json();
+        console.log("❌ Auth failed:", errorData);
       }
     } catch (error) {
-      console.error("Auth check failed:", error);
+      console.error("🚫 Auth check failed:", error);
     } finally {
       setLoading(false);
     }
@@ -105,7 +112,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const isAgent = () => {
-    return user?.type === "agent";
+    return ["agent", "semi-agent", "sales-inhouse"].includes(user?.type);
   };
 
   const value = {
