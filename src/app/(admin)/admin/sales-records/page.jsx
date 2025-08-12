@@ -49,10 +49,15 @@ function SalesRecordForm({ open, onClose, onSaved, edit }) {
     if (edit && open) {
       const r = edit;
       const toId = (v) => (v && typeof v === "object" ? (v._id || "") : (v || ""));
+      const toName = (v) => {
+        if (!v) return "";
+        if (typeof v === "object") return v.name || "";
+        return "";
+      };
       setForm({
         agentId: toId(r.agentId),
-  projectId: r.projectId || "",
-  projectName: r.projectName || "",
+        projectId: toId(r.projectId),
+        projectName: r.projectName || toName(r.projectId) || "",
         block: r.block || "",
         unitType: r.unitType || "",
         status: r.status || "Closed",
@@ -61,8 +66,28 @@ function SalesRecordForm({ open, onClose, onSaved, edit }) {
         notes: r.notes || "",
         assetTypeId: toId(r.assetTypeId),
       });
+      // If only an ID is present and name is empty, fetch property details to show project name
+      const pid = toId(r.projectId);
+      const hasName = Boolean(r.projectName || toName(r.projectId));
+      if (pid && !hasName) {
+        (async () => {
+          try {
+            const resp = await fetch(`/api/properties/${pid}`);
+            const data = await resp.json();
+            if (data?.success && data.property) {
+              setForm((f) => ({
+                ...f,
+                projectName: f.projectName || data.property.name || "",
+                assetTypeId: f.assetTypeId || data.property.assetType?._id || f.assetTypeId,
+              }));
+            }
+          } catch (_) {
+            // ignore
+          }
+        })();
+      }
     } else if (open) {
-  setForm({ agentId: "", projectId: "", projectName: "", block: "", unitType: "", status: "Closed", tanggalClosing: "", hargaPropertiTerjual: "", notes: "", assetTypeId: "" });
+      setForm({ agentId: "", projectId: "", projectName: "", block: "", unitType: "", status: "Closed", tanggalClosing: "", hargaPropertiTerjual: "", notes: "", assetTypeId: "" });
     }
   }, [edit, open]);
 
