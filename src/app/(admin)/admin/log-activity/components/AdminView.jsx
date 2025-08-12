@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
+import { useAdmin } from "@/hooks/useAdmin";
 
 const StatusBadge = ({ status }) => {
   const styles = {
@@ -27,6 +28,8 @@ const StatusBadge = ({ status }) => {
 };
 
 export default function AdminView() {
+  const { admin } = useAdmin();
+  const isViewer = admin && admin.role === "viewer";
   const [activities, setActivities] = useState([]);
   const [filteredActivities, setFilteredActivities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -378,7 +381,7 @@ export default function AdminView() {
                           <>
                             <button
                               onClick={() => handleValidation(act._id, "Approved")}
-                              disabled={processingId === act._id}
+                              disabled={processingId === act._id || isViewer}
                               className={`bg-gradient-to-r from-green-400 to-green-500 text-white px-3 py-1 text-xs font-semibold rounded-full hover:from-green-500 hover:to-green-600 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed`}
                               title="Setujui aktivitas"
                             >
@@ -396,7 +399,7 @@ export default function AdminView() {
                             </button>
                             <button
                               onClick={() => handleValidation(act._id, "Rejected")}
-                              disabled={processingId === act._id}
+                              disabled={processingId === act._id || isViewer}
                               className={`bg-gradient-to-r from-red-400 to-red-500 text-white px-3 py-1 text-xs font-semibold rounded-full hover:from-red-500 hover:to-red-600 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed`}
                               title="Tolak aktivitas"
                             >

@@ -10,7 +10,7 @@ export async function PUT(req, { params }) {
   try {
     // Try admin authentication first (for approval)
     const adminAuth = await verifyAdmin(req);
-    if (adminAuth.success && adminAuth.admin.role === "superadmin") {
+    if (adminAuth.success && ["superadmin", "editor"].includes(adminAuth.admin.role)) {
       return await handleAdminApproval(req, params, adminAuth.admin);
     }
 

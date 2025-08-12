@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import ActivityType from "@/lib/models/ActivityType";
-import { verifyAdmin } from "@/lib/auth";
+import { verifyAdminWithRole, verifyAdmin } from "@/lib/auth";
 
 // GET: list activity types (only active for non-admin)
 export async function GET(req) {
@@ -24,10 +24,8 @@ export async function GET(req) {
 // POST: create new activity type (admin only)
 export async function POST(req) {
   try {
-    const adminAuth = await verifyAdmin(req);
-    if (!adminAuth.success) {
-      return NextResponse.json({ success: false, error: "Akses ditolak" }, { status: 401 });
-    }
+  const auth = await verifyAdminWithRole(req, ["superadmin", "editor"]);
+  if (auth.error) return auth.error;
 
     const body = await req.json();
     const { name, score, isActive = true, description } = body;
@@ -52,8 +50,8 @@ export async function POST(req) {
       score: Number(score) || 0,
       isActive: !!isActive,
       description: description?.trim(),
-      createdBy: adminAuth.admin._id,
-      updatedBy: adminAuth.admin._id,
+  createdBy: auth.admin._id,
+  updatedBy: auth.admin._id,
     });
     await item.save();
     return NextResponse.json({ success: true, item });

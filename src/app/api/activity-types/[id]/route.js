@@ -1,16 +1,14 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import ActivityType from "@/lib/models/ActivityType";
-import { verifyAdmin } from "@/lib/auth";
+import { verifyAdminWithRole } from "@/lib/auth";
 import mongoose from "mongoose";
 
 // PUT: update activity type (admin only)
 export async function PUT(req, { params }) {
   try {
-    const adminAuth = await verifyAdmin(req);
-    if (!adminAuth.success) {
-      return NextResponse.json({ success: false, error: "Akses ditolak" }, { status: 401 });
-    }
+  const auth = await verifyAdminWithRole(req, ["superadmin", "editor"]);
+  if (auth.error) return auth.error;
 
     const { id } = await params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -22,7 +20,7 @@ export async function PUT(req, { params }) {
 
     await connectDB();
 
-    const update = { updatedBy: adminAuth.admin._id };
+  const update = { updatedBy: auth.admin._id };
     if (name !== undefined) update.name = name.trim();
     if (score !== undefined) update.score = Number(score) || 0;
     if (isActive !== undefined) update.isActive = !!isActive;
@@ -49,10 +47,8 @@ export async function PUT(req, { params }) {
 // DELETE: soft-delete (set isActive = false)
 export async function DELETE(req, { params }) {
   try {
-    const adminAuth = await verifyAdmin(req);
-    if (!adminAuth.success) {
-      return NextResponse.json({ success: false, error: "Akses ditolak" }, { status: 401 });
-    }
+  const auth = await verifyAdminWithRole(req, ["superadmin", "editor"]);
+  if (auth.error) return auth.error;
 
     const { id } = params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -63,7 +59,7 @@ export async function DELETE(req, { params }) {
 
     const item = await ActivityType.findByIdAndUpdate(
       id,
-      { isActive: false, updatedBy: adminAuth.admin._id },
+      { isActive: false, updatedBy: auth.admin._id },
       { new: true }
     );
     if (!item) {

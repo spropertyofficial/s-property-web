@@ -37,17 +37,22 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
       name: "Analytics",
       path: "/admin/analytics",
       icon: <FaChartBar />,
-      subItems:[
+      subItems: [
         { name: "Production", path: "/admin/kpi/production" },
         { name: "Performance", path: "/admin/kpi/performance" },
-  { name: "Pengaturan KPI Produksi", path: "/admin/kpi/production/settings" },
-      ]
+      ],
     },
     {
       name: "Aktivitas & Skor",
       path: "/admin/kpi/activity-types",
       icon: <FaCog />,
     },
+    {
+      name: "Laporan Penjualan",
+      path: "/admin/sales-records",
+      icon: <FaChartBar />,
+    },
+
     {
       name: "Log Activity",
       path: "/admin/log-activity",
@@ -64,7 +69,7 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
       subItems: [
         { name: "Perumahan", path: "/admin/perumahan" },
         { name: "Ruko", path: "/admin/ruko" },
-  { name: "KPI Config", path: "/admin/kpi/config" },
+        { name: "KPI Config", path: "/admin/kpi/config" },
         { name: "Apartemen", path: "/admin/apartemen" },
         { name: "Tanah", path: "/admin/tanah" },
         { name: "Kavling", path: "/admin/kavling" },
@@ -75,8 +80,14 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
       icon: <FaTags />,
       subItems: [
         { name: "Tipe Aset", path: "/admin/manage-categories/asset-types" },
-        { name: "Status Pasar", path: "/admin/manage-categories/market-status" },
-        { name: "Status Listing", path: "/admin/manage-categories/listing-status" },
+        {
+          name: "Status Pasar",
+          path: "/admin/manage-categories/market-status",
+        },
+        {
+          name: "Status Listing",
+          path: "/admin/manage-categories/listing-status",
+        },
       ],
     },
     {
@@ -117,7 +128,11 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
             onClick={onToggle}
             className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
           >
-            {isOpen ? <FaTimes className="text-sm" /> : <FaBars className="text-sm" />}
+            {isOpen ? (
+              <FaTimes className="text-sm" />
+            ) : (
+              <FaBars className="text-sm" />
+            )}
           </button>
         </div>
 
@@ -144,7 +159,9 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
                       >
                         <div className="flex items-center">
                           <span className="text-lg mr-3">{item.icon}</span>
-                          {isOpen && <span className="font-medium">{item.name}</span>}
+                          {isOpen && (
+                            <span className="font-medium">{item.name}</span>
+                          )}
                         </div>
                         {isOpen && (
                           <FaChevronDown
@@ -183,7 +200,9 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
                       }`}
                     >
                       <span className="text-lg mr-3">{item.icon}</span>
-                      {isOpen && <span className="font-medium">{item.name}</span>}
+                      {isOpen && (
+                        <span className="font-medium">{item.name}</span>
+                      )}
                     </Link>
                   )}
                 </li>
