@@ -60,7 +60,7 @@ function SalesRecordForm({ open, onClose, onSaved, edit }) {
         projectName: r.projectName || toName(r.projectId) || "",
         block: r.block || "",
         unitType: r.unitType || "",
-        status: r.status || "Closing",
+  status: r.status || "Closing",
         tanggalClosing: r.tanggalClosing ? new Date(r.tanggalClosing).toISOString().slice(0, 10) : "",
         hargaPropertiTerjual: r.hargaPropertiTerjual ?? "",
         notes: r.notes || "",
@@ -341,7 +341,7 @@ export default function SalesRecordsPage() {
           </div>
           <div>
             <label className="block text-sm">Status</label>
-              <select value={status} onChange={(e)=>{ setPage(1); setStatus(e.target.value); }} className="w-full border rounded p-2">
+            <select value={status} onChange={(e)=>{ setPage(1); setStatus(e.target.value); }} className="w-full border rounded p-2">
               <option value="">Semua</option>
               <option>Closing</option>
               <option>Cancelled</option>

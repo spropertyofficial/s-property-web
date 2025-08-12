@@ -81,7 +81,7 @@ export async function GET(req) {
     const range = parseMonthRange(start, end);
     if (!range) return NextResponse.json({ success: false, error: "start/end tidak valid" }, { status: 400 });
 
-    const match = { status: "Closing", tanggalClosing: { $gte: range.s, $lt: range.e } };
+  const match = { status: "Closing", tanggalClosing: { $gte: range.s, $lt: range.e } };
 
     const wb = XLSX.utils.book_new();
 

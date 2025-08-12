@@ -13,26 +13,22 @@ export async function GET(req) {
   try {
     await connectDB();
     const { searchParams } = new URL(req.url);
-    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-    const limit = Math.min(
-      100,
-      Math.max(1, parseInt(searchParams.get("limit") || "10", 10))
-    );
-    const status = searchParams.get("status");
+  const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "10", 10)));
+  const status = searchParams.get("status");
     const period = searchParams.get("period"); // YYYY-MM
     const agentId = searchParams.get("agentId");
     const projectId = searchParams.get("projectId");
     const projectName = searchParams.get("projectName");
-    const assetTypeId = searchParams.get("assetTypeId");
+  const assetTypeId = searchParams.get("assetTypeId");
     const q = searchParams.get("q"); // free text search on projectName/block/unitType/notes
 
     const filter = {};
     if (status) filter.status = status;
     if (agentId) filter.agentId = agentId;
     if (projectId) filter.projectId = projectId;
-    if (projectName)
-      filter.projectName = { $regex: projectName, $options: "i" };
-    if (assetTypeId) filter.assetTypeId = assetTypeId;
+    if (projectName) filter.projectName = { $regex: projectName, $options: "i" };
+  if (assetTypeId) filter.assetTypeId = assetTypeId;
     if (period) {
       try {
         const [ys, ms] = period.split("-");
@@ -80,18 +76,15 @@ export async function GET(req) {
       message: error?.message,
       stack: error?.stack,
     });
-    return NextResponse.json(
-      { success: false, error: "Gagal mengambil data penjualan" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Gagal mengambil data penjualan" }, { status: 500 });
   }
 }
 
 // POST /api/sales-records (admin-only)
 export async function POST(req) {
   try {
-    const auth = await verifyAdminWithRole(req, ["superadmin", "editor"]);
-    if (auth.error) return auth.error;
+  const auth = await verifyAdminWithRole(req, ["superadmin", "editor"]);
+  if (auth.error) return auth.error;
     await connectDB();
     const body = await req.json();
     const {
@@ -101,43 +94,25 @@ export async function POST(req) {
       block,
       unitType,
       tanggalClosing,
-      hargaPropertiTerjual,
-      status = "Closing",
-      assetTypeId,
+    hargaPropertiTerjual,
+  status = "Closing",
+  assetTypeId,
       notes,
       attachments = [],
     } = body;
 
-    if (!agentId)
-      return NextResponse.json(
-        { success: false, error: "agentId wajib" },
-        { status: 400 }
-      );
+    if (!agentId) return NextResponse.json({ success: false, error: "agentId wajib" }, { status: 400 });
     if (!projectId && !projectName) {
-      return NextResponse.json(
-        { success: false, error: "projectName wajib jika projectId kosong" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: "projectName wajib jika projectId kosong" }, { status: 400 });
     }
     if (!(hargaPropertiTerjual >= 0)) {
-      return NextResponse.json(
-        { success: false, error: "hargaPropertiTerjual harus >= 0" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: "hargaPropertiTerjual harus >= 0" }, { status: 400 });
     }
-    // Normalize status: treat legacy "Closed" as "Closing"
-    const normalizedStatus = status === "Closed" ? "Closing" : status;
-    if (normalizedStatus === "Closing" && !tanggalClosing) {
-      return NextResponse.json(
-        { success: false, error: "tanggalClosing wajib untuk status Closing" },
-        { status: 400 }
-      );
+    if (status === "Closing" && !tanggalClosing) {
+      return NextResponse.json({ success: false, error: "tanggalClosing wajib untuk status Closing" }, { status: 400 });
     }
-    if (!["Closing", "Cancelled"].includes(normalizedStatus)) {
-      return NextResponse.json(
-        { success: false, error: "Status tidak valid" },
-        { status: 400 }
-      );
+    if (!["Closing", "Cancelled"].includes(status)) {
+      return NextResponse.json({ success: false, error: "Status tidak valid" }, { status: 400 });
     }
 
     // Normalize attachments
@@ -162,11 +137,11 @@ export async function POST(req) {
       unitType: unitType?.trim(),
       tanggalClosing: tanggalClosing ? new Date(tanggalClosing) : undefined,
       hargaPropertiTerjual: Number(hargaPropertiTerjual),
-      status: normalizedStatus,
-      assetTypeId: assetTypeId || undefined,
+      status,
+  assetTypeId: assetTypeId || undefined,
       notes: notes?.trim(),
       attachments: atts,
-      createdBy: auth.admin._id,
+  createdBy: auth.admin._id,
     });
 
     return NextResponse.json({ success: true, record: doc });
@@ -174,15 +149,9 @@ export async function POST(req) {
     if (error?.name === "ValidationError") {
       const firstKey = Object.keys(error.errors)[0];
       const message = error.errors[firstKey]?.message || "Data tidak valid";
-      return NextResponse.json(
-        { success: false, error: message },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: message }, { status: 400 });
     }
     console.error("POST /api/sales-records error:", error);
-    return NextResponse.json(
-      { success: false, error: "Gagal menyimpan data penjualan" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Gagal menyimpan data penjualan" }, { status: 500 });
   }
 }

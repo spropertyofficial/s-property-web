@@ -9,7 +9,7 @@ export default function LeaderboardTable({ data, activityTypes }) {
         <thead className="text-xs text-slate-700 uppercase bg-slate-50">
           <tr>
             <th className="px-6 py-3">Peringkat</th>
-            <th className="px-6 py-3">Nama Mitra</th>
+            <th className="px-6 py-3">Agen</th>
             {activityTypes?.map((t) => (
               <th key={t.id} className="px-6 py-3 text-center">{t.name}</th>
             ))}
