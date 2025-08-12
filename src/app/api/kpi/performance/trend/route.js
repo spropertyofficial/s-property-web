@@ -31,7 +31,7 @@ export async function GET(req) {
       return NextResponse.json({ success: false, error: "wajib period atau start+end" }, { status: 400 });
     }
 
-    const match = { status: "Closed", tanggalClosing: { $gte: start, $lt: end } };
+  const match = { status: "Closing", tanggalClosing: { $gte: start, $lt: end } };
 
     const rows = await SaleRecord.aggregate([
       { $match: match },

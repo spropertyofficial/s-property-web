@@ -18,7 +18,7 @@ function SalesRecordForm({ open, onClose, onSaved, edit }) {
     projectName: "",
     block: "",
     unitType: "",
-    status: "Closed",
+  status: "Closing",
     tanggalClosing: "",
     hargaPropertiTerjual: "",
     notes: "",
@@ -60,7 +60,7 @@ function SalesRecordForm({ open, onClose, onSaved, edit }) {
         projectName: r.projectName || toName(r.projectId) || "",
         block: r.block || "",
         unitType: r.unitType || "",
-        status: r.status || "Closed",
+  status: r.status || "Closing",
         tanggalClosing: r.tanggalClosing ? new Date(r.tanggalClosing).toISOString().slice(0, 10) : "",
         hargaPropertiTerjual: r.hargaPropertiTerjual ?? "",
         notes: r.notes || "",
@@ -87,7 +87,7 @@ function SalesRecordForm({ open, onClose, onSaved, edit }) {
         })();
       }
     } else if (open) {
-      setForm({ agentId: "", projectId: "", projectName: "", block: "", unitType: "", status: "Closed", tanggalClosing: "", hargaPropertiTerjual: "", notes: "", assetTypeId: "" });
+  setForm({ agentId: "", projectId: "", projectName: "", block: "", unitType: "", status: "Closing", tanggalClosing: "", hargaPropertiTerjual: "", notes: "", assetTypeId: "" });
     }
   }, [edit, open]);
 
@@ -237,13 +237,13 @@ function SalesRecordForm({ open, onClose, onSaved, edit }) {
             <div>
               <label className="block text-sm font-medium">Status</label>
               <select className="w-full border rounded p-2" value={form.status} onChange={(e)=>setForm((f)=>({...f, status:e.target.value}))}>
-                <option>Closed</option>
+                <option>Closing</option>
                 <option>Cancelled</option>
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium">Tanggal Closing</label>
-              <input type="date" className="w-full border rounded p-2" value={form.tanggalClosing} onChange={(e)=>setForm((f)=>({...f, tanggalClosing:e.target.value}))} required={form.status === "Closed"} />
+              <input type="date" className="w-full border rounded p-2" value={form.tanggalClosing} onChange={(e)=>setForm((f)=>({...f, tanggalClosing:e.target.value}))} required={form.status === "Closing"} />
             </div>
           </div>
           <div>
@@ -343,7 +343,7 @@ export default function SalesRecordsPage() {
             <label className="block text-sm">Status</label>
             <select value={status} onChange={(e)=>{ setPage(1); setStatus(e.target.value); }} className="w-full border rounded p-2">
               <option value="">Semua</option>
-              <option>Closed</option>
+              <option>Closing</option>
               <option>Cancelled</option>
             </select>
           </div>

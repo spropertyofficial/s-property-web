@@ -3,6 +3,10 @@
     "app/api/submit-form/route.js": {
       "maxDuration": 30,
       "memory": 1024
+    },
+    "app/api/sales-records/route.js": {
+      "maxDuration": 30,
+      "memory": 1024
     }
   },
   "headers": [

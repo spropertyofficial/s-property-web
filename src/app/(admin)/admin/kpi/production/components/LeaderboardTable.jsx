@@ -1,7 +1,6 @@
 "use client";
 
-export default function LeaderboardTable({ data }) {
-  // Di masa depan, Anda bisa menambahkan logika sorting di sini
+export default function LeaderboardTable({ data, activityTypes }) {
   const sortedData = [...data].sort((a, b) => b.totalScore - a.totalScore);
 
   return (
@@ -10,12 +9,10 @@ export default function LeaderboardTable({ data }) {
         <thead className="text-xs text-slate-700 uppercase bg-slate-50">
           <tr>
             <th className="px-6 py-3">Peringkat</th>
-            <th className="px-6 py-3">Nama Mitra</th>
-            <th className="px-6 py-3 text-center">Listing Baru</th>
-            <th className="px-6 py-3 text-center">Survei Klien</th>
-            <th className="px-6 py-3 text-center">Follow Up</th>
-            <th className="px-6 py-3 text-center">Sesi Live</th>
-            <th className="px-6 py-3 text-center">Training</th>
+            <th className="px-6 py-3">Agen</th>
+            {activityTypes?.map((t) => (
+              <th key={t.id} className="px-6 py-3 text-center">{t.name}</th>
+            ))}
             <th className="px-6 py-3 text-center">Total Aktivitas</th>
             <th className="px-6 py-3 text-center">Skor Aktivitas</th>
           </tr>
@@ -23,7 +20,7 @@ export default function LeaderboardTable({ data }) {
         <tbody>
           {sortedData.map((agent, index) => (
             <tr
-              key={agent.name}
+              key={`${agent.name}-${index}`}
               className="bg-white border-b hover:bg-slate-50"
             >
               <td className="px-6 py-4 text-center">
@@ -46,11 +43,9 @@ export default function LeaderboardTable({ data }) {
                   )}
                 </div>
               </td>
-              <td className="px-6 py-4 text-center">{agent.newListings}</td>
-              <td className="px-6 py-4 text-center">{agent.surveys}</td>
-              <td className="px-6 py-4 text-center">{agent.followUps}</td>
-              <td className="px-6 py-4 text-center">{agent.liveSessions}</td>
-              <td className="px-6 py-4 text-center">{agent.training}</td>
+              {activityTypes?.map((t) => (
+                <td key={t.id} className="px-6 py-4 text-center">{agent.counts?.[t.id] || 0}</td>
+              ))}
               <td className="px-6 py-4 text-center font-semibold text-slate-700">{agent.totalActivities}</td>
               <td className="px-6 py-4 text-center font-bold text-teal-600">
                 {agent.totalScore}

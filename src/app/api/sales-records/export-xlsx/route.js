@@ -4,6 +4,7 @@ import connectDB from "@/lib/mongodb";
 import { verifyAdminWithRole } from "@/lib/auth";
 import SaleRecord from "@/lib/models/SaleRecord";
 import CategoryAssetType from "@/lib/models/CategoryAssetType";
+import "@/lib/models/User";
 import * as XLSX from "xlsx";
 
 function parseMonthRange(start, end) {
@@ -81,7 +82,7 @@ export async function GET(req) {
     const range = parseMonthRange(start, end);
     if (!range) return NextResponse.json({ success: false, error: "start/end tidak valid" }, { status: 400 });
 
-    const match = { status: "Closed", tanggalClosing: { $gte: range.s, $lt: range.e } };
+  const match = { status: "Closing", tanggalClosing: { $gte: range.s, $lt: range.e } };
 
     const wb = XLSX.utils.book_new();
 

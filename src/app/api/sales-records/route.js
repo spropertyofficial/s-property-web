@@ -2,14 +2,22 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import { verifyAdminWithRole } from "@/lib/auth";
 import SaleRecord from "@/lib/models/SaleRecord";
+// Register referenced models for populate on Vercel/Node runtime
+import "@/lib/models/Property";
+import "@/lib/models/User";
+
+// Ensure Node.js runtime and no static caching in Vercel
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
 // GET /api/sales-records
 export async function GET(req) {
   try {
     await connectDB();
     const { searchParams } = new URL(req.url);
-    const page = Math.max(1, Number(searchParams.get("page")) || 1);
-    const limit = Math.min(100, Math.max(1, Number(searchParams.get("limit")) || 10));
+  const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "10", 10)));
   const status = searchParams.get("status");
     const period = searchParams.get("period"); // YYYY-MM
     const agentId = searchParams.get("agentId");
@@ -25,12 +33,16 @@ export async function GET(req) {
     if (projectName) filter.projectName = { $regex: projectName, $options: "i" };
   if (assetTypeId) filter.assetTypeId = assetTypeId;
     if (period) {
-      const [y, m] = period.split("-").map(Number);
-      if (y && m) {
-        const start = new Date(Date.UTC(y, m - 1, 1, 0, 0, 0, 0));
-        const end = new Date(Date.UTC(y, m, 1, 0, 0, 0, 0));
-        filter.tanggalClosing = { $gte: start, $lt: end };
-      }
+      try {
+        const [ys, ms] = period.split("-");
+        const y = parseInt(ys, 10);
+        const m = parseInt(ms, 10);
+        if (Number.isInteger(y) && Number.isInteger(m) && m >= 1 && m <= 12) {
+          const start = new Date(Date.UTC(y, m - 1, 1, 0, 0, 0, 0));
+          const end = new Date(Date.UTC(y, m, 1, 0, 0, 0, 0));
+          filter.tanggalClosing = { $gte: start, $lt: end };
+        }
+      } catch {}
     }
     if (q) {
       filter.$or = [
@@ -62,7 +74,11 @@ export async function GET(req) {
       pageCount: Math.ceil(total / limit) || 1,
     });
   } catch (error) {
-    console.error("GET /api/sales-records error:", error);
+    console.error("GET /api/sales-records error:", {
+      name: error?.name,
+      message: error?.message,
+      stack: error?.stack,
+    });
     return NextResponse.json({ success: false, error: "Gagal mengambil data penjualan" }, { status: 500 });
   }
 }
@@ -81,8 +97,8 @@ export async function POST(req) {
       block,
       unitType,
       tanggalClosing,
-      hargaPropertiTerjual,
-  status = "Closed",
+    hargaPropertiTerjual,
+  status = "Closing",
   assetTypeId,
       notes,
       attachments = [],
@@ -95,10 +111,10 @@ export async function POST(req) {
     if (!(hargaPropertiTerjual >= 0)) {
       return NextResponse.json({ success: false, error: "hargaPropertiTerjual harus >= 0" }, { status: 400 });
     }
-    if (status === "Closed" && !tanggalClosing) {
-      return NextResponse.json({ success: false, error: "tanggalClosing wajib untuk status Closed" }, { status: 400 });
+    if (status === "Closing" && !tanggalClosing) {
+      return NextResponse.json({ success: false, error: "tanggalClosing wajib untuk status Closing" }, { status: 400 });
     }
-    if (!["Closed", "Cancelled"].includes(status)) {
+    if (!["Closing", "Cancelled"].includes(status)) {
       return NextResponse.json({ success: false, error: "Status tidak valid" }, { status: 400 });
     }
 

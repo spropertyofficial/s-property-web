@@ -23,7 +23,7 @@ const SaleRecordSchema = new mongoose.Schema(
     block: { type: String, trim: true },
     unitType: { type: String, trim: true },
 
-    // Tanggal closing wajib bila status Closed
+    // Tanggal closing wajib bila status Closing
     tanggalClosing: { type: Date },
 
     // KPI memakai ini sebagai pendapatan
@@ -35,8 +35,8 @@ const SaleRecordSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["Closed", "Cancelled"],
-      default: "Closed",
+      enum: ["Closing", "Cancelled"],
+      default: "Closing",
       required: true,
     },
 
@@ -57,8 +57,8 @@ SaleRecordSchema.pre("validate", function (next) {
   if (!this.projectId && !this.projectName) {
     this.invalidate("projectName", "projectName wajib diisi jika projectId kosong");
   }
-  if (this.status === "Closed" && !this.tanggalClosing) {
-    this.invalidate("tanggalClosing", "tanggalClosing wajib untuk status Closed");
+  if (this.status === "Closing" && !this.tanggalClosing) {
+    this.invalidate("tanggalClosing", "tanggalClosing wajib untuk status Closing");
   }
   next();
 });
@@ -66,4 +66,15 @@ SaleRecordSchema.pre("validate", function (next) {
 // Index untuk performa query
 SaleRecordSchema.index({ status: 1, tanggalClosing: -1, agentId: 1, projectId: 1 });
 
-export default mongoose.models.SaleRecord || mongoose.model("SaleRecord", SaleRecordSchema);
+// Penting untuk pengembangan (Next.js HMR): ketika skema berubah (enum dari Closed->Closing),
+// model yang sudah ter-compile bisa tetap memakai skema lama. Hapus model lama lalu re-compile.
+if (mongoose.models.SaleRecord) {
+  try {
+    mongoose.deleteModel("SaleRecord");
+  } catch (_) {
+    // abaikan jika belum tersedia (kompatibilitas versi)
+    delete mongoose.models.SaleRecord;
+  }
+}
+
+export default mongoose.model("SaleRecord", SaleRecordSchema);

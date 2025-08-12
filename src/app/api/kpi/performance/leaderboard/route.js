@@ -22,7 +22,7 @@ export async function GET(req) {
     const start = new Date(Date.UTC(y, m - 1, 1));
     const end = new Date(Date.UTC(y, m, 1));
 
-    const match = { status: "Closed", tanggalClosing: { $gte: start, $lt: end } };
+  const match = { status: "Closing", tanggalClosing: { $gte: start, $lt: end } };
     if (projectId) match.projectId = projectId;
 
     const rows = await SaleRecord.aggregate([

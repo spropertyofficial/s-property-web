@@ -42,7 +42,7 @@ export async function PUT(req, { params }) {
     if (update.unitType !== undefined) update.unitType = update.unitType?.trim();
     if (update.tanggalClosing) update.tanggalClosing = new Date(update.tanggalClosing);
     if (update.hargaPropertiTerjual !== undefined) update.hargaPropertiTerjual = Number(update.hargaPropertiTerjual);
-    if (update.status && !["Closed", "Cancelled"].includes(update.status)) {
+  if (update.status && !["Closing", "Cancelled"].includes(update.status)) {
       return NextResponse.json({ success: false, error: "Status tidak valid" }, { status: 400 });
     }
     if (Array.isArray(update.attachments)) {
