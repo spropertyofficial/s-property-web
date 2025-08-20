@@ -56,9 +56,9 @@ export async function POST(req) {
     }
 
   const body = await req.json();
-  const { activityType: activityTypeName, activityTypeId, date, notes, attachments } = body;
+  const { activityType: activityTypeName, activityTypeId, date, time, link, notes, attachments } = body;
 
-    if ((!activityTypeId && !activityTypeName) || !date) {
+  if ((!activityTypeId && !activityTypeName) || !date) {
       return NextResponse.json(
         { success: false, error: "Jenis aktivitas dan tanggal wajib diisi" },
         { status: 400 }
@@ -110,6 +110,28 @@ export async function POST(req) {
       );
     }
 
+    // Optional validation for time (HH:MM)
+    if (time && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
+      return NextResponse.json(
+        { success: false, error: "Format jam tidak valid (HH:MM)" },
+        { status: 400 }
+      );
+    }
+
+    // Optional basic link validation (allow http/https URLs)
+    if (link && link.length > 500) {
+      return NextResponse.json(
+        { success: false, error: "Link maksimal 500 karakter" },
+        { status: 400 }
+      );
+    }
+    if (link && !/^https?:\/\//i.test(link)) {
+      return NextResponse.json(
+        { success: false, error: "Link harus diawali http:// atau https://" },
+        { status: 400 }
+      );
+    }
+
     // Optional notes length guard (schema also validates)
     if (notes && notes.length > 1000) {
       return NextResponse.json(
@@ -143,6 +165,8 @@ export async function POST(req) {
       activityType: atDoc.name,
       activityTypeId: atDoc._id,
       date: normalizedDate,
+      time: time || undefined,
+      link: link?.trim() || undefined,
       notes,
       status: "Pending", // Status default saat dibuat
       attachments: normalizedAttachments,

@@ -21,6 +21,18 @@ const ActivityLogSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    // Optional external reference link (e.g., live stream, ad post, social media content)
+    link: {
+      type: String,
+      trim: true,
+      maxlength: [500, "Link maksimal 500 karakter"],
+    },
+    // Optional time (HH:mm) captured as simple string to avoid timezone ambiguity
+    time: {
+      type: String,
+      trim: true,
+      match: [/^([01]\d|2[0-3]):[0-5]\d$/, "Format jam tidak valid (HH:MM)"],
+    },
     notes: {
       type: String,
       trim: true,
