@@ -5,7 +5,7 @@ import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import Swal from "sweetalert2";
 
-export default function LeadCard({ lead, onClick, index = 0 }) {
+export default function LeadCard({ lead, onClick, onQuickOpen, index = 0 }) {
   const [deleting, setDeleting] = useState(false);
   async function handleDelete(e) {
     e.preventDefault();
@@ -67,18 +67,29 @@ export default function LeadCard({ lead, onClick, index = 0 }) {
         Updated: {new Date(lead.updatedAt).toLocaleDateString()}
       </p>
       </Link>
-      <button
-        title="Hapus"
-        onMouseDown={(e)=> { e.preventDefault(); e.stopPropagation(); }}
-        onClick={handleDelete}
-        className="absolute bottom-2 right-2 p-1 rounded bg-white/90 backdrop-blur hover:bg-red-50 text-slate-500 hover:text-red-600 transition border border-slate-200"
-      >
-        {deleting ? (
-          <span className="animate-pulse text-[10px] px-1">...</span>
-        ) : (
-          <Trash2 size={14} />
-        )}
-      </button>
+      {/* Actions container at bottom-right: quick edit and delete */}
+      <div className="absolute bottom-2 right-2 flex items-center gap-1">
+        <button
+          title="Edit cepat"
+          onMouseDown={(e)=> { e.preventDefault(); e.stopPropagation(); }}
+          onClick={(e)=> { e.preventDefault(); e.stopPropagation(); onQuickOpen?.(lead); }}
+          className="p-1 rounded bg-white/90 backdrop-blur hover:bg-red-50 text-slate-500 hover:text-red-600 transition border border-slate-200 text-xs font-bold h-6 w-6 flex items-center justify-center"
+        >
+          !
+        </button>
+        <button
+          title="Hapus"
+          onMouseDown={(e)=> { e.preventDefault(); e.stopPropagation(); }}
+          onClick={handleDelete}
+          className="p-1 rounded bg-white/90 backdrop-blur hover:bg-red-50 text-slate-500 hover:text-red-600 transition border border-slate-200"
+        >
+          {deleting ? (
+            <span className="animate-pulse text-[10px] px-1">...</span>
+          ) : (
+            <Trash2 size={14} />
+          )}
+        </button>
+      </div>
     </div>
   );
 }

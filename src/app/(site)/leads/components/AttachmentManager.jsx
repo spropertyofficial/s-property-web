@@ -233,7 +233,7 @@ function PreviewModal({ attachment, onClose }) {
         className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
         onClick={onClose}
       />
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col animate-scale-in">
+      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 flex flex-col animate-scale-in">
         <div className="flex items-center justify-between px-4 py-2 border-b">
           <h4 className="font-medium text-sm truncate pr-4">{title}</h4>
           <div className="flex items-center gap-2">
@@ -252,23 +252,26 @@ function PreviewModal({ attachment, onClose }) {
             </button>
           </div>
         </div>
-        <div className="p-4 overflow-auto flex-1 bg-slate-50">
+        {/* Fixed-height viewport for content to prevent overly tall modal */}
+        <div className="p-4 bg-slate-50 h-[70vh] overflow-auto">
           {isImage && (
-            <img
-              src={url}
-              alt={title}
-              className="max-w-full h-auto rounded shadow"
-            />
+            <div className="h-full w-full flex items-center justify-center">
+              <img
+                src={url}
+                alt={title}
+                className="max-h-full w-full object-contain rounded shadow"
+              />
+            </div>
           )}
           {isPDF && (
             <iframe
               src={`${url}#view=FitH`}
               title={title}
-              className="w-full h-[70vh] rounded border"
+              className="w-full h-full rounded border bg-white"
             />
           )}
           {!isImage && !isPDF && (
-            <div className="text-center text-sm text-slate-600 space-y-3">
+            <div className="h-full w-full flex flex-col items-center justify-center text-center text-sm text-slate-600 space-y-3">
               <p>Preview tidak tersedia untuk tipe ini.</p>
               <a
                 href={url}
