@@ -1,17 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import PropertyTypeahead from "./PropertyTypeahead";
-
-const SOURCES = [
-  "Pameran/ Open Table",
-  "Walk-In Marketing Gallery",
-  "Leads Pribadi",
-  "Leads Kantor",
-  "Referensi/Refferal",
-  "Instagram",
-  "Tiktok",
-  "Facebook"
-];
+import { SOURCES } from "@/lib/constants/leads";
 
 export default function LeadCreateModal({ onClose, onCreated }) {
   const [form, setForm] = useState({ name: "", contact: "", email: "", source: "", propertyName: "", property: null, unit: "" });

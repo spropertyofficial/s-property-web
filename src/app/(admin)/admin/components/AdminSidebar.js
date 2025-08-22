@@ -16,6 +16,7 @@ import {
   FaGlobe,
   FaUserPlus,
   FaIndustry,
+  FaAddressBook,
 } from "react-icons/fa";
 import { useState } from "react";
 
@@ -53,6 +54,11 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
       icon: <FaChartBar />,
     },
 
+    {
+      name: "Leads",
+      path: "/admin/leads",
+      icon: <FaAddressBook />,
+    },
     {
       name: "Log Activity",
       path: "/admin/log-activity",

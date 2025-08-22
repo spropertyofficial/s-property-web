@@ -9,8 +9,9 @@ export async function GET(req) {
   try {
     await dbConnect();
     const { searchParams } = new URL(req.url);
-    const q = (searchParams.get("q") || "").trim();
-    const status = (searchParams.get("status") || "").trim();
+  const q = (searchParams.get("q") || "").trim();
+  const status = (searchParams.get("status") || "").trim();
+  const source = (searchParams.get("source") || "").trim();
     const page = Math.max(parseInt(searchParams.get("page") || "1", 10), 1);
     const limit = Math.min(
       Math.max(parseInt(searchParams.get("limit") || "10", 10), 1),
@@ -31,7 +32,8 @@ export async function GET(req) {
     }
 
     const filter = {};
-    if (status) filter.status = status;
+  if (status) filter.status = status;
+  if (source) filter.source = source;
     if (adminAuth.success) {
       const agentParam = (searchParams.get("agent") || "").trim();
       if (agentParam) filter.agent = agentParam;
@@ -50,9 +52,10 @@ export async function GET(req) {
         .skip(skip)
         .limit(limit)
         .select(
-          "name status property propertyName unit agent contact email updatedAt"
+          "name status property propertyName unit agent contact email source createdAt updatedAt"
         )
         .populate("property", "name")
+        .populate("agent", "name agentCode")
         .lean(),
       Lead.countDocuments(filter),
     ]);

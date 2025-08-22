@@ -21,8 +21,11 @@ export async function GET(req, { params }) {
     const { doc } = await findAccessibleLead(id, req);
     if (!doc) return NextResponse.json({ success: false, error: "Lead tidak ditemukan" }, { status: 404 });
     // Populate property name if referenced
-    if (doc.property && doc.populate) {
-      await doc.populate('property','name');
+    if (doc.populate) {
+      const paths = [];
+      if (doc.property) paths.push({ path: 'property', select: 'name' });
+      if (doc.agent) paths.push({ path: 'agent', select: 'name agentCode' });
+      if (paths.length) await doc.populate(paths);
     }
     return NextResponse.json({ success: true, data: doc });
   } catch (e) {

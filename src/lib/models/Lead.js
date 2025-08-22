@@ -26,9 +26,13 @@ const LeadSchema = new mongoose.Schema(
     contact: { type: String, trim: true, maxlength: 50 }, // Nomor Telepon / WA
     email: { type: String, trim: true, lowercase: true, maxlength: 150 },
     property: { type: mongoose.Schema.Types.ObjectId, ref: "Property" }, // Properti diminati
-  propertyName: { type: String, trim: true, maxlength: 150 }, // Fallback nama properti ketika property ref belum tersedia
-  unit: { type: String, trim: true, maxlength: 100 }, // Unit / Block / No.
-  agent: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Agen / Mitra penanggung jawab
+    propertyName: { type: String, trim: true, maxlength: 150 }, // Fallback nama properti ketika property ref belum tersedia
+    unit: { type: String, trim: true, maxlength: 100 }, // Unit / Block / No.
+    agent: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    }, // Agen / Mitra penanggung jawab
     source: { type: String, trim: true, maxlength: 100 }, // Sumber mengetahui proyek
     status: {
       type: String,
