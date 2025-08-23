@@ -201,7 +201,7 @@ async function handleUserEdit(req, params, user) {
   }
 
   const body = await req.json();
-  const { activityType: activityTypeName, activityTypeId, date, notes, attachments } = body;
+  const { activityType: activityTypeName, activityTypeId, date, time, link, notes, attachments } = body;
 
   if ((!activityTypeId && !activityTypeName) || !date) {
     return NextResponse.json(
@@ -278,6 +278,27 @@ async function handleUserEdit(req, params, user) {
     );
   }
 
+  // Optional validation for time (HH:MM)
+  if (time && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
+    return NextResponse.json(
+      { success: false, error: "Format jam tidak valid (HH:MM)" },
+      { status: 400 }
+    );
+  }
+
+  if (link && link.length > 500) {
+    return NextResponse.json(
+      { success: false, error: "Link maksimal 500 karakter" },
+      { status: 400 }
+    );
+  }
+  if (link && !/^https?:\/\//i.test(link)) {
+    return NextResponse.json(
+      { success: false, error: "Link harus diawali http:// atau https://" },
+      { status: 400 }
+    );
+  }
+
   // Optional notes length guard (schema also validates)
   if (notes && notes.length > 1000) {
     return NextResponse.json(
@@ -313,6 +334,8 @@ async function handleUserEdit(req, params, user) {
       activityType: atDoc.name,
       activityTypeId: atDoc._id,
       date: normalizedDate,
+      time: time || undefined,
+      link: link?.trim() || undefined,
       notes,
       attachments: normalizedAttachments,
     },

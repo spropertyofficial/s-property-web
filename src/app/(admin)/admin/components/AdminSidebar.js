@@ -16,6 +16,7 @@ import {
   FaGlobe,
   FaUserPlus,
   FaIndustry,
+  FaAddressBook,
 } from "react-icons/fa";
 import { useState } from "react";
 
@@ -54,6 +55,11 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
     },
 
     {
+      name: "Leads",
+      path: "/admin/leads",
+      icon: <FaAddressBook />,
+    },
+    {
       name: "Log Activity",
       path: "/admin/log-activity",
       icon: <FaIndustry />,
@@ -69,7 +75,6 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
       subItems: [
         { name: "Perumahan", path: "/admin/perumahan" },
         { name: "Ruko", path: "/admin/ruko" },
-        { name: "KPI Config", path: "/admin/kpi/config" },
         { name: "Apartemen", path: "/admin/apartemen" },
         { name: "Tanah", path: "/admin/tanah" },
         { name: "Kavling", path: "/admin/kavling" },
@@ -99,11 +104,6 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
       name: "Manajemen Admin",
       path: "/admin/manage-users",
       icon: <FaUsersCog />,
-    },
-    {
-      name: "Pengaturan",
-      path: "/admin/settings",
-      icon: <FaCog />,
     },
   ];
 
