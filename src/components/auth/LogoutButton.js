@@ -71,12 +71,20 @@ export default function LogoutButton({
         
         {/* Agent-only menu items for mobile */}
         {isAgent() && (
-          <Link
-            href="/log-activity"
-            className="w-full px-4 py-2 bg-tosca-100 hover:bg-tosca-200 text-white rounded-md transition-colors font-medium text-center block"
-          >
-            Log Aktivitas
-          </Link>
+          <>
+            <Link
+              href="/leads"
+              className="w-full px-4 py-2 bg-tosca-100 hover:bg-tosca-200 text-white rounded-md transition-colors font-medium text-center block"
+            >
+              Leads
+            </Link>
+            <Link
+              href="/log-activity"
+              className="w-full px-4 py-2 bg-tosca-100 hover:bg-tosca-200 text-white rounded-md transition-colors font-medium text-center block"
+            >
+              Log Aktivitas
+            </Link>
+          </>
         )}
         
         <button
@@ -164,6 +172,14 @@ export default function LogoutButton({
           {/* Menu Items Section */}
           {isAgent() && (
             <div className="py-1">
+              <Link
+                href="/leads"
+                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3 transition-colors"
+                onClick={() => setIsDropdownOpen(false)}
+              >
+                <User size={16} className="text-gray-500" />
+                <span>Leads</span>
+              </Link>
               <Link
                 href="/log-activity"
                 className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3 transition-colors"
