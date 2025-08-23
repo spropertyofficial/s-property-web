@@ -7,6 +7,35 @@ module.exports = {
   ],
   theme: {
     extend: {
+      keyframes: {
+        'fade-in-up': {
+          '0%': { opacity: 0, transform: 'translateY(8px)' },
+          '100%': { opacity: 1, transform: 'translateY(0)' }
+        },
+        'scale-in': {
+          '0%': { opacity: 0, transform: 'scale(.95)' },
+          '100%': { opacity: 1, transform: 'scale(1)' }
+        },
+        'fade-in': {
+          '0%': { opacity: 0 },
+          '100%': { opacity: 1 }
+        },
+        'slide-up': {
+          '0%': { transform: 'translateY(12px)', opacity: 0 },
+          '100%': { transform: 'translateY(0)', opacity: 1 }
+        },
+        'sheet-up': {
+          '0%': { transform: 'translateY(100%)', opacity: 1 },
+          '100%': { transform: 'translateY(0)', opacity: 1 }
+        }
+      },
+      animation: {
+        'fade-in-up': 'fade-in-up .35s cubic-bezier(.22,.72,.29,1) both',
+        'scale-in': 'scale-in .25s cubic-bezier(.22,.72,.29,1) both',
+        'fade-in': 'fade-in .3s ease both',
+        'slide-up': 'slide-up .25s ease both',
+        'sheet-up': 'sheet-up .35s cubic-bezier(.22,.72,.29,1) both'
+      },
       gridTemplateColumns: {
         "auto-fit": "repeat(auto-fit, minmax(250px, 1fr))",
         "auto-fill": "repeat(auto-fill, minmax(250px, 1fr))",

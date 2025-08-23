@@ -317,10 +317,12 @@ export default function AdminView() {
               <thead className="text-left text-slate-600 bg-gradient-to-r from-slate-50 to-slate-100">
                 <tr>
                   <th className="p-4 font-semibold">📅 Tanggal</th>
+                  <th className="p-4 font-semibold">⏰ Jam</th>
                   <th className="p-4 font-semibold">👤 Agen</th>
                   <th className="p-4 font-semibold">🎯 Aktivitas</th>
                   <th className="p-4 font-semibold">📝 Catatan</th>
                   <th className="p-4 font-semibold">🖼️ Bukti</th>
+                  <th className="p-4 font-semibold">🔗 Link</th>
       <th className="p-4 font-semibold">❗ Alasan</th>
                   <th className="p-4 font-semibold">📊 Status</th>
                   <th className="p-4 font-semibold text-center">⚙️ Aksi</th>
@@ -336,6 +338,9 @@ export default function AdminView() {
                         month: 'short',
                         day: 'numeric'
                       })}
+                    </td>
+                    <td className="p-4">
+                      {act.time ? act.time : <span className="text-xs text-gray-400">-</span>}
                     </td>
                     <td className="p-4">
                       <div className="font-medium text-gray-900">{act.agent?.name || 'Unknown'}</div>
@@ -366,6 +371,21 @@ export default function AdminView() {
                           <span className="text-xs text-gray-400">-</span>
                         )}
                       </div>
+                    </td>
+                    <td className="p-4 max-w-xs">
+                      {act.link ? (
+                        <a
+                          href={act.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline break-all text-xs"
+                          title={act.link}
+                        >
+                          {act.link}
+                        </a>
+                      ) : (
+                        <span className="text-xs text-gray-400">-</span>
+                      )}
                     </td>
                     <td className="p-4 text-slate-600 max-w-xs">
                       <div className="truncate" title={act.rejectReason}>
