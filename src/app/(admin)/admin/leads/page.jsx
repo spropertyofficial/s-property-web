@@ -42,7 +42,7 @@ export default function AdminLeadsPage() {
       if (status) params.set("status", status);
       if (agent) params.set("agent", agent); // requires ObjectId
       if (source) params.set("source", source);
-      const res = await fetch(`/api/leads?${params.toString()}`);
+  const res = await fetch(`/api/admin/leads?${params.toString()}`);
       const json = await res.json();
       if (!json.success) throw new Error(json.error || "Gagal memuat");
       setItems(json.data || []);
