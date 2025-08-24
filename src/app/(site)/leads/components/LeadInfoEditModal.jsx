@@ -32,19 +32,48 @@ export default function LeadInfoEditModal({ lead, onClose, onSaved }) {
     e.preventDefault();
     setLoading(true); setError(null);
     try {
-      // status via dedicated endpoint if changed, but we can patch together
-      const payload = { ...form };
-      const res = await fetch(`/api/leads/${lead._id}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      const statusChanged = lead.status !== form.status;
+      // Kirim perubahan field umum (tanpa status) ke endpoint PATCH utama
+      const payload = {
+        name: form.name,
+        contact: form.contact,
+        email: form.email,
+        unit: form.unit,
+        source: form.source,
+      };
+
+      let latestDoc = lead;
+      // Lakukan PATCH umum terlebih dahulu
+      const res = await fetch(`/api/leads/${lead._id}`, {
+        method:'PATCH',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
       const json = await res.json();
-      if(!json.success) throw new Error(json.error || 'Gagal menyimpan');
-      if (lead.status !== form.status) {
+      if(!json.success) throw new Error(json.error || 'Gagal menyimpan perubahan');
+      latestDoc = json.data || latestDoc;
+      window.dispatchEvent(new CustomEvent('lead:updated', { detail: { id: lead._id, fields: payload } }));
+
+      // Jika status berubah, gunakan endpoint khusus agar tervalidasi
+      if (statusChanged) {
+        const resStatus = await fetch(`/api/leads/${lead._id}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type':'application/json' },
+          body: JSON.stringify({ status: form.status })
+        });
+        const jsonStatus = await resStatus.json();
+        if (!jsonStatus.success) throw new Error(jsonStatus.error || 'Gagal memperbarui status');
+        latestDoc = jsonStatus.data || latestDoc;
         window.dispatchEvent(new CustomEvent('lead:status', { detail: { id: lead._id, status: form.status } }));
       }
-      window.dispatchEvent(new CustomEvent('lead:updated', { detail: { id: lead._id, fields: payload } }));
-      onSaved?.(json.data);
+
+      onSaved?.(latestDoc);
       onClose();
       Swal.fire({ icon:'success', title:'Tersimpan', text:'Informasi lead diperbarui', timer:1600, showConfirmButton:false });
-    } catch(e2){ setError(e2.message); Swal.fire({ icon:'error', title:'Gagal', text: e2.message || 'Tidak bisa menyimpan'});} finally { setLoading(false);} }
+    } catch(e2){
+      setError(e2.message);
+      Swal.fire({ icon:'error', title:'Gagal', text: e2.message || 'Tidak bisa menyimpan'});
+    } finally { setLoading(false);} }
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in" onClick={onClose}>
