@@ -18,28 +18,20 @@ export async function GET(req) {
       100
     );
 
-    // Auth: admin sees all, user sees own
-    const adminAuth = await verifyAdmin(req);
-    let userAuth = null;
-    if (!adminAuth.success) {
-      userAuth = await verifyUser(req);
-      if (!userAuth.success) {
-        return NextResponse.json(
-          { success: false, error: "Akses ditolak" },
-          { status: 401 }
-        );
-      }
+    // Auth: only authenticated user can access and only see own leads
+    const userAuth = await verifyUser(req);
+    if (!userAuth.success) {
+      return NextResponse.json(
+        { success: false, error: "Akses ditolak" },
+        { status: 401 }
+      );
     }
 
     const filter = {};
-  if (status) filter.status = status;
-  if (source) filter.source = source;
-    if (adminAuth.success) {
-      const agentParam = (searchParams.get("agent") || "").trim();
-      if (agentParam) filter.agent = agentParam;
-    } else {
-      filter.agent = userAuth.user._id;
-    }
+    if (status) filter.status = status;
+    if (source) filter.source = source;
+    // enforce own leads only
+    filter.agent = userAuth.user._id;
     if (q) {
       const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
       filter.$or = [{ name: regex }, { contact: regex }, { email: regex }];
@@ -55,7 +47,7 @@ export async function GET(req) {
           "name status property propertyName unit agent contact email source createdAt updatedAt"
         )
         .populate("property", "name")
-        .populate("agent", "name agentCode")
+  .populate("agent", "name agentCode")
         .lean(),
       Lead.countDocuments(filter),
     ]);
