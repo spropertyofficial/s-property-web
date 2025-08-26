@@ -17,6 +17,7 @@ import {
   FaUserPlus,
   FaIndustry,
   FaAddressBook,
+  FaUsers,
 } from "react-icons/fa";
 import { useState } from "react";
 
@@ -102,8 +103,13 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
     },
     {
       name: "Manajemen Admin",
-      path: "/admin/manage-users",
+      path: "/admin/manage-admins",
       icon: <FaUsersCog />,
+    },
+    {
+      name: "Manajemen User",
+  path: "/admin/manage-users",
+      icon: <FaUsers />,
     },
   ];
 
