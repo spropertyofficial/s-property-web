@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 
-export default function ManageUsers() {
+export default function ManageAdmins() {
   const router = useRouter();
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +28,6 @@ export default function ManageUsers() {
         if (!res.ok) throw new Error("Unauthorized");
         const me = await res.json();
         if (me?.role !== "superadmin") {
-          // Notify in center, then redirect
           await Swal.fire({ icon: 'error', title: 'Akses ditolak', text: 'Halaman khusus superadmin' });
           router.replace("/admin");
           return;
