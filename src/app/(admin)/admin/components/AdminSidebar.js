@@ -108,7 +108,7 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
     },
     {
       name: "Manajemen User",
-      path: "/admin/users",
+  path: "/admin/manage-users",
       icon: <FaUsers />,
     },
   ];
