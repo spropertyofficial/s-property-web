@@ -26,6 +26,7 @@ export default function AdminLeadsPage() {
   const [status, setStatus] = useState("");
   const [agent, setAgent] = useState(""); // Mitra (agent)
   const [source, setSource] = useState("");
+  // date filters removed
   const [agents, setAgents] = useState([]);
   // sources now static from constants
   const [total, setTotal] = useState(0);
@@ -38,10 +39,10 @@ export default function AdminLeadsPage() {
       const params = new URLSearchParams();
       params.set("page", String(page));
       params.set("limit", String(limit));
-      if (q) params.set("q", q);
-      if (status) params.set("status", status);
-      if (agent) params.set("agent", agent); // requires ObjectId
-      if (source) params.set("source", source);
+  if (q) params.set("q", q);
+  if (status) params.set("status", status);
+  if (agent) params.set("agent", agent); // requires ObjectId
+  if (source) params.set("source", source);
   const res = await fetch(`/api/admin/leads?${params.toString()}`);
       const json = await res.json();
       if (!json.success) throw new Error(json.error || "Gagal memuat");
@@ -157,6 +158,7 @@ export default function AdminLeadsPage() {
               </option>
             ))}
           </select>
+          {/* date filters removed */}
           <div className="flex items-center gap-2">
             <select
               value={limit}
@@ -185,7 +187,7 @@ export default function AdminLeadsPage() {
         </div>
       </section>
 
-      {/* Mobile cards */}
+  {/* Mobile cards */}
       <section className="sm:hidden">
         {loading && <p className="text-sm text-slate-500">Memuat…</p>}
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -214,10 +216,15 @@ export default function AdminLeadsPage() {
               <p className="text-[11px] text-slate-500 mt-1 truncate">
                 Milik: {it.agent?.name || "-"} • Sumber: {it.source || "-"}
               </p>
-              <div className="mt-2 flex justify-between items-center text-[11px] text-slate-500">
-                <span>
-                  Tanggal: {new Date(it.createdAt).toLocaleDateString()}
-                </span>
+              <div className="mt-2 flex justify-between items-start text-[11px] text-slate-500 gap-2">
+                <div className="space-y-0.5">
+                  <div>
+                    <span className="font-medium">Tanggal Lead Masuk:</span> {new Date(it.leadInAt || it.createdAt).toLocaleDateString()}
+                  </div>
+                  <div>
+                    <span className="font-medium">Tanggal Ditambahkan:</span> {new Date(it.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
                 <Link
                   href={`/admin/leads/${it._id}`}
                   className="text-tosca-600"
@@ -235,7 +242,8 @@ export default function AdminLeadsPage() {
         <table className="min-w-full text-sm">
           <thead className="bg-slate-50 text-left">
             <tr>
-              <th className="px-3 py-2">Tanggal</th>
+              <th className="px-3 py-2">Tanggal Lead Masuk</th>
+              <th className="px-3 py-2">Tanggal Ditambahkan</th>
               <th className="px-3 py-2">Nama</th>
               <th className="px-3 py-2">Kontak</th>
               <th className="px-3 py-2">Properti</th>
@@ -248,30 +256,29 @@ export default function AdminLeadsPage() {
           <tbody>
             {loading && (
               <tr>
-                <td className="px-3 py-3 text-slate-500" colSpan={8}>
+                <td className="px-3 py-3 text-slate-500" colSpan={9}>
                   Memuat…
                 </td>
               </tr>
             )}
             {error && (
               <tr>
-                <td className="px-3 py-3 text-red-600" colSpan={8}>
+                <td className="px-3 py-3 text-red-600" colSpan={9}>
                   {error}
                 </td>
               </tr>
             )}
             {!loading && !error && items.length === 0 && (
               <tr>
-                <td className="px-3 py-3 text-slate-500" colSpan={8}>
+                <td className="px-3 py-3 text-slate-500" colSpan={9}>
                   Tidak ada data
                 </td>
               </tr>
             )}
             {items.map((it) => (
               <tr key={it._id} className="border-t">
-                <td className="px-3 py-2">
-                  {new Date(it.createdAt).toLocaleDateString()}
-                </td>
+                <td className="px-3 py-2">{new Date(it.leadInAt || it.createdAt).toLocaleDateString()}</td>
+                <td className="px-3 py-2">{new Date(it.createdAt).toLocaleDateString()}</td>
                 <td className="px-3 py-2 font-medium">{it.name}</td>
                 <td className="px-3 py-2">{it.contact || "-"}</td>
                 <td className="px-3 py-2">

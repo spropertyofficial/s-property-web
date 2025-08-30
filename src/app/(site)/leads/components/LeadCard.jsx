@@ -63,9 +63,14 @@ export default function LeadCard({ lead, onClick, onQuickOpen, index = 0 }) {
       {lead.contact && (
         <p className="text-xs text-slate-500">📞 {lead.contact}</p>
       )}
-      <p className="text-[10px] text-slate-400 mt-1">
-        Updated: {new Date(lead.updatedAt).toLocaleDateString()}
-      </p>
+      <div className="text-[10px] text-slate-400 mt-1 space-y-0.5">
+        <p>
+          Tanggal Lead Masuk: {new Date(lead.leadInAt || lead.createdAt).toLocaleDateString()}
+        </p>
+        <p>
+          Tanggal Ditambahkan: {new Date(lead.createdAt).toLocaleDateString()}
+        </p>
+      </div>
       </Link>
       {/* Actions container at bottom-right: quick edit and delete */}
       <div className="absolute bottom-2 right-2 flex items-center gap-1">

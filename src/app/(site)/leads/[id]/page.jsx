@@ -134,6 +134,14 @@ export default function LeadDetailPage({ params }) {
               <DisplayField label="Unit" value={lead.unit} />
               <DisplayField label="Sumber" value={lead.source} />
               <DisplayField
+                label="Tanggal Lead Masuk"
+                value={new Date(lead.leadInAt || lead.createdAt).toLocaleDateString()}
+              />
+              <DisplayField
+                label="Tanggal Ditambahkan"
+                value={new Date(lead.createdAt).toLocaleDateString()}
+              />
+              <DisplayField
                 label="Diperbarui"
                 value={new Date(lead.updatedAt).toLocaleString()}
               />

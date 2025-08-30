@@ -18,6 +18,7 @@ export default function LeadsList({ onCreate }) {
         <select value={status} onChange={e=>{setPage(1); setStatus(e.target.value);}} className="rounded border border-slate-300 px-2 py-2 text-sm bg-white">
           {STATUSES.map(s=> <option key={s} value={s}>{s || 'Semua Status'}</option>)}
         </select>
+  {/* date filters removed */}
         <select value={limit} onChange={e=>{setPage(1); setLimit(Number(e.target.value));}} className="rounded border border-slate-300 px-2 py-2 text-sm bg-white">
           {[5,10,20,50].map(l=> <option key={l} value={l}>{l}</option>)}
         </select>

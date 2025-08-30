@@ -15,11 +15,13 @@ export async function GET(req) {
   const status = (searchParams.get("status") || "").trim();
   const agent = (searchParams.get("agent") || "").trim();
   const source = (searchParams.get("source") || "").trim();
+  // date filters removed
 
     const filter = {};
     if (status) filter.status = status;
   if (agent) filter.agent = agent;
   if (source) filter.source = source;
+  // date filters removed
     if (q) {
       const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
       filter.$or = [{ name: regex }, { contact: regex }, { email: regex }];
@@ -27,7 +29,7 @@ export async function GET(req) {
 
     const rows = await Lead.find(filter)
       .sort({ updatedAt: -1 })
-      .select("name contact email status property propertyName unit agent source updatedAt createdAt")
+  .select("name contact email status property propertyName unit agent source leadInAt updatedAt createdAt")
       .populate("property", "name")
       .populate("agent", "name agentCode email")
       .lean();
@@ -35,7 +37,8 @@ export async function GET(req) {
     // Build worksheet data with requested columns
     const data = [
       [
-        "Tanggal", // we will use createdAt as the main date
+        "Tanggal Lead Masuk", // use leadInAt as the main date
+        "Tanggal Ditambahkan", // createdAt
         "Nama",
         "Kontak",
         "Email",
@@ -48,6 +51,7 @@ export async function GET(req) {
     ];
     for (const r of rows) {
       data.push([
+        new Date(r.leadInAt || r.createdAt).toISOString(),
         new Date(r.createdAt).toISOString(),
         r.name || "",
         r.contact || "",

@@ -1,10 +1,27 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import PropertyTypeahead from "./PropertyTypeahead";
+import { toastError } from "@/utils/swal";
 import { SOURCES } from "@/lib/constants/leads";
 
 export default function LeadCreateModal({ onClose, onCreated }) {
-  const [form, setForm] = useState({ name: "", contact: "", email: "", source: "", propertyName: "", property: null, unit: "" });
+  const todayStr = (() => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  })();
+  const [form, setForm] = useState({
+    leadInAt: todayStr, // YYYY-MM-DD
+    name: "",
+    contact: "",
+    email: "",
+    source: "",
+    propertyName: "",
+    property: null,
+    unit: "",
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [sourceOpen, setSourceOpen] = useState(false);
@@ -19,6 +36,20 @@ export default function LeadCreateModal({ onClose, onCreated }) {
     e.preventDefault();
     setLoading(true); setError(null);
     try {
+      // Optional quick client check: if contact provided, query existing by q
+      if (form.contact && form.contact.trim()) {
+        const q = encodeURIComponent(form.contact.trim());
+        const resCheck = await fetch(`/api/leads?q=${q}&limit=1`);
+        const jCheck = await resCheck.json();
+        if (jCheck?.success && Array.isArray(jCheck.data)) {
+          const exists = jCheck.data.some((it) => (it.contact || "").replace(/[-\s]/g, "") === form.contact.replace(/[-\s]/g, ""));
+          if (exists) {
+            toastError('Kontak sudah ada');
+            setLoading(false);
+            return;
+          }
+        }
+      }
       const payload = { ...form };
       if (payload.property) {
         // When property selected from master, ignore raw name for saving
@@ -28,6 +59,7 @@ export default function LeadCreateModal({ onClose, onCreated }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          leadInAt: payload.leadInAt,
           name: payload.name,
           contact: payload.contact,
           email: payload.email,
@@ -38,7 +70,13 @@ export default function LeadCreateModal({ onClose, onCreated }) {
         })
       });
       const json = await res.json();
-      if (!json.success) throw new Error(json.error || 'Gagal membuat lead');
+      if (!json.success) {
+        if (res.status === 409 && /Kontak sudah ada/i.test(json.error || "")) {
+          toastError('Kontak sudah ada');
+          throw new Error(json.error);
+        }
+        throw new Error(json.error || 'Gagal membuat lead');
+      }
   // Emit global event for other components (list) to refresh
   window.dispatchEvent(new CustomEvent('lead:created', { detail: json.data }));
   onCreated?.(json.data);
@@ -58,6 +96,18 @@ export default function LeadCreateModal({ onClose, onCreated }) {
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <div className="grid gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium">Tanggal Lead Masuk*</label>
+            <input
+              type="date"
+              required
+              value={form.leadInAt}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, leadInAt: e.target.value }))
+              }
+              className="rounded border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
+            />
+          </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-medium">Nama*</label>
             <input required value={form.name} onChange={e=> setForm(f=>({...f, name:e.target.value}))} className="rounded border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Nama prospek"/>

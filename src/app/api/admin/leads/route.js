@@ -20,11 +20,12 @@ export async function GET(req) {
     const status = (searchParams.get("status") || "").trim();
     const source = (searchParams.get("source") || "").trim();
     const agent = (searchParams.get("agent") || "").trim();
-    const page = Math.max(parseInt(searchParams.get("page") || "1", 10), 1);
+  const page = Math.max(parseInt(searchParams.get("page") || "1", 10), 1);
     const limit = Math.min(
       Math.max(parseInt(searchParams.get("limit") || "10", 10), 1),
       100
     );
+  // date filters removed
 
     const filter = {};
     if (status) filter.status = status;
@@ -35,6 +36,8 @@ export async function GET(req) {
       filter.$or = [{ name: regex }, { contact: regex }, { email: regex }];
     }
 
+  // date filters removed
+
     const skip = (page - 1) * limit;
     const [items, total] = await Promise.all([
       Lead.find(filter)
@@ -42,7 +45,7 @@ export async function GET(req) {
         .skip(skip)
         .limit(limit)
         .select(
-          "name status property propertyName unit agent contact email source createdAt updatedAt"
+          "name status property propertyName unit agent contact email source leadInAt createdAt updatedAt"
         )
         .populate("property", "name")
         .populate("agent", "name agentCode")
