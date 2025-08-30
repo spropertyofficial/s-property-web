@@ -18,8 +18,8 @@ export default function useLeads(initial = {}) {
       const params = new URLSearchParams();
       params.set("page", page);
       params.set("limit", limit);
-      if (q) params.set("q", q);
-      if (status) params.set("status", status);
+  if (q) params.set("q", q);
+  if (status) params.set("status", status);
       const res = await fetch(`/api/leads?${params.toString()}`);
       const json = await res.json();
       if (!json.success) throw new Error(json.error || "Gagal memuat");
@@ -53,7 +53,7 @@ export default function useLeads(initial = {}) {
   }, [fetchLeads]);
 
   return {
-    data, loading, error, page, limit, q, status, totalPages, total,
-    setPage, setLimit, setQ, setStatus, refresh: fetchLeads,
+  data, loading, error, page, limit, q, status, totalPages, total,
+  setPage, setLimit, setQ, setStatus, refresh: fetchLeads,
   };
 }

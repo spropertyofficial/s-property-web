@@ -7,11 +7,13 @@ import { Plus } from "lucide-react";
 export default function LeadsPage() {
   const [open, setOpen] = useState(false);
   return (
-    <div className="p-4 max-w-3xl mx-auto h-screen">
-      <header className="flex items-center justify-between mb-4">
+    <div className="p-4 max-w-3xl mx-auto h-[100svh] flex flex-col">
+      <header className="flex items-center justify-between mb-4 shrink-0">
         <h1 className="text-xl font-semibold">Leads</h1>
       </header>
-      <LeadsList onCreate={() => setOpen(true)} />
+      <div className="flex-1 min-h-0 overflow-y-auto pb-32 sm:pb-24">
+        <LeadsList onCreate={() => setOpen(true)} />
+      </div>
       <button
         aria-label="Tambah Lead"
         onClick={() => setOpen(true)}

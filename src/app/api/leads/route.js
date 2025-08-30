@@ -12,11 +12,12 @@ export async function GET(req) {
   const q = (searchParams.get("q") || "").trim();
   const status = (searchParams.get("status") || "").trim();
   const source = (searchParams.get("source") || "").trim();
-    const page = Math.max(parseInt(searchParams.get("page") || "1", 10), 1);
+  const page = Math.max(parseInt(searchParams.get("page") || "1", 10), 1);
     const limit = Math.min(
       Math.max(parseInt(searchParams.get("limit") || "10", 10), 1),
       100
     );
+  // date filters removed
 
     // Auth: only authenticated user can access and only see own leads
     const userAuth = await verifyUser(req);
@@ -37,6 +38,8 @@ export async function GET(req) {
       filter.$or = [{ name: regex }, { contact: regex }, { email: regex }];
     }
 
+  // date filters removed
+
     const skip = (page - 1) * limit;
     const [items, total] = await Promise.all([
       Lead.find(filter)
@@ -44,7 +47,7 @@ export async function GET(req) {
         .skip(skip)
         .limit(limit)
         .select(
-          "name status property propertyName unit agent contact email source createdAt updatedAt"
+          "name status property propertyName unit agent contact email source leadInAt createdAt updatedAt"
         )
         .populate("property", "name")
   .populate("agent", "name agentCode")
@@ -81,8 +84,8 @@ export async function POST(req) {
     }
     await dbConnect();
 
-    const body = await req.json();
-    const { name, contact, email, property, propertyName, unit, source } =
+  const body = await req.json();
+  const { name, contact, email, property, propertyName, unit, source, leadInAt } =
       body || {};
 
     if (!name || typeof name !== "string" || !name.trim()) {
@@ -92,7 +95,17 @@ export async function POST(req) {
       );
     }
 
+    // Parse leadInAt if provided (YYYY-MM-DD), fall back to now
+    let leadInAtDate = undefined;
+    if (leadInAt) {
+      const parsed = new Date(leadInAt);
+      if (!isNaN(parsed.getTime())) {
+        leadInAtDate = parsed;
+      }
+    }
+
     const doc = new Lead({
+      leadInAt: leadInAtDate || Date.now(),
       name: name.trim(),
       contact: contact?.trim() || undefined,
       email: email?.trim() || undefined,
@@ -114,10 +127,16 @@ export async function POST(req) {
   } catch (error) {
     if (error?.code === 11000) {
       const field = Object.keys(error.keyPattern || {})[0] || "field";
+      // Specific, friendlier messages
+      const message = field === "contact"
+        ? "Kontak sudah ada"
+        : field === "email"
+        ? "Email sudah ada"
+        : `${field} sudah terpakai`;
       return NextResponse.json(
         {
           success: false,
-          error: `${field} sudah terpakai untuk lead aktif lain`,
+          error: message,
         },
         { status: 409 }
       );
