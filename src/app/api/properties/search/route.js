@@ -17,7 +17,14 @@ export async function GET(req) {
     const q = (searchParams.get('q') || '').trim();
     if (!q) return NextResponse.json({ success:true, data: [] });
     const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), 'i');
-    const items = await Property.find({ name: regex }).select('_id name').limit(8).lean();
+    // If user is sales-inhouse, restrict strictly to allowedProperties (empty list yields no results)
+    let baseFilter = { name: regex };
+    const agentUser = userAuth?.user;
+    if (userAuth?.success && agentUser?.type === 'sales-inhouse') {
+      const list = Array.isArray(agentUser.allowedProperties) ? agentUser.allowedProperties : [];
+      baseFilter._id = { $in: list };
+    }
+    const items = await Property.find(baseFilter).select('_id name').limit(8).lean();
     return NextResponse.json({ success:true, data: items });
   } catch (e) {
     return NextResponse.json({ success:false, error:"Gagal mencari properti" }, { status:500 });

@@ -3,8 +3,10 @@ import { useState, useRef, useEffect } from "react";
 import PropertyTypeahead from "./PropertyTypeahead";
 import { toastError } from "@/utils/swal";
 import { SOURCES } from "@/lib/constants/leads";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LeadCreateModal({ onClose, onCreated }) {
+  const { user } = useAuth();
   const todayStr = (() => {
     const d = new Date();
     const y = d.getFullYear();
@@ -26,6 +28,16 @@ export default function LeadCreateModal({ onClose, onCreated }) {
   const [error, setError] = useState(null);
   const [sourceOpen, setSourceOpen] = useState(false);
   const sourceRef = useRef(null);
+  // Auto-pick allowed property when exactly one is assigned
+  useEffect(() => {
+    if (user?.type === 'sales-inhouse') {
+      const list = Array.isArray(user.allowedProperties) ? user.allowedProperties : [];
+      if (list.length === 1) {
+        const p = list[0];
+        setForm(f=> ({ ...f, property: p._id || p, propertyName: p.name || f.propertyName }));
+      }
+    }
+  }, [user]);
   useEffect(()=> {
     function handler(e){ if(!sourceRef.current?.contains(e.target)) setSourceOpen(false); }
     document.addEventListener('mousedown', handler);
@@ -36,6 +48,12 @@ export default function LeadCreateModal({ onClose, onCreated }) {
     e.preventDefault();
     setLoading(true); setError(null);
     try {
+      // Sales-inhouse must select property from list
+      if (user?.type === 'sales-inhouse' && !form.property) {
+        toastError('Sales Inhouse wajib memilih properti dari daftar');
+        setLoading(false);
+        return;
+      }
       // Optional quick client check: if contact provided, query existing by q
       if (form.contact && form.contact.trim()) {
         const q = encodeURIComponent(form.contact.trim());
@@ -127,6 +145,9 @@ export default function LeadCreateModal({ onClose, onCreated }) {
               onInput={(val)=> setForm(f=> ({...f, propertyName: val, property: null}))}
               onSelect={(it)=> setForm(f=> ({...f, propertyName: it.name, property: it._id}))}
             />
+            {user?.type === 'sales-inhouse' && !form.property && Array.isArray(user.allowedProperties) && user.allowedProperties.length > 1 && (
+              <p className="text-[10px] text-amber-600">Pilih salah satu dari proyek yang telah ditetapkan oleh admin.</p>
+            )}
             {form.property && <p className="text-[10px] text-green-600">Terpilih dari master</p>}
           </div>
           <div className="flex flex-col gap-1">

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaSave, FaTrashAlt, FaKey, FaTimes } from "react-icons/fa";
 import { USER_TYPES } from "../utils/constants";
 import { toastError, toastSuccess } from "../utils/toast";
@@ -11,18 +11,46 @@ export default function UserRow({ user, onChange }) {
     type: user.type || "user",
     isActive: Boolean(user.isActive),
   });
+  const [allowed, setAllowed] = useState(Array.isArray(user.allowedProperties) ? user.allowedProperties.map(p=>({ _id: p._id || p, name: p.name || '' })) : []);
+  const [pQuery, setPQuery] = useState("");
+  const [pItems, setPItems] = useState([]);
+  const [pOpen, setPOpen] = useState(false);
+  const pRef = useRef(null);
   const [saving, setSaving] = useState(false);
   const [showReset, setShowReset] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [showDelete, setShowDelete] = useState(false);
 
+  useEffect(()=>{
+    function onDoc(e){ if(!pRef.current?.contains(e.target)) setPOpen(false); }
+    document.addEventListener('mousedown', onDoc);
+    return ()=> document.removeEventListener('mousedown', onDoc);
+  },[]);
+
+  useEffect(()=>{
+    if (!pQuery || pQuery.length < 2) { setPItems([]); return; }
+    let active = true; const ctl = new AbortController();
+    const t = setTimeout(async ()=>{
+      try {
+        const res = await fetch(`/api/properties/suggest?q=${encodeURIComponent(pQuery)}&limit=10`, { signal: ctl.signal });
+        const j = await res.json();
+        if (!active) return; setPItems(j?.items||[]);
+      } catch { if (active) setPItems([]); }
+    }, 300);
+    return ()=> { active=false; ctl.abort(); clearTimeout(t); };
+  }, [pQuery]);
+
   async function save() {
     setSaving(true);
     try {
+      const payload = { ...form };
+      if ((payload.type === 'sales-inhouse') && allowed.length >= 0) {
+        payload.allowedProperties = allowed.map(p=>p._id);
+      }
       const res = await fetch(`/api/admin/users/${user._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok || !data?.success) throw new Error(data?.message || "Gagal menyimpan");
@@ -71,6 +99,36 @@ export default function UserRow({ user, onChange }) {
           </select>
         </td>
         <td className="p-3 text-xs text-gray-700">{user.agentCode || "-"}</td>
+        <td className="p-3">
+          {form.type === 'sales-inhouse' ? (
+            <div className="space-y-2" ref={pRef}>
+              <div className="flex gap-2 flex-wrap">
+                {allowed.map(p=> (
+                  <span key={p._id} className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200 rounded px-2 py-0.5 text-xs">
+                    {p.name || p._id}
+                    <button type="button" className="text-blue-700/70 hover:text-blue-900" onClick={()=> setAllowed(list=> list.filter(x=>x._id!==p._id))}>×</button>
+                  </span>
+                ))}
+              </div>
+              <div className="relative">
+                <input value={pQuery} onChange={e=>{ setPQuery(e.target.value); setPOpen(true); }} onFocus={()=> setPOpen(true)} placeholder="Tambah proyek..." className="border rounded-lg px-3 py-2 w-72 focus:ring-2 focus:ring-blue-500" />
+                {pOpen && (pQuery.length >=2) && (
+                  <div className="absolute z-10 bg-white border rounded-md shadow w-full mt-1 max-h-56 overflow-auto">
+                    {pItems.length===0 ? (
+                      <div className="px-3 py-2 text-sm text-gray-500">Tidak ada hasil</div>
+                    ) : pItems.map(it=> (
+                      <button type="button" key={it._id} onClick={()=>{ if(!allowed.find(a=>a._id===it._id)) setAllowed(l=>[...l,{_id:it._id,name:it.name}]); setPQuery(''); setPOpen(false); }} className="w-full text-left px-3 py-2 hover:bg-blue-50 text-sm">
+                        {it.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <span className="text-xs text-gray-500">-</span>
+          )}
+        </td>
         <td className="p-3">
           <button
             onClick={() => setForm(f=>({...f, isActive: !f.isActive}))}
