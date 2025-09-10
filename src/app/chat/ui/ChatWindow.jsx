@@ -131,7 +131,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
         {!messages || messages.length===0 ? (
       <div className="h-full grid place-items-center text-slate-500">Belum ada pesan</div>
         ) : messages.map(m => (
-          <MessageBubble key={m.id} mine={m.sender==='me'} text={m.body} ts={m.ts} status={m.status} />
+          <MessageBubble key={m._id || m.id} mine={m.sender==='me'} text={m.body} ts={m.ts} status={m.status} />
         ))}
         {/* Spacer to prevent last message hidden behind fixed composer on mobile */}
         {isMobile && <div style={{ height: composerH }} />}

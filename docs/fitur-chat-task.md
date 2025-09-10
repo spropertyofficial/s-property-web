@@ -33,7 +33,7 @@ Dokumen ini merinci tugas-tugas teknis untuk membangun Fitur Chat Terpusat, mula
 **Fokus:** Membangun halaman "Kotak Masuk" agar agen dapat melihat dan membalas pesan.
 
 ### Tugas 2.1: Buat Halaman & Layout Dasar Kotak Masuk
-- [ ] Buat halaman baru di `/admin/inbox`
+- [ ] Buat halaman baru di `/chat`
 - [ ] Rancang layout tiga panel (Daftar Chat, Jendela Chat, Info Lead) dengan Tailwind CSS dan pastikan responsif
 
 ### Tugas 2.2: Implementasi Daftar Percakapan (Panel Kiri)

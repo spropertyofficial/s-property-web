@@ -2,52 +2,61 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Lead from "@/lib/models/Lead";
 import ChatMessage from "@/lib/models/ChatMessage";
+import querystring from "querystring";
 
 export async function POST(req) {
-  try {
-    await dbConnect();
-    const body = await req.json();
-    // Twilio webhook payload
-    const {
-      From, // nomor pengirim (format: whatsapp:+62xxxx)
-      To,   // nomor penerima (format: whatsapp:+62xxxx)
-      Body, // isi pesan
-      MessageSid, // ID pesan Twilio
-      Timestamp, // waktu pesan (opsional)
-    } = body;
+  await dbConnect();
+  const rawBody = await req.text();
+  console.log("Twilio webhook rawBody:", rawBody);
+  const body = require("querystring").parse(rawBody);
+  console.log("Twilio webhook parsed body:", body);
 
-    if (!From || !Body) {
-      return NextResponse.json({ success: false, error: "Payload tidak valid" }, { status: 400 });
-    }
+  const { From, To, Body, MessageSid, Timestamp } = body;
+  console.log(
+    "Twilio webhook From:",
+    From,
+    "To:",
+    To,
+    "Body:",
+    Body,
+    "MessageSid:",
+    MessageSid,
+    "Timestamp:",
+    Timestamp
+  );
 
-    // Cari lead berdasarkan nomor pengirim
-    let lead = await Lead.findOne({ contact: From.replace("whatsapp:", "") });
-    if (!lead) {
-      // Buat lead baru jika belum ada
-      lead = await Lead.create({
-        name: "Prospek WhatsApp",
-        contact: From.replace("whatsapp:", ""),
-        source: "WhatsApp",
-        status: "Baru",
-        agent: null, // assignment akan diatur di milestone berikutnya
-      });
-    }
-
-    // Simpan pesan ke ChatMessage
-    await ChatMessage.create({
-      lead: lead._id,
-      from: From,
-      to: To,
-      body: Body,
-      direction: "inbound",
-      status: "received",
-      sentAt: Timestamp ? new Date(Timestamp) : Date.now(),
-      twilioSid: MessageSid,
-    });
-
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error("Webhook error:", err);
-    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
+  if (!From || !Body) {
+    console.log("Payload tidak valid", body);
+    return NextResponse.json(
+      { success: false, error: "Payload tidak valid" },
+      { status: 400 }
+    );
   }
+
+  let lead = await Lead.findOne({ contact: From.replace("whatsapp:", "") });
+  if (!lead) {
+    lead = await Lead.create({
+      name: "-",
+      contact: From.replace("whatsapp:", ""),
+      source: "WhatsApp",
+      status: "Baru"
+    });
+    console.log("Lead baru dibuat:", From.replace("whatsapp:", ""));
+  } else {
+    console.log("Lead sudah ada:", lead.contact);
+  }
+
+  await ChatMessage.create({
+    lead: lead._id,
+    from: From,
+    to: To,
+    body: Body,
+    direction: "inbound",
+    status: "received",
+    sentAt: Timestamp ? new Date(Timestamp) : Date.now(),
+    twilioSid: MessageSid,
+  });
+
+  console.log("Pesan berhasil disimpan untuk lead:", lead.contact);
+  return NextResponse.json({ success: true });
 }

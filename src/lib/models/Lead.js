@@ -32,7 +32,7 @@ const LeadSchema = new mongoose.Schema(
     agent: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
     }, // Agen / Mitra penanggung jawab
     source: { type: String, trim: true, maxlength: 100 }, // Sumber mengetahui proyek
     status: {
