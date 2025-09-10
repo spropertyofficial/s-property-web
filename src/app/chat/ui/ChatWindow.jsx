@@ -2,7 +2,25 @@
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-export default function ChatWindow({ conversation, messages, onSend, showEscalation, onStopEscalation, onBack, onToggleInfo }) {
+export default function ChatWindow({ conversation, messages, onSend, showEscalation, onStopEscalation, onBack, onToggleInfo, refetchConversations }) {
+  // Mark inbound messages as read if room chat is open and new message arrives
+  // Mark inbound messages as read if room chat is open and new message arrives, then refetch conversations
+  // refetchConversations sekarang diterima sebagai prop
+  useEffect(() => {
+    if (!conversation || !messages || messages.length === 0) return;
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg.direction === "inbound" && lastMsg.status === "received") {
+      fetch("/api/conversations/read", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leadId: conversation.lead._id })
+      }).then(() => {
+        if (typeof refetchConversations === "function") {
+          refetchConversations();
+        }
+      });
+    }
+  }, [messages, conversation?.id, refetchConversations]);
   const [text, setText] = useState("");
   const scrollerRef = useRef(null);
   const inputRef = useRef(null);

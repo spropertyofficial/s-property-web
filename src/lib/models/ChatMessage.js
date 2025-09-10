@@ -14,7 +14,7 @@ const ChatMessageSchema = new mongoose.Schema(
     direction: { type: String, enum: ["inbound", "outbound"], required: true }, // Arah pesan
     status: {
       type: String,
-      enum: ["received", "sent", "failed"],
+      enum: ["received", "sent", "failed", "read"],
       default: "received",
     },
     sentAt: { type: Date, default: Date.now },

@@ -83,27 +83,31 @@ export default function ConversationsList({
               <div className="w-12 h-12 flex items-center justify-center">
                 <RxAvatar className="w-10 h-10 text-teal-600" />
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 relative">
                 {/* Nama user */}
                 <div className="flex justify-between items-start">
                   <p className="font-bold text-slate-800 truncate">
                     {getDisplayName(item.lead)}
                   </p>
-                  <p className="text-xs text-slate-400 flex-shrink-0 ml-2">
-                    {item.timestamp || formatTime(item.lastMessageAt)}
+                  <p className="text-xs text-slate-400 flex-shrink-0 ml-2 text-right">
+                    {formatTime(getLastMessageTime(item))}
                   </p>
                 </div>
                 {/* Pesan terakhir */}
                 <div className="flex justify-between items-end mt-1">
-                  <p className="text-sm text-slate-500 truncate">
-                    {item.lastMessageText || (item.messages && item.messages.length > 0 ? item.messages[item.messages.length - 1].body : "")}
+                  <p className="text-sm text-slate-500 truncate pr-8">
+                    {item.lastMessageText ||
+                      (item.messages && item.messages.length > 0
+                        ? item.messages[item.messages.length - 1].body
+                        : "")}
                   </p>
-                  {(item.unread || 0) > 0 && (
-                    <div className="w-5 h-5 bg-teal-500 text-white text-xs rounded-full flex items-center justify-center flex-shrink-0">
-                      {item.unread}
-                    </div>
-                  )}
                 </div>
+                {/* Notif pesan belum dibaca di pojok kanan bawah */}
+                {(item.unread || 0) > 0 && (
+                  <div className="absolute bottom-2 right-2 w-5 h-5 bg-teal-500 text-white text-xs rounded-full flex items-center justify-center flex-shrink-0 shadow">
+                    {item.unread}
+                  </div>
+                )}
                 {item.isNewAssignment && (
                   <div className="mt-2 text-xs font-bold text-red-600 animate-pulse">
                     🔥 TUGAS BARU
@@ -116,6 +120,15 @@ export default function ConversationsList({
       </div>
     </div>
   );
+
+  function getLastMessageTime(item) {
+    if (item.lastMessageAt) return item.lastMessageAt;
+    if (item.messages && item.messages.length > 0) {
+      const lastMsg = item.messages[item.messages.length - 1];
+      return lastMsg.sentAt || lastMsg.timestamp || null;
+    }
+    return null;
+  }
 }
 
 function formatTime(ts) {
@@ -136,7 +149,12 @@ function getInitials(name) {
 
 function getDisplayName(lead) {
   if (!lead) return "?";
-  if (!lead.name || lead.name.trim() === "" || lead.name === "Prospek WhatsApp" || lead.name === "-") {
+  if (
+    !lead.name ||
+    lead.name.trim() === "" ||
+    lead.name === "Prospek WhatsApp" ||
+    lead.name === "-"
+  ) {
     return lead.contact || "?";
   }
   return lead.name;
