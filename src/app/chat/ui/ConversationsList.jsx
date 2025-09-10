@@ -81,7 +81,7 @@ export default function ConversationsList({
               )}
               {/* Avatar user */}
               <div className="w-12 h-12 flex items-center justify-center">
-                <RxAvatar className="w-10 h-10 text-teal-600 bg-teal-100 rounded-full" />
+                <RxAvatar className="w-10 h-10 text-teal-600" />
               </div>
               <div className="flex-1 min-w-0">
                 {/* Nama user */}
@@ -136,7 +136,7 @@ function getInitials(name) {
 
 function getDisplayName(lead) {
   if (!lead) return "?";
-  if (!lead.name || lead.name.trim() === "" || lead.name === "Prospek WhatsApp") {
+  if (!lead.name || lead.name.trim() === "" || lead.name === "Prospek WhatsApp" || lead.name === "-") {
     return lead.contact || "?";
   }
   return lead.name;
