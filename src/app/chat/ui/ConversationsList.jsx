@@ -22,6 +22,16 @@ export default function ConversationsList({
     [items]
   );
 
+  // Urutkan items dari yang terbaru
+  const sortedItems = [...items].sort((a, b) => {
+    const aTime = getLastMessageTime(a);
+    const bTime = getLastMessageTime(b);
+    if (!aTime && !bTime) return 0;
+    if (!aTime) return 1;
+    if (!bTime) return -1;
+    return new Date(bTime) - new Date(aTime);
+  });
+
   return (
     <div className="flex flex-col h-full">
       <div className="p-4 border-b border-slate-200 flex-shrink-0 bg-white">
@@ -63,12 +73,12 @@ export default function ConversationsList({
       </div>
 
       <div id="conversation-list" className="flex-1 overflow-y-auto">
-        {items.length === 0 ? (
+        {sortedItems.length === 0 ? (
           <div className="p-6 text-center text-slate-500">
             Tidak ada percakapan
           </div>
         ) : (
-          items.map((item) => (
+          sortedItems.map((item) => (
             <button
               key={item.lead?._id || item.id}
               onClick={() => onSelect(item.lead?._id || item.id)}
