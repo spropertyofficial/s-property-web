@@ -20,6 +20,8 @@ const ChatMessageSchema = new mongoose.Schema(
     sentAt: { type: Date, default: Date.now },
     receivedAt: { type: Date, default: Date.now },
     twilioSid: { type: String }, // SID dari Twilio (opsional)
+    mediaUrls: [{ type: String }], // Array URL media
+    mediaTypes: [{ type: String }], // Array tipe media
   },
   {
     timestamps: true,

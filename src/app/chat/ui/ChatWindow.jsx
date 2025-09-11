@@ -1,5 +1,6 @@
 "use client";
 import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 export default function ChatWindow({ conversation, messages, onSend, showEscalation, onStopEscalation, onBack, onToggleInfo, refetchConversations }) {
@@ -214,7 +215,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   );
 }
 
-function MessageBubble({ mine, text, ts, status, sentAt, createdAt, receivedAt, ...payload }){
+function MessageBubble({ mine, text, ts, status, sentAt, createdAt, receivedAt, mediaUrls, mediaTypes, ...payload }){
   // Pilih waktu pesan yang valid
   const time = ts || sentAt || createdAt || receivedAt;
   return (
@@ -222,6 +223,12 @@ function MessageBubble({ mine, text, ts, status, sentAt, createdAt, receivedAt, 
       <div
         className={`max-w-md px-4 py-3 rounded-2xl shadow-md border ${mine ? "bg-teal-600 text-white border-teal-300" : "bg-white text-slate-800 border-slate-200"}`}
       >
+        {/* Tampilkan media jika ada */}
+        {mediaUrls && mediaUrls.length > 0 && mediaUrls.map((url, idx) => (
+          mediaTypes[idx] && mediaTypes[idx].startsWith('image') ? (
+            <Image key={url} src={url} alt="media" width={200} height={200} className="mb-2 max-w-xs max-h-60 rounded" />
+          ) : null
+        ))}
         <div className="whitespace-pre-wrap text-sm">{text}</div>
         <div className={`mt-1 text-[10px] ${mine ? "text-white/70" : "text-slate-400"}`}>
           {formatTime(time)}{mine ? ` • ${status}` : ""}

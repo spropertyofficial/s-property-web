@@ -57,6 +57,15 @@ export async function POST(req) {
     console.log("Lead sudah ada:", lead.contact);
   }
 
+  // Ambil media jika ada
+  const numMedia = parseInt(body.NumMedia || "0", 10);
+  const mediaUrls = [];
+  const mediaTypes = [];
+  for (let i = 0; i < numMedia; i++) {
+    if (body[`MediaUrl${i}`]) mediaUrls.push(body[`MediaUrl${i}`]);
+    if (body[`MediaContentType${i}`]) mediaTypes.push(body[`MediaContentType${i}`]);
+  }
+
   await ChatMessage.create({
     lead: lead._id,
     from: From,
@@ -66,6 +75,8 @@ export async function POST(req) {
     status: "received",
     sentAt: Timestamp ? new Date(Timestamp) : Date.now(),
     twilioSid: MessageSid,
+    mediaUrls,
+    mediaTypes,
   });
 
   console.log("Pesan berhasil disimpan untuk lead:", lead.contact);

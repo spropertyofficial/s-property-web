@@ -30,6 +30,11 @@ const nextConfig = {
         hostname: "picsum.photos",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "api.twilio.com",
+        pathname: "/**",
+      },
     ],
   },
   env: {},
