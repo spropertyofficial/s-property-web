@@ -112,9 +112,6 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
     );
   }
 
-  // Ambil nomor WhatsApp agent dari environment (client-side tidak bisa akses process.env)
-  // Jadi, nomor agent sebaiknya dikirim dari backend ke frontend lewat prop
-  const agentNumber = conversation?.agentNumber || "whatsapp:+628123456789"; // fallback jika belum ada
   return (
     <div className="grid grid-rows-[auto,1fr,auto] h-full min-h-0 overflow-hidden">
       <div className="px-3 py-3 border-b border-slate-200 bg-white flex items-center justify-between">

@@ -11,7 +11,7 @@ export async function POST(req) {
   const body = require("querystring").parse(rawBody);
   console.log("Twilio webhook parsed body:", body);
 
-  const { From, To, Body, MessageSid, Timestamp } = body;
+  const { From, To, Body, MessageSid, Timestamp, MessageStatus } = body;
   console.log(
     "Twilio webhook From:",
     From,
@@ -25,6 +25,17 @@ export async function POST(req) {
     Timestamp
   );
 
+  // Jika webhook untuk status outbound (MessageStatus & MessageSid), update status pesan
+  if (MessageSid && MessageStatus) {
+    // Update status pesan outbound sesuai MessageSid
+    await ChatMessage.findOneAndUpdate(
+      { twilioSid: MessageSid },
+      { status: MessageStatus },
+    );
+    console.log(`Update status ChatMessage SID ${MessageSid} => ${MessageStatus}`);
+    return NextResponse.json({ success: true });
+  }
+  // Jika webhook inbound (pesan masuk dari user)
   if (!From || !Body) {
     console.log("Payload tidak valid", body);
     return NextResponse.json(

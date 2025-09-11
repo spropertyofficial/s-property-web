@@ -26,6 +26,7 @@ export async function POST(req) {
       body: message,
       from: process.env.TWILIO_WHATSAPP_NUMBER,
       to: `whatsapp:${toNumber}`,
+      statusCallback: `${process.env.NEXT_PUBLIC_BASE_URL || "https://af12a559e28b.ngrok-free.app"}/api/whatsapp/webhook`,
     });
     // Simpan pesan ke ChatMessage
     const chatMsg = await ChatMessage.create({
@@ -34,6 +35,7 @@ export async function POST(req) {
       to: toNumber,
       body: message,
       direction: "outbound",
+      status: "sent",
       twilioSid: twilioRes.sid,
     });
     return Response.json({ success: true, chatMsg });
