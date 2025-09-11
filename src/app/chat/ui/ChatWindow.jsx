@@ -3,6 +3,15 @@ import { ArrowLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export default function ChatWindow({ conversation, messages, onSend, showEscalation, onStopEscalation, onBack, onToggleInfo, refetchConversations }) {
+  // Untuk auto-resize textarea maksimal 6 baris
+  const maxRows = 6;
+  const [inputRows, setInputRows] = useState(1);
+  function handleInputChange(e) {
+    setText(e.target.value);
+    // Hitung jumlah baris
+    const lines = e.target.value.split('\n').length;
+    setInputRows(Math.min(maxRows, lines));
+  }
   // Debug: tampilkan isi conversation di console
   console.log('[ChatWindow] conversation:', conversation);
   useEffect(() => {
@@ -187,11 +196,12 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
         <div className="flex items-end gap-2">
           <textarea
             ref={inputRef}
-            rows={1}
+            rows={inputRows}
             value={text}
-            onChange={e=>setText(e.target.value)}
+            onChange={handleInputChange}
             placeholder="Tulis pesan..."
-    className="flex-1 resize-none rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 max-h-32"
+            className="flex-1 resize-none rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            style={{maxHeight: `${maxRows * 24}px`, overflowY: inputRows === maxRows ? 'auto' : 'hidden'}}
             inputMode="text"
             enterKeyHint="send"
             autoCorrect="on"
