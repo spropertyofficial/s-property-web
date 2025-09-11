@@ -1,6 +1,6 @@
-import dbConnect from "../../../../lib/dbConnect";
-import ChatMessage from "../../../../lib/models/ChatMessage";
-import Lead from "../../../../lib/models/Lead";
+import dbConnect from "@/lib/mongodb";
+import ChatMessage from "@/lib/models/ChatMessage";
+import Lead from "@/lib/models/Lead";
 import twilio from "twilio";
 
 export async function POST(req) {
@@ -18,17 +18,22 @@ export async function POST(req) {
   // Kirim pesan ke WhatsApp via Twilio
   const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
   try {
+    const toNumber = lead.contact;
+    if (!toNumber) {
+      return Response.json({ error: "Nomor WhatsApp (contact) tidak ditemukan pada lead." }, { status: 400 });
+    }
     const twilioRes = await client.messages.create({
       body: message,
       from: process.env.TWILIO_WHATSAPP_NUMBER,
-      to: `whatsapp:${lead.phone}`,
+      to: `whatsapp:${toNumber}`,
     });
     // Simpan pesan ke ChatMessage
     const chatMsg = await ChatMessage.create({
       lead: lead._id,
-      sender: "agent",
-      content: message,
-      timestamp: new Date(),
+      from: process.env.TWILIO_WHATSAPP_NUMBER,
+      to: toNumber,
+      body: message,
+      direction: "outbound",
       twilioSid: twilioRes.sid,
     });
     return Response.json({ success: true, chatMsg });

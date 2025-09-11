@@ -81,7 +81,8 @@ export default function ChatInboxPageContent() {
         body: JSON.stringify({ leadId: selected.lead._id, message: text }),
       });
       if (!res.ok) throw new Error("Gagal mengirim pesan");
-      // TODO: refetch conversations/messages if needed
+      // Refetch agar pesan baru langsung muncul
+      refetchConversations();
     } catch (err) {
       console.error(err);
     }
