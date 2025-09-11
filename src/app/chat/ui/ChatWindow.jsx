@@ -224,11 +224,23 @@ function MessageBubble({ mine, text, ts, status, sentAt, createdAt, receivedAt, 
         className={`max-w-md px-4 py-3 rounded-2xl shadow-md border ${mine ? "bg-teal-600 text-white border-teal-300" : "bg-white text-slate-800 border-slate-200"}`}
       >
         {/* Tampilkan media jika ada */}
-        {mediaUrls && mediaUrls.length > 0 && mediaUrls.map((url, idx) => (
-          mediaTypes[idx] && mediaTypes[idx].startsWith('image') ? (
-            <Image key={url} src={url} alt="media" width={200} height={200} className="mb-2 max-w-xs max-h-60 rounded" />
-          ) : null
-        ))}
+        {mediaUrls && mediaUrls.length > 0 && mediaUrls.map((url, idx) => {
+          const type = mediaTypes[idx] || "";
+          if (type.startsWith("image")) {
+            return <Image key={url} src={url} alt="media" width={200} height={200} className="mb-2 max-w-xs max-h-60 rounded" />;
+          }
+          if (type.startsWith("video")) {
+            return <video key={url} src={url} controls className="mb-2 max-w-xs max-h-60 rounded" />;
+          }
+          if (type.startsWith("audio")) {
+            return <audio key={url} src={url} controls className="mb-2 w-full" />;
+          }
+          if (type === "application/pdf") {
+            return <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="mb-2 block text-blue-600 underline">Lihat PDF</a>;
+          }
+          // Default: link download
+          return <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="mb-2 block text-blue-600 underline">Download File</a>;
+        })}
         <div className="whitespace-pre-wrap text-sm">{text}</div>
         <div className={`mt-1 text-[10px] ${mine ? "text-white/70" : "text-slate-400"}`}>
           {formatTime(time)}{mine ? ` • ${status}` : ""}

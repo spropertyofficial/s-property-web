@@ -3,6 +3,9 @@ import dbConnect from "@/lib/mongodb";
 import Lead from "@/lib/models/Lead";
 import ChatMessage from "@/lib/models/ChatMessage";
 import querystring from "querystring";
+import axios from "axios";
+import streamifier from "streamifier";
+import cloudinary from "@/lib/cloudinary";
 
 export async function POST(req) {
   await dbConnect();
@@ -62,7 +65,32 @@ export async function POST(req) {
   const mediaUrls = [];
   const mediaTypes = [];
   for (let i = 0; i < numMedia; i++) {
-    if (body[`MediaUrl${i}`]) mediaUrls.push(body[`MediaUrl${i}`]);
+    if (body[`MediaUrl${i}`]) {
+      // Download media dari Twilio dan upload ke Cloudinary
+      try {
+        const twilioRes = await axios.get(body[`MediaUrl${i}`], {
+          responseType: "arraybuffer",
+          auth: {
+            username: process.env.TWILIO_ACCOUNT_SID,
+            password: process.env.TWILIO_AUTH_TOKEN,
+          },
+        });
+        // Upload ke Cloudinary
+        const cloudinaryUrl = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: "whatsapp-media" },
+            (error, result) => {
+              if (error) return reject(error);
+              resolve(result.secure_url);
+            }
+          );
+          streamifier.createReadStream(twilioRes.data).pipe(uploadStream);
+        });
+        mediaUrls.push(cloudinaryUrl);
+      } catch (err) {
+        console.error("Gagal download/upload media Twilio:", err);
+      }
+    }
     if (body[`MediaContentType${i}`]) mediaTypes.push(body[`MediaContentType${i}`]);
   }
 
