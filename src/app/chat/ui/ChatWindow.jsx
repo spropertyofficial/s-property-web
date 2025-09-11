@@ -1,8 +1,8 @@
 "use client";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Files, Images, Video } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { FaPlay, FaPause } from "react-icons/fa";
+import { FaPlay, FaPause, FaPaperclip, FaVideo } from "react-icons/fa";
 
 export default function ChatWindow({ conversation, messages, onSend, showEscalation, onStopEscalation, onBack, onToggleInfo, refetchConversations }) {
   // Untuk auto-resize textarea maksimal 6 baris
@@ -39,6 +39,11 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   const [composerH, setComposerH] = useState(56);
   const [isMobile, setIsMobile] = useState(false);
   const [previewImg, setPreviewImg] = useState(null);
+  const [showAttachmentType, setShowAttachmentType] = useState(false);
+  const [attachmentType, setAttachmentType] = useState(null);
+  const [attachmentPreview, setAttachmentPreview] = useState(null);
+  const [attachmentFile, setAttachmentFile] = useState(null);
+  const fileInputRef = useRef();
 
   useEffect(() => {
     // Scroll to bottom on new messages
@@ -107,13 +112,81 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   function handleSubmit(e){
     e.preventDefault();
     const trimmed = text.trim();
-    if(!trimmed) return;
+    // Jika ada attachment, kirim media
+    if (attachmentFile && attachmentType) {
+      handleSendMedia({ file: attachmentFile, type: attachmentFile.type, text });
+      setAttachmentPreview(null);
+      setAttachmentFile(null);
+      setAttachmentType(null);
+      setText("");
+      return;
+    }
+    // Jika hanya teks
+    if (!trimmed) return;
     onSend?.(trimmed);
     setText("");
   }
 
   function handlePreviewImg(url) { setPreviewImg(url); }
   function closePreviewImg() { setPreviewImg(null); }
+  function handleAttachmentClick(e) {
+    setShowAttachmentType(true);
+  }
+  function closeAttachmentType() { setShowAttachmentType(false); }
+  function handleAttachmentTypeSelect(type) {
+    setAttachmentType(type);
+    setShowAttachmentType(false);
+    setTimeout(() => fileInputRef.current?.click(), 100); // trigger file input
+  }
+
+  // Di ChatWindow.jsx
+  async function handleSendMedia({ file, type, text }) {
+    if (!file || !type) return;
+    // Konversi file ke base64
+    const toBase64 = file => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    const base64 = await toBase64(file);
+    // Kirim ke backend
+    const res = await fetch("/api/conversations/reply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        leadId: conversation.lead._id,
+        message: text || "",
+        mediaFile: base64,
+        mediaType: type,
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      // Optionally, refetch chat
+      if (typeof refetchConversations === "function") refetchConversations();
+    } else {
+      alert(data.error || "Gagal mengirim media");
+    }
+  }
+
+  function handleFileChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setAttachmentFile(file);
+    // Preview sebelum kirim
+    if (file.type.startsWith('image')) {
+      setAttachmentPreview(URL.createObjectURL(file));
+    } else if (file.type.startsWith('video')) {
+      setAttachmentPreview(URL.createObjectURL(file));
+    } else if (file.type === 'application/pdf') {
+      setAttachmentPreview(file.name);
+    } else {
+      setAttachmentPreview(file.name);
+    }
+    setAttachmentType(attachmentType); // tetap simpan tipe
+    e.target.value = "";
+  }
 
   if(!conversation){
     return (
@@ -202,13 +275,42 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
         {isMobile && <div style={{ height: composerH }} />}
       </div>
 
+      {/* Tampilkan preview di composer sebelum kirim */}
       <form
         ref={composerRef}
         onSubmit={handleSubmit}
         className={`${isMobile ? 'fixed left-0 right-0 z-20' : ''} p-3 border-t bg-white`}
         style={isMobile ? { bottom: `${kbOffset}px` } : undefined}
       >
-        <div className="flex items-end gap-2">
+        <div className="flex items-end gap-2" style={{ position: 'relative' }}>
+          {/* Button lampiran */}
+          <div style={{ position: 'relative' }}>
+            <button type="button" className="p-2 rounded-full bg-slate-200 text-slate-600 hover:bg-slate-300" title="Lampirkan file" onClick={handleAttachmentClick}>
+              <FaPaperclip />
+            </button>
+            {/* Popup pilihan tipe lampiran di atas button, scoped ke button */}
+            {showAttachmentType && (
+              <div
+                className="absolute z-50 left-[30%] bottom-12 w-44"
+                onClick={closeAttachmentType}
+              >
+                <div className="bg-white rounded-lg shadow-lg p-4 flex flex-col gap-2 w-fit" onClick={e => e.stopPropagation()}>
+                  <button className="py-2 px-4 rounded bg-teal-600 text-white font-semibold hover:bg-teal-700 w-fit" onClick={() => handleAttachmentTypeSelect('image')}><Images /></button>
+                  <button className="py-2 px-4 rounded bg-teal-600 text-white font-semibold hover:bg-teal-700 w-fit" onClick={() => handleAttachmentTypeSelect('video')}><Video/></button>
+                  <button className="py-2 px-4 rounded bg-teal-600 text-white font-semibold hover:bg-teal-700 w-fit" onClick={() => handleAttachmentTypeSelect('document')}><Files /></button>
+                  <button className="mt-2 text-xs text-slate-500 hover:underline" onClick={closeAttachmentType}>Batal</button>
+                </div>
+              </div>
+            )}
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              style={{ display: 'none' }}
+              accept={attachmentType === 'image' ? 'image/*' : attachmentType === 'video' ? 'video/*' : attachmentType === 'document' ? '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar' : ''}
+              onChange={handleFileChange}
+            />
+          </div>
           <textarea
             ref={inputRef}
             rows={inputRows}
@@ -222,6 +324,25 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
             autoCorrect="on"
             autoCapitalize="sentences"
           />
+          {/* Tampilkan preview di composer sebelum kirim */}
+          {attachmentPreview && (
+            <div className="mr-2 flex items-center gap-2">
+              {attachmentType === 'image' && (
+                <img src={attachmentPreview} alt="preview" className="max-w-[80px] max-h-[80px] rounded border" />
+              )}
+              {attachmentType === 'video' && (
+                <video src={attachmentPreview} controls className="max-w-[80px] max-h-[80px] rounded border" />
+              )}
+              {attachmentType === 'document' && (
+                <span className="inline-block px-2 py-1 bg-slate-200 rounded text-xs text-slate-700 border">{attachmentPreview}</span>
+              )}
+              <button type="button" className="px-2 py-1 rounded bg-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-300" onClick={() => {
+                setAttachmentPreview(null);
+                setAttachmentFile(null);
+                setAttachmentType(null);
+              }}>Batal</button>
+            </div>
+          )}
           <button type="submit" className="px-5 py-2 rounded-lg bg-teal-600 text-white text-sm font-bold hover:bg-teal-700 disabled:opacity-50 active:scale-95" disabled={!text.trim()}>Kirim</button>
         </div>
       </form>
