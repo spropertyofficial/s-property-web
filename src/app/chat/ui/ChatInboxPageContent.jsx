@@ -5,6 +5,8 @@ import ChatWindow from "./ChatWindow";
 import LeadInfoPanel from "./LeadInfoPanel";
 
 export default function ChatInboxPageContent() {
+  // State untuk pesan yang baru dikirim (pending)
+  const [pendingMessages, setPendingMessages] = useState([]);
   // Fetch conversations from backend
   const {
     data,
@@ -24,7 +26,10 @@ export default function ChatInboxPageContent() {
   // Logging conversations setelah data tersedia
   useEffect(() => {
     if (data?.conversations) {
-      console.log("[FRONTEND] conversations:", data.conversations.map(c => ({ id: c.lead?._id, unread: c.unread })));
+      console.log(
+        "[FRONTEND] conversations:",
+        data.conversations.map((c) => ({ id: c.lead?._id, unread: c.unread }))
+      );
     }
   }, [data]);
   // Extract messagesById from backend data
@@ -63,10 +68,15 @@ export default function ChatInboxPageContent() {
     () => conversations.find((c) => c.lead?._id === selectedId) || null,
     [conversations, selectedId]
   );
-  const messages = useMemo(
-    () => (selected ? messagesById[selected.lead._id] || [] : []),
-    [messagesById, selected]
-  );
+  const messages = useMemo(() => {
+    if (!selected) return [];
+    const base = messagesById[selected.lead._id] || [];
+    // Gabungkan pesan pending jika leadId sama
+    const pendings = pendingMessages.filter(
+      (m) => m.lead === selected.lead._id
+    );
+    return [...base, ...pendings];
+  }, [messagesById, selected, pendingMessages]);
 
   function selectConversation(id) {
     setSelectedId(id);
@@ -81,12 +91,30 @@ export default function ChatInboxPageContent() {
         body: JSON.stringify({ leadId: selected.lead._id, message: text }),
       });
       if (!res.ok) throw new Error("Gagal mengirim pesan");
-      // Refetch agar pesan baru langsung muncul
+      const result = await res.json();
+      // Tambahkan pesan ke pending agar langsung tampil
+      if (result.chatMsg) {
+        setPendingMessages((prev) => [...prev, result.chatMsg]);
+      }
+      // Refetch agar sinkron dengan backend
       refetchConversations();
     } catch (err) {
       console.error(err);
     }
   }
+  // Bersihkan pendingMessages setelah data dari backend terupdate
+  useEffect(() => {
+    if (!selected) return;
+    // Jika pesan dari backend sudah memuat pesan yang sama, hapus dari pending
+    const base = messagesById[selected.lead._id] || [];
+    setPendingMessages((prev) =>
+      prev.filter((pm) => {
+        // Jika pesan dengan twilioSid/id sudah ada di base, hapus dari pending
+        if (!pm.twilioSid) return true;
+        return !base.some((bm) => bm.twilioSid === pm.twilioSid);
+      })
+    );
+  }, [messagesById, selected]);
 
   // Filters
   const filtered = useMemo(() => {

@@ -3,9 +3,8 @@ import { ArrowLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export default function ChatWindow({ conversation, messages, onSend, showEscalation, onStopEscalation, onBack, onToggleInfo, refetchConversations }) {
-  // Mark inbound messages as read if room chat is open and new message arrives
-  // Mark inbound messages as read if room chat is open and new message arrives, then refetch conversations
-  // refetchConversations sekarang diterima sebagai prop
+  // Debug: tampilkan isi conversation di console
+  console.log('[ChatWindow] conversation:', conversation);
   useEffect(() => {
     if (!conversation || !messages || messages.length === 0) return;
     const lastMsg = messages[messages.length - 1];
@@ -113,6 +112,9 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
     );
   }
 
+  // Ambil nomor WhatsApp agent dari environment (client-side tidak bisa akses process.env)
+  // Jadi, nomor agent sebaiknya dikirim dari backend ke frontend lewat prop
+  const agentNumber = conversation?.agentNumber || "whatsapp:+628123456789"; // fallback jika belum ada
   return (
     <div className="grid grid-rows-[auto,1fr,auto] h-full min-h-0 overflow-hidden">
       <div className="px-3 py-3 border-b border-slate-200 bg-white flex items-center justify-between">
@@ -164,7 +166,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
                   <span className="px-4 py-1 rounded-full bg-slate-200 text-xs text-slate-700 font-semibold shadow">{date}</span>
                 </div>
                 {msgs.map(m => (
-                  <MessageBubble key={m._id || m.id} {...m} mine={m.sender==='me'} text={m.body} />
+                  <MessageBubble key={m._id || m.id} {...m} mine={m.direction === "outbound"} text={m.body} />
                 ))}
               </div>
             ));
