@@ -68,15 +68,17 @@ export default function ChatInboxPageContent() {
     () => conversations.find((c) => c.lead?._id === selectedId) || null,
     [conversations, selectedId]
   );
-  const messages = useMemo(() => {
-    if (!selected) return [];
-    const base = messagesById[selected.lead._id] || [];
-    // Gabungkan pesan pending jika leadId sama
-    const pendings = pendingMessages.filter(
-      (m) => m.lead === selected.lead._id
-    );
-    return [...base, ...pendings];
-  }, [messagesById, selected, pendingMessages]);
+  const messages = useMemo(
+    () => {
+      if (!selected) return [];
+      const base = messagesById[selected.lead._id] || [];
+      const baseIds = new Set(base.map(m => m._id));
+      // Gabungkan pesan pending jika leadId sama, tapi filter yang _id-nya sudah ada di base
+      const pendings = pendingMessages.filter(m => m.lead === selected.lead._id && (!m._id || !baseIds.has(m._id)));
+      return [...base, ...pendings];
+    },
+    [messagesById, selected, pendingMessages]
+  );
 
   function selectConversation(id) {
     setSelectedId(id);

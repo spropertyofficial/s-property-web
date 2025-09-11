@@ -166,7 +166,12 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
                   <span className="px-4 py-1 rounded-full bg-slate-200 text-xs text-slate-700 font-semibold shadow">{date}</span>
                 </div>
                 {msgs.map(m => (
-                  <MessageBubble key={m._id || m.id} {...m} mine={m.direction === "outbound"} text={m.body} />
+                  <MessageBubble 
+                    key={m._id ? m._id : m.twilioSid ? `pending-${m.twilioSid}` : `pending-${Math.random()}`}
+                    {...m} 
+                    mine={m.direction === "outbound"} 
+                    text={m.body} 
+                  />
                 ))}
               </div>
             ));
