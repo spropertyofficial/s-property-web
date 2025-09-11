@@ -147,10 +147,29 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
         {!messages || messages.length===0 ? (
-      <div className="h-full grid place-items-center text-slate-500">Belum ada pesan</div>
-        ) : messages.map(m => (
-          <MessageBubble key={m._id || m.id} mine={m.sender==='me'} text={m.body} ts={m.ts} status={m.status} />
-        ))}
+          <div className="h-full grid place-items-center text-slate-500">Belum ada pesan</div>
+        ) : (
+          // Kelompokkan pesan per tanggal
+          (() => {
+            const groups = {};
+            messages.forEach(m => {
+              const d = new Date(m.ts || m.sentAt || m.createdAt || m.receivedAt);
+              const dateStr = isNaN(d.getTime()) ? "" : d.toLocaleDateString("id-ID", { year: 'numeric', month: 'long', day: 'numeric' });
+              if (!groups[dateStr]) groups[dateStr] = [];
+              groups[dateStr].push(m);
+            });
+            return Object.entries(groups).map(([date, msgs]) => (
+              <div key={date}>
+                <div className="flex justify-center my-4">
+                  <span className="px-4 py-1 rounded-full bg-slate-200 text-xs text-slate-700 font-semibold shadow">{date}</span>
+                </div>
+                {msgs.map(m => (
+                  <MessageBubble key={m._id || m.id} {...m} mine={m.sender==='me'} text={m.body} />
+                ))}
+              </div>
+            ));
+          })()
+        )}
         {/* Spacer to prevent last message hidden behind fixed composer on mobile */}
         {isMobile && <div style={{ height: composerH }} />}
       </div>
@@ -181,13 +200,17 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   );
 }
 
-function MessageBubble({ mine, text, ts, status }){
+function MessageBubble({ mine, text, ts, status, sentAt, createdAt, receivedAt, ...payload }){
+  // Pilih waktu pesan yang valid
+  const time = ts || sentAt || createdAt || receivedAt;
   return (
-    <div className={`flex ${mine?"justify-end":"justify-start"} mb-2`}>
-      <div className={`max-w-md p-3 rounded-lg ${mine?"chat-bubble-agent":"chat-bubble-lead"}`}>
+    <div className={`flex ${mine ? "justify-end" : "justify-start"} mb-2`}>
+      <div
+        className={`max-w-md px-4 py-3 rounded-2xl shadow-md border ${mine ? "bg-teal-600 text-white border-teal-300" : "bg-white text-slate-800 border-slate-200"}`}
+      >
         <div className="whitespace-pre-wrap text-sm">{text}</div>
-        <div className={`mt-1 text-[10px] ${mine?"text-white/70":"text-slate-400"}`}>
-          {formatTime(ts)}{mine?` • ${status}`:""}
+        <div className={`mt-1 text-[10px] ${mine ? "text-white/70" : "text-slate-400"}`}>
+          {formatTime(time)}{mine ? ` • ${status}` : ""}
         </div>
       </div>
     </div>
@@ -195,8 +218,10 @@ function MessageBubble({ mine, text, ts, status }){
 }
 
 function formatTime(ts){
+  if (!ts) return "";
   const d = new Date(ts);
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
 function getInitials(name){
