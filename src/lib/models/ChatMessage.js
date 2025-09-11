@@ -10,7 +10,7 @@ const ChatMessageSchema = new mongoose.Schema(
     }, // Lead yang terkait
     from: { type: String, required: true }, // Nomor pengirim (WhatsApp)
     to: { type: String, required: true }, // Nomor penerima (WhatsApp)
-    body: { type: String, required: true }, // Isi pesan
+    body: { type: String }, // Isi pesan
     direction: { type: String, enum: ["inbound", "outbound"], required: true }, // Arah pesan
     status: {
       type: String,

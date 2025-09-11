@@ -39,7 +39,9 @@ export async function POST(req) {
     return NextResponse.json({ success: true });
   }
   // Jika webhook inbound (pesan masuk dari user)
-  if (!From || !Body) {
+  // Validasi: payload harus punya pengirim dan minimal ada teks ATAU media
+  const numMedia = parseInt(body.NumMedia || "0", 10);
+  if (!From || (!Body && numMedia === 0)) {
     console.log("Payload tidak valid", body);
     return NextResponse.json(
       { success: false, error: "Payload tidak valid" },
@@ -61,7 +63,6 @@ export async function POST(req) {
   }
 
   // Ambil media jika ada
-  const numMedia = parseInt(body.NumMedia || "0", 10);
   const mediaUrls = [];
   const mediaTypes = [];
   for (let i = 0; i < numMedia; i++) {
@@ -75,10 +76,13 @@ export async function POST(req) {
             password: process.env.TWILIO_AUTH_TOKEN,
           },
         });
+        // Tentukan tipe resource Cloudinary
+        const type = body[`MediaContentType${i}`] || "";
+        const resourceType = type.startsWith("image") ? "image" : "auto";
         // Upload ke Cloudinary
         const cloudinaryUrl = await new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: "whatsapp-media" },
+            { folder: "whatsapp-media", resource_type: resourceType },
             (error, result) => {
               if (error) return reject(error);
               resolve(result.secure_url);

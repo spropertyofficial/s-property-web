@@ -2,6 +2,7 @@
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { FaPlay, FaPause } from "react-icons/fa";
 
 export default function ChatWindow({ conversation, messages, onSend, showEscalation, onStopEscalation, onBack, onToggleInfo, refetchConversations }) {
   // Untuk auto-resize textarea maksimal 6 baris
@@ -37,6 +38,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   const composerRef = useRef(null);
   const [composerH, setComposerH] = useState(56);
   const [isMobile, setIsMobile] = useState(false);
+  const [previewImg, setPreviewImg] = useState(null);
 
   useEffect(() => {
     // Scroll to bottom on new messages
@@ -110,6 +112,9 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
     setText("");
   }
 
+  function handlePreviewImg(url) { setPreviewImg(url); }
+  function closePreviewImg() { setPreviewImg(null); }
+
   if(!conversation){
     return (
       <div className="h-full grid place-items-center text-slate-500">
@@ -124,6 +129,14 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
 
   return (
     <div className="grid grid-rows-[auto,1fr,auto] h-full min-h-0 overflow-hidden">
+      {/* Modal preview gambar */}
+      {previewImg && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center" onClick={closePreviewImg}>
+          <img src={previewImg} alt="Preview" className="max-w-max max-h-[80%] rounded-lg shadow-lg" onClick={e => e.stopPropagation()} />
+          <button className="absolute top-4 right-4 text-white text-2xl bg-black/50 rounded-full px-3 py-1" onClick={closePreviewImg}>&times;</button>
+        </div>
+      )}
+
       <div className="px-3 py-3 border-b border-slate-200 bg-white flex items-center justify-between">
         <div className="flex items-center">
           <button onClick={onBack} className="lg:hidden mr-2 p-2 rounded-full hover:bg-slate-100"><ArrowLeft/></button>
@@ -178,6 +191,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
                     {...m} 
                     mine={m.direction === "outbound"} 
                     text={m.body} 
+                    onPreviewImg={handlePreviewImg}
                   />
                 ))}
               </div>
@@ -215,25 +229,84 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   );
 }
 
+function SimpleAudioPlayer({ url }) {
+  const [playing, setPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const audioRef = useRef();
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const updateTime = () => setCurrentTime(audio.currentTime);
+    const setAudioDuration = () => setDuration(audio.duration);
+    const handleEnded = () => {
+      setPlaying(false);
+      setCurrentTime(0); // Reset ke awal setelah selesai
+    };
+    audio.addEventListener('timeupdate', updateTime);
+    audio.addEventListener('loadedmetadata', setAudioDuration);
+    audio.addEventListener('ended', handleEnded);
+    return () => {
+      audio.removeEventListener('timeupdate', updateTime);
+      audio.removeEventListener('loadedmetadata', setAudioDuration);
+      audio.removeEventListener('ended', handleEnded);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (playing) audioRef.current?.play();
+    else audioRef.current?.pause();
+  }, [playing]);
+
+  function togglePlay() {
+    if (!playing && currentTime === duration) {
+      audioRef.current.currentTime = 0;
+      setCurrentTime(0);
+    }
+    setPlaying(p => !p);
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <button type="button" onClick={togglePlay} className="p-2 rounded-full bg-teal-600 text-white">
+        {playing ? <FaPause /> : <FaPlay />}
+      </button>
+      <audio ref={audioRef} src={url} preload="metadata" style={{ display: 'none' }} />
+      <span className="text-xs text-slate-500 min-w-[40px]">{formatAudioTime(currentTime)} / {formatAudioTime(duration)}</span>
+    </div>
+  );
+}
+
 function MessageBubble({ mine, text, ts, status, sentAt, createdAt, receivedAt, mediaUrls, mediaTypes, ...payload }){
   // Pilih waktu pesan yang valid
   const time = ts || sentAt || createdAt || receivedAt;
+  // Ambil fungsi preview dari props jika ada
+  const { onPreviewImg } = payload;
+  // Pastikan bubble tetap dirender meski text kosong jika ada media
+  const hasMedia = mediaUrls && mediaUrls.length > 0;
+  const hasText = text && text.trim().length > 0;
+  if (!hasMedia && !hasText) return null;
   return (
     <div className={`flex ${mine ? "justify-end" : "justify-start"} mb-2`}>
       <div
         className={`max-w-md px-4 py-3 rounded-2xl shadow-md border ${mine ? "bg-teal-600 text-white border-teal-300" : "bg-white text-slate-800 border-slate-200"}`}
       >
         {/* Tampilkan media jika ada */}
-        {mediaUrls && mediaUrls.length > 0 && mediaUrls.map((url, idx) => {
+        {hasMedia && mediaUrls.map((url, idx) => {
           const type = mediaTypes[idx] || "";
           if (type.startsWith("image")) {
-            return <Image key={url} src={url} alt="media" width={200} height={200} className="mb-2 max-w-xs max-h-60 rounded" />;
+            return (
+              <span key={url} className="mb-2 block cursor-pointer" onClick={() => onPreviewImg?.(url)}>
+                <Image src={url} alt="media" width={200} height={200} className="max-w-xs max-h-60 rounded transition-transform hover:scale-105" />
+              </span>
+            );
           }
           if (type.startsWith("video")) {
             return <video key={url} src={url} controls className="mb-2 max-w-xs max-h-60 rounded" />;
           }
           if (type.startsWith("audio")) {
-            return <audio key={url} src={url} controls className="mb-2 w-full" />;
+            return <SimpleAudioPlayer key={url} url={url} />;
           }
           if (type === "application/pdf") {
             return <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="mb-2 block text-blue-600 underline">Lihat PDF</a>;
@@ -241,7 +314,7 @@ function MessageBubble({ mine, text, ts, status, sentAt, createdAt, receivedAt, 
           // Default: link download
           return <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="mb-2 block text-blue-600 underline">Download File</a>;
         })}
-        <div className="whitespace-pre-wrap text-sm">{text}</div>
+        {hasText && <div className="whitespace-pre-wrap text-sm">{text}</div>}
         <div className={`mt-1 text-[10px] ${mine ? "text-white/70" : "text-slate-400"}`}>
           {formatTime(time)}{mine ? ` • ${status}` : ""}
         </div>
@@ -251,10 +324,19 @@ function MessageBubble({ mine, text, ts, status, sentAt, createdAt, receivedAt, 
 }
 
 function formatTime(ts){
+  // Untuk waktu pesan (jam:menit)
   if (!ts) return "";
   const d = new Date(ts);
   if (isNaN(d.getTime())) return "";
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+function formatAudioTime(secs) {
+  // Untuk audio player (menit:detik)
+  if (!secs || isNaN(secs)) return "00:00";
+  const min = Math.floor(secs / 60);
+  const sec = Math.floor(secs % 60);
+  return `${min.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
 }
 
 function getInitials(name){
