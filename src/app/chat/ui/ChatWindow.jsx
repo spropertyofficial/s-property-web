@@ -47,6 +47,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   const fileInputRef = useRef();
   const [activePreviewIdx, setActivePreviewIdx] = useState(0);
   const [isSending, setIsSending] = useState(false);
+  const [localMessages, setLocalMessages] = useState([]);
 
   useEffect(() => {
     // Scroll to bottom on new messages
@@ -112,11 +113,39 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
     }
   }, [composerRef.current]);
 
+  useEffect(() => {
+    // Sinkronisasi localMessages dengan messages dari backend
+    setLocalMessages(messages || []);
+  }, [messages]);
+
+  function addPendingMessage({ text, mediaUrls = [], mediaTypes = [] }) {
+    setLocalMessages(prev => [
+      ...prev,
+      {
+        _id: `pending-${Date.now()}-${Math.random()}`,
+        body: text,
+        direction: "outbound",
+        status: "pending",
+        mediaUrls,
+        mediaTypes,
+        ts: Date.now(),
+      },
+    ]);
+  }
+
   function handleSubmit(e){
     e.preventDefault();
     const trimmed = text.trim();
     if (attachmentFiles.length > 0 && attachmentType) {
       setIsSending(true);
+      // Optimistic UI: tampilkan lampiran di chat window sebagai pending
+      for (let i = 0; i < attachmentFiles.length; i++) {
+        const file = attachmentFiles[i];
+        const caption = i === 0 ? text : "";
+        const url = attachmentPreviews[i]?.url || "";
+        const type = file.type;
+        addPendingMessage({ text: caption, mediaUrls: url ? [url] : [], mediaTypes: type ? [type] : [] });
+      }
       // Kirim satu per satu, hanya file pertama dengan caption
       const sendAll = async () => {
         for (let i = 0; i < attachmentFiles.length; i++) {
@@ -129,15 +158,18 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
         setAttachmentType(null);
         setText("");
         setIsSending(false);
+        if (typeof refetchConversations === "function") refetchConversations();
       };
       sendAll();
       return;
     }
     if (!trimmed) return;
     setIsSending(true);
+    addPendingMessage({ text: trimmed });
     onSend?.(trimmed);
     setText("");
     setIsSending(false);
+    if (typeof refetchConversations === "function") refetchConversations();
   }
 
   function handlePreviewImg(url) { setPreviewImg(url); }
@@ -280,13 +312,13 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
         className="min-h-0 overflow-y-auto p-4 bg-slate-50 overscroll-contain [overflow-anchor:none]"
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
-        {!messages || messages.length===0 ? (
+        {!localMessages || localMessages.length===0 ? (
           <div className="h-full grid place-items-center text-slate-500">Belum ada pesan</div>
         ) : (
           // Kelompokkan pesan per tanggal
           (() => {
             const groups = {};
-            messages.forEach(m => {
+            localMessages.forEach(m => {
               const d = new Date(m.ts || m.sentAt || m.createdAt || m.receivedAt);
               const dateStr = isNaN(d.getTime()) ? "" : d.toLocaleDateString("id-ID", { year: 'numeric', month: 'long', day: 'numeric' });
               if (!groups[dateStr]) groups[dateStr] = [];
