@@ -136,6 +136,13 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   function handleSubmit(e){
     e.preventDefault();
     const trimmed = text.trim();
+    // Hide preview immediately after send
+    if (attachmentPreviews.length > 0 || attachmentFiles.length > 0) {
+      setAttachmentPreviews([]);
+      setAttachmentFiles([]);
+      setAttachmentType(null);
+      setActivePreviewIdx(0);
+    }
     if (attachmentFiles.length > 0 && attachmentType) {
       setIsSending(true);
       // Optimistic UI: tampilkan lampiran di chat window sebagai pending
@@ -153,9 +160,6 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
           const caption = i === 0 ? text : "";
           await handleSendMedia({ file, type: file.type, text: caption });
         }
-        setAttachmentPreviews([]);
-        setAttachmentFiles([]);
-        setAttachmentType(null);
         setText("");
         setIsSending(false);
         if (typeof refetchConversations === "function") refetchConversations();
