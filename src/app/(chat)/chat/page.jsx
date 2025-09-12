@@ -12,8 +12,7 @@ export default function ChatInboxPage() {
 
   if (loading) return <div>Loading...</div>;
   if (!user) {
-   console.log("User not authenticated, redirecting to /login");
-   console.log("User", user);
+    
   }
 
   return (

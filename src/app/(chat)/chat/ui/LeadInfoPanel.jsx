@@ -59,16 +59,16 @@ export default function LeadInfoPanel({ conversation, onToggleAssign }){
             <button onClick={() => setShowInfoModal(true)} className="text-xs px-3 py-1 rounded bg-teal-600 text-white">Ubah</button>
           </div>
           <div className="bg-white rounded-lg border p-4 grid gap-2 text-sm">
-              <Field label="Nama" value={lead.name || '-'} />
-              <Field label="Kontak" value={lead.contact || '-'} />
-              <Field label="Email" value={lead.email || '-'} />
-              <Field label="Status" value={lead.status || '-'} />
-              <Field label="Properti" value={lead.property?.name || lead.propertyName || '-'} />
-              <Field label="Unit" value={lead.unit || '-'} />
-              <Field label="Sumber" value={lead.source || '-'} />
-              <Field label="Tanggal Lead Masuk" value={lead.leadInAt ? new Date(lead.leadInAt).toLocaleDateString() : lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "-"} />
-              <Field label="Tanggal Ditambahkan" value={lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "-"} />
-              <Field label="Diperbarui" value={lead.updatedAt ? new Date(lead.updatedAt).toLocaleString() : "-"} />
+              <Field label="Nama" value={lead?.name || '-'} />
+              <Field label="Kontak" value={lead?.contact || '-'} />
+              <Field label="Email" value={lead?.email || '-'} />
+              <Field label="Status" value={lead?.status || '-'} />
+              <Field label="Properti" value={lead?.property?.name || lead?.propertyName || '-'} />
+              <Field label="Unit" value={lead?.unit || '-'} />
+              <Field label="Sumber" value={lead?.source || '-'} />
+              <Field label="Tanggal Lead Masuk" value={lead?.leadInAt ? new Date(lead.leadInAt).toLocaleDateString() : lead?.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "-"} />
+              <Field label="Tanggal Ditambahkan" value={lead?.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "-"} />
+              <Field label="Diperbarui" value={lead?.updatedAt ? new Date(lead.updatedAt).toLocaleString() : "-"} />
           </div>
         </section>
 
