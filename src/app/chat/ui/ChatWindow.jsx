@@ -41,9 +41,10 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   const [previewImg, setPreviewImg] = useState(null);
   const [showAttachmentType, setShowAttachmentType] = useState(false);
   const [attachmentType, setAttachmentType] = useState(null);
-  const [attachmentPreview, setAttachmentPreview] = useState(null);
-  const [attachmentFile, setAttachmentFile] = useState(null);
+  const [attachmentPreviews, setAttachmentPreviews] = useState([]); // array of {url, type, name, caption}
+  const [attachmentFiles, setAttachmentFiles] = useState([]); // array of File
   const fileInputRef = useRef();
+  const [activePreviewIdx, setActivePreviewIdx] = useState(0);
 
   useEffect(() => {
     // Scroll to bottom on new messages
@@ -112,16 +113,22 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   function handleSubmit(e){
     e.preventDefault();
     const trimmed = text.trim();
-    // Jika ada attachment, kirim media
-    if (attachmentFile && attachmentType) {
-      handleSendMedia({ file: attachmentFile, type: attachmentFile.type, text });
-      setAttachmentPreview(null);
-      setAttachmentFile(null);
-      setAttachmentType(null);
-      setText("");
+    if (attachmentFiles.length > 0 && attachmentType) {
+      // Kirim satu per satu, hanya file pertama dengan caption
+      const sendAll = async () => {
+        for (let i = 0; i < attachmentFiles.length; i++) {
+          const file = attachmentFiles[i];
+          const caption = i === 0 ? text : "";
+          await handleSendMedia({ file, type: file.type, text: caption });
+        }
+        setAttachmentPreviews([]);
+        setAttachmentFiles([]);
+        setAttachmentType(null);
+        setText("");
+      };
+      sendAll();
       return;
     }
-    // Jika hanya teks
     if (!trimmed) return;
     onSend?.(trimmed);
     setText("");
@@ -171,21 +178,29 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   }
 
   function handleFileChange(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    setAttachmentFile(file);
-    // Preview sebelum kirim
-    if (file.type.startsWith('image')) {
-      setAttachmentPreview(URL.createObjectURL(file));
-    } else if (file.type.startsWith('video')) {
-      setAttachmentPreview(URL.createObjectURL(file));
-    } else if (file.type === 'application/pdf') {
-      setAttachmentPreview(file.name);
-    } else {
-      setAttachmentPreview(file.name);
-    }
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    setAttachmentFiles(prev => [...prev, ...files]);
     setAttachmentType(attachmentType); // tetap simpan tipe
+    // Preview semua file
+    const previews = files.map(file => {
+      if (file.type.startsWith('image')) {
+        return { url: URL.createObjectURL(file), type: 'image', name: file.name };
+      } else if (file.type.startsWith('video')) {
+        return { url: URL.createObjectURL(file), type: 'video', name: file.name };
+      } else if (file.type === 'application/pdf') {
+        return { url: '', type: 'document', name: file.name };
+      } else {
+        return { url: '', type: 'document', name: file.name };
+      }
+    });
+    setAttachmentPreviews(prev => [...prev, ...previews]);
     e.target.value = "";
+  }
+
+  function handleRemovePreview(idx) {
+    setAttachmentPreviews(prev => prev.filter((_, i) => i !== idx));
+    setAttachmentFiles(prev => prev.filter((_, i) => i !== idx));
   }
 
   if(!conversation){
@@ -308,39 +323,74 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
               type="file"
               style={{ display: 'none' }}
               accept={attachmentType === 'image' ? 'image/*' : attachmentType === 'video' ? 'video/*' : attachmentType === 'document' ? '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar' : ''}
+              multiple
               onChange={handleFileChange}
             />
           </div>
-          <textarea
-            ref={inputRef}
-            rows={inputRows}
-            value={text}
-            onChange={handleInputChange}
-            placeholder="Tulis pesan..."
-            className="flex-1 resize-none rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-            style={{maxHeight: `${maxRows * 24}px`, overflowY: inputRows === maxRows ? 'auto' : 'hidden'}}
-            inputMode="text"
-            enterKeyHint="send"
-            autoCorrect="on"
-            autoCapitalize="sentences"
-          />
+          {/* Input chat/kolom caption */}
+          {attachmentPreviews.length > 0 ? (
+            <textarea
+              ref={inputRef}
+              rows={inputRows}
+              value={text}
+              onChange={handleInputChange}
+              placeholder="Keterangan (opsional)"
+              className="flex-1 resize-none rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              style={{maxHeight: `${maxRows * 24}px`, overflowY: inputRows === maxRows ? 'auto' : 'hidden'}}
+              inputMode="text"
+              enterKeyHint="send"
+              autoCorrect="on"
+              autoCapitalize="sentences"
+            />
+          ) : (
+            <textarea
+              ref={inputRef}
+              rows={inputRows}
+              value={text}
+              onChange={handleInputChange}
+              placeholder="Tulis pesan..."
+              className="flex-1 resize-none rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              style={{maxHeight: `${maxRows * 24}px`, overflowY: inputRows === maxRows ? 'auto' : 'hidden'}}
+              inputMode="text"
+              enterKeyHint="send"
+              autoCorrect="on"
+              autoCapitalize="sentences"
+            />
+          )}
           {/* Tampilkan preview di composer sebelum kirim */}
-          {attachmentPreview && (
-            <div className="mr-2 flex items-center gap-2">
-              {attachmentType === 'image' && (
-                <img src={attachmentPreview} alt="preview" className="max-w-[80px] max-h-[80px] rounded border" />
-              )}
-              {attachmentType === 'video' && (
-                <video src={attachmentPreview} controls className="max-w-[80px] max-h-[80px] rounded border" />
-              )}
-              {attachmentType === 'document' && (
-                <span className="inline-block px-2 py-1 bg-slate-200 rounded text-xs text-slate-700 border">{attachmentPreview}</span>
-              )}
-              <button type="button" className="px-2 py-1 rounded bg-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-300" onClick={() => {
-                setAttachmentPreview(null);
-                setAttachmentFile(null);
-                setAttachmentType(null);
-              }}>Batal</button>
+          {attachmentPreviews.length > 0 && (
+            <div className="fixed left-0 right-0 bottom-[72px] z-30 flex justify-center pointer-events-none">
+              <div className="bg-white rounded-xl shadow-lg border border-slate-300 px-4 py-3 w-full max-w-lg flex flex-col gap-2 pointer-events-auto">
+                <div className="flex gap-3 overflow-x-auto pb-2 items-center">
+                  {attachmentPreviews.map((preview, idx) => (
+                    <div
+                      key={idx}
+                      className={`relative flex flex-col items-center min-w-[110px] max-w-[140px] cursor-pointer ${activePreviewIdx === idx ? 'border-2 border-teal-500' : 'border'} rounded-lg bg-white`}
+                      onClick={() => setActivePreviewIdx(idx)}
+                    >
+                      {preview.type === 'image' && (
+                        <img src={preview.url} alt="preview" className="w-[100px] h-[100px] object-cover rounded-lg" />
+                      )}
+                      {preview.type === 'video' && (
+                        <video src={preview.url} controls className="w-[100px] h-[100px] rounded-lg object-cover" />
+                      )}
+                      {preview.type === 'document' && (
+                        <span className="inline-block px-3 py-2 bg-slate-200 rounded text-xs text-slate-700 border w-[100px] text-center">{preview.name}</span>
+                      )}
+                      <button type="button" className="absolute top-2 right-2 bg-black/60 text-white rounded-full px-2 py-0.5 text-xs" onClick={e => { e.stopPropagation(); handleRemovePreview(idx); }}>&times;</button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2 justify-end mt-1">
+                  <button type="button" className="px-3 py-1 rounded bg-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-300" onClick={() => {
+                    setAttachmentPreviews([]);
+                    setAttachmentFiles([]);
+                    setAttachmentType(null);
+                    setActivePreviewIdx(0);
+                  }}>Batal</button>
+                  <button type="button" className="px-3 py-1 rounded bg-teal-500 text-white text-xs font-bold hover:bg-teal-600" onClick={() => fileInputRef.current?.click()}>+ Tambah</button>
+                </div>
+              </div>
             </div>
           )}
           <button type="submit" className="px-5 py-2 rounded-lg bg-teal-600 text-white text-sm font-bold hover:bg-teal-700 disabled:opacity-50 active:scale-95" disabled={!text.trim()}>Kirim</button>
