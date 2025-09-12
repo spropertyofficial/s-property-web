@@ -3,6 +3,7 @@ import { ArrowLeft, Files, Images, Video } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { FaPlay, FaPause, FaPaperclip, FaVideo } from "react-icons/fa";
+import Swal from 'sweetalert2';
 
 export default function ChatWindow({ conversation, messages, onSend, showEscalation, onStopEscalation, onBack, onToggleInfo, refetchConversations }) {
   // Untuk auto-resize textarea maksimal 6 baris
@@ -180,10 +181,28 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   function handleFileChange(e) {
     const files = Array.from(e.target.files);
     if (!files.length) return;
-    setAttachmentFiles(prev => [...prev, ...files]);
+    const MAX_SIZE = 10485760; // 10 MB
+    let oversized = false;
+    const validFiles = files.filter(file => {
+      if (file.size > MAX_SIZE) {
+        oversized = true;
+        return false;
+      }
+      return true;
+    });
+    if (oversized) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Ukuran file terlalu besar',
+        text: 'Ukuran file tidak boleh lebih dari 10 MB.',
+        confirmButtonText: 'OK',
+      });
+    }
+    if (!validFiles.length) return;
+    setAttachmentFiles(prev => [...prev, ...validFiles]);
     setAttachmentType(attachmentType); // tetap simpan tipe
     // Preview semua file
-    const previews = files.map(file => {
+    const previews = validFiles.map(file => {
       if (file.type.startsWith('image')) {
         return { url: URL.createObjectURL(file), type: 'image', name: file.name };
       } else if (file.type.startsWith('video')) {
@@ -220,7 +239,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
       {/* Modal preview gambar */}
       {previewImg && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center" onClick={closePreviewImg}>
-          <img src={previewImg} alt="Preview" className="max-w-max max-h-[80%] rounded-lg shadow-lg" onClick={e => e.stopPropagation()} />
+          <img src={previewImg} alt="Preview" className="max-w-[90%] max-h-[90%] rounded-lg shadow-lg" onClick={e => e.stopPropagation()} />
           <button className="absolute top-4 right-4 text-white text-2xl bg-black/50 rounded-full px-3 py-1" onClick={closePreviewImg}>&times;</button>
         </div>
       )}
