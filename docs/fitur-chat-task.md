@@ -24,8 +24,8 @@ Dokumen ini merinci tugas-tugas teknis untuk membangun Fitur Chat Terpusat, mula
     - Simpan pesan ke koleksi ChatMessage
 
 ### Tugas 1.4: Buat API untuk Frontend
-- [ ] Buat endpoint `GET /api/conversations` untuk mengambil daftar percakapan agen yang login
-- [ ] Buat endpoint `POST /api/conversations/reply` untuk mengirim balasan (menggunakan API Twilio)
+- [] Buat endpoint `GET /api/conversations` untuk mengambil daftar percakapan agen yang login
+- [x] Buat endpoint `POST /api/conversations/reply` untuk mengirim balasan (menggunakan API Twilio)
 
 ---
 
@@ -33,19 +33,19 @@ Dokumen ini merinci tugas-tugas teknis untuk membangun Fitur Chat Terpusat, mula
 **Fokus:** Membangun halaman "Kotak Masuk" agar agen dapat melihat dan membalas pesan.
 
 ### Tugas 2.1: Buat Halaman & Layout Dasar Kotak Masuk
-- [ ] Buat halaman baru di `/chat`
-- [ ] Rancang layout tiga panel (Daftar Chat, Jendela Chat, Info Lead) dengan Tailwind CSS dan pastikan responsif
+- [x] Buat halaman baru di `/chat`
+- [x] Rancang layout tiga panel (Daftar Chat, Jendela Chat, Info Lead) dengan Tailwind CSS dan pastikan responsif
 
 ### Tugas 2.2: Implementasi Daftar Percakapan (Panel Kiri)
-- [ ] Buat komponen daftar percakapan (data dari `GET /api/conversations`)
-- [ ] Implementasikan klik untuk memilih percakapan aktif
+- [x] Buat komponen daftar percakapan (data dari `GET /api/conversations`)
+- [x] Implementasikan klik untuk memilih percakapan aktif
 
 ### Tugas 2.3: Implementasi Jendela Chat (Panel Tengah)
-- [ ] Buat komponen riwayat pesan percakapan aktif
-- [ ] Buat form input untuk mengetik dan mengirim balasan (terhubung ke `POST /api/conversations/reply`)
+- [x] Buat komponen riwayat pesan percakapan aktif
+- [x] Buat form input untuk mengetik dan mengirim balasan (terhubung ke `POST /api/conversations/reply`)
 
 ### Tugas 2.4: Implementasi Panel Info Lead (Panel Kanan)
-- [ ] Buat komponen detail Lead terkait percakapan aktif
+- [X] Buat komponen detail Lead terkait percakapan aktif
 
 ---
 

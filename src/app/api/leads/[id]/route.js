@@ -36,7 +36,7 @@ export async function GET(req, { params }) {
 export async function PATCH(req, { params }) {
   try {
     await dbConnect();
-    const { id } = params;
+    const { id } = await params;
     const { doc } = await findAccessibleLead(id, req);
     if (!doc) return NextResponse.json({ success: false, error: "Lead tidak ditemukan / akses ditolak" }, { status: 404 });
 

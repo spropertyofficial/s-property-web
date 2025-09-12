@@ -68,6 +68,7 @@ export default function ChatInboxPageContent() {
     () => conversations.find((c) => c.lead?._id === selectedId) || null,
     [conversations, selectedId]
   );
+  console.log("[FRONTEND] selected conversation:", selected);
   const messages = useMemo(
     () => {
       if (!selected) return [];
@@ -205,10 +206,10 @@ export default function ChatInboxPageContent() {
                 </button>
               </div>
               <div className="flex-1 overflow-hidden">
-                <LeadInfoPanel
+                {/* <LeadInfoPanel
                   conversation={selected}
                   // TODO: implementasi assign ke backend jika diperlukan
-                />
+                /> */}
               </div>
             </div>
           </div>

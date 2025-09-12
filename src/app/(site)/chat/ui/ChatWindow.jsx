@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 
 export default function ChatWindow({ conversation, messages, onSend, showEscalation, onStopEscalation, onBack, onToggleInfo, refetchConversations }) {
   // Untuk auto-resize textarea maksimal 6 baris
+  console.log("[ChatWindow] conversation prop:", conversation);
   function getDisplayName(lead) {
     if (!lead) return "?";
     if (
