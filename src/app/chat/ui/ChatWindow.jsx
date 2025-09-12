@@ -7,6 +7,18 @@ import Swal from 'sweetalert2';
 
 export default function ChatWindow({ conversation, messages, onSend, showEscalation, onStopEscalation, onBack, onToggleInfo, refetchConversations }) {
   // Untuk auto-resize textarea maksimal 6 baris
+  function getDisplayName(lead) {
+    if (!lead) return "?";
+    if (
+      !lead.name ||
+      lead.name.trim() === "" ||
+      lead.name === "Prospek WhatsApp" ||
+      lead.name === "-"
+    ) {
+      return lead.contact || "?";
+    }
+    return lead.name;
+  }
   const maxRows = 6;
   const [inputRows, setInputRows] = useState(1);
   function handleInputChange(e) {
@@ -290,8 +302,8 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
           <button onClick={onBack} className="lg:hidden mr-2 p-2 rounded-full hover:bg-slate-100"><ArrowLeft/></button>
           <div className="w-10 h-10 rounded-full bg-teal-500 text-white flex items-center justify-center font-bold text-lg mr-3">{getInitials(conversation.lead.name)}</div>
           <div>
-            <div className="font-bold text-slate-800">{conversation.lead.name}</div>
-            <div className="text-xs text-slate-500">{conversation.lead.property?.name || conversation.lead.phone}</div>
+            <div className="font-bold text-slate-800">{getDisplayName(conversation.lead)}</div>
+            <div className="text-xs text-slate-500">{conversation.lead.property?.name || conversation.lead.contact}</div>
           </div>
         </div>
         <div className="flex items-center gap-2">
