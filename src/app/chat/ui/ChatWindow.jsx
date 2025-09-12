@@ -2,7 +2,7 @@
 import { ArrowLeft, Files, Images, Video } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { FaPlay, FaPause, FaPaperclip, FaVideo } from "react-icons/fa";
+import { FaPlay, FaPause, FaPaperclip, FaVideo, FaSpinner } from "react-icons/fa";
 import Swal from 'sweetalert2';
 
 export default function ChatWindow({ conversation, messages, onSend, showEscalation, onStopEscalation, onBack, onToggleInfo, refetchConversations }) {
@@ -46,6 +46,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   const [attachmentFiles, setAttachmentFiles] = useState([]); // array of File
   const fileInputRef = useRef();
   const [activePreviewIdx, setActivePreviewIdx] = useState(0);
+  const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
     // Scroll to bottom on new messages
@@ -115,6 +116,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
     e.preventDefault();
     const trimmed = text.trim();
     if (attachmentFiles.length > 0 && attachmentType) {
+      setIsSending(true);
       // Kirim satu per satu, hanya file pertama dengan caption
       const sendAll = async () => {
         for (let i = 0; i < attachmentFiles.length; i++) {
@@ -126,13 +128,16 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
         setAttachmentFiles([]);
         setAttachmentType(null);
         setText("");
+        setIsSending(false);
       };
       sendAll();
       return;
     }
     if (!trimmed) return;
+    setIsSending(true);
     onSend?.(trimmed);
     setText("");
+    setIsSending(false);
   }
 
   function handlePreviewImg(url) { setPreviewImg(url); }
@@ -360,6 +365,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
               enterKeyHint="send"
               autoCorrect="on"
               autoCapitalize="sentences"
+              disabled={isSending}
             />
           ) : (
             <textarea
@@ -374,6 +380,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
               enterKeyHint="send"
               autoCorrect="on"
               autoCapitalize="sentences"
+              disabled={isSending}
             />
           )}
           {/* Tampilkan preview di composer sebelum kirim */}
@@ -412,7 +419,10 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
               </div>
             </div>
           )}
-          <button type="submit" className="px-5 py-2 rounded-lg bg-teal-600 text-white text-sm font-bold hover:bg-teal-700 disabled:opacity-50 active:scale-95" disabled={!text.trim()}>Kirim</button>
+          <button type="submit" className="px-5 py-2 rounded-lg bg-teal-600 text-white text-sm font-bold hover:bg-teal-700 disabled:opacity-50 active:scale-95 flex items-center justify-center" disabled={isSending || (!text.trim() && attachmentPreviews.length === 0)}>
+            {isSending ? <FaSpinner className="animate-spin mr-2" /> : null}
+            Kirim
+          </button>
         </div>
       </form>
     </div>
