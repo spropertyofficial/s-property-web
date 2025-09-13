@@ -1,13 +1,18 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LeadInfoEditModal from "@/app/(site)/leads/components/LeadInfoEditModal";
 import LeadProfileEditModal from "@/app/(site)/leads/components/LeadProfileEditModal";
+import LeadAssignmentPanel from "./components/LeadAssignmentPanel";
 
 export default function LeadInfoPanel({ conversation, onToggleAssign }){
   // State for modal edit
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-    const [lead, setLead] = useState(conversation?.lead || null); // Ensure lead is not null
+  const [lead, setLead] = useState(conversation?.lead || null); // Ensure lead is not null
+  // Sync lead state with conversation prop
+  useEffect(() => {
+    setLead(conversation?.lead || null);
+  }, [conversation]);
 
   if (!conversation) {
     return (
@@ -43,11 +48,11 @@ export default function LeadInfoPanel({ conversation, onToggleAssign }){
       {/* Avatar and Name at top */}
       <div className="p-4 bg-slate-50 rounded-lg flex items-center mb-2">
         <div className="w-12 h-12 rounded-full bg-teal-500 text-white flex items-center justify-center font-bold text-xl mr-4">
-          {getInitials(lead?.name || '')}
+          {getInitials(lead?.name ?? '')}
         </div>
         <div>
-          <p className="font-bold text-lg">{lead?.name || '-'}</p>
-          <p className="text-sm text-slate-500">{lead?.phone || '-'}</p>
+          <p className="font-bold text-lg">{lead?.name ?? '-'}</p>
+          <p className="text-sm text-slate-500">{lead?.phone ?? '-'}</p>
         </div>
       </div>
 
@@ -58,18 +63,18 @@ export default function LeadInfoPanel({ conversation, onToggleAssign }){
             <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Informasi Lead</h2>
             <button onClick={() => setShowInfoModal(true)} className="text-xs px-3 py-1 rounded bg-teal-600 text-white">Ubah</button>
           </div>
-          <div className="bg-white rounded-lg border p-4 grid gap-2 text-sm">
-              <Field label="Nama" value={lead?.name || '-'} />
-              <Field label="Kontak" value={lead?.contact || '-'} />
-              <Field label="Email" value={lead?.email || '-'} />
-              <Field label="Status" value={lead?.status || '-'} />
-              <Field label="Properti" value={lead?.property?.name || lead?.propertyName || '-'} />
-              <Field label="Unit" value={lead?.unit || '-'} />
-              <Field label="Sumber" value={lead?.source || '-'} />
-              <Field label="Tanggal Lead Masuk" value={lead?.leadInAt ? new Date(lead.leadInAt).toLocaleDateString() : lead?.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "-"} />
-              <Field label="Tanggal Ditambahkan" value={lead?.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "-"} />
-              <Field label="Diperbarui" value={lead?.updatedAt ? new Date(lead.updatedAt).toLocaleString() : "-"} />
-          </div>
+      <div className="bg-white rounded-lg border p-4 grid gap-2 text-sm">
+        <Field label="Nama" value={lead?.name ?? '-'} />
+        <Field label="Kontak" value={lead?.contact ?? '-'} />
+        <Field label="Email" value={lead?.email ?? '-'} />
+        <Field label="Status" value={lead?.status ?? '-'} />
+        <Field label="Properti" value={lead?.property?.name ?? lead?.propertyName ?? '-'} />
+        <Field label="Unit" value={lead?.unit ?? '-'} />
+        <Field label="Sumber" value={lead?.source ?? '-'} />
+        <Field label="Tanggal Lead Masuk" value={lead?.leadInAt ? new Date(lead.leadInAt).toLocaleDateString() : lead?.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "-"} />
+        <Field label="Tanggal Ditambahkan" value={lead?.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "-"} />
+        <Field label="Diperbarui" value={lead?.updatedAt ? new Date(lead.updatedAt).toLocaleString() : "-"} />
+      </div>
         </section>
 
         {/* Profil Lead */}
@@ -78,43 +83,23 @@ export default function LeadInfoPanel({ conversation, onToggleAssign }){
             <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Profil Lead</h2>
             <button onClick={() => setShowProfileModal(true)} className="text-xs px-3 py-1 rounded bg-teal-600 text-white">Ubah</button>
           </div>
-          <div className="bg-white rounded-lg border p-4 grid gap-2 text-sm">
-              <Field label="Umur" value={lead.umur || '-'} />
-              <Field label="Pekerjaan" value={lead.pekerjaan || '-'} />
-              <Field label="Status Pernikahan" value={lead.statusPernikahan || '-'} />
-              <Field label="Anggaran" value={lead.anggaran?.toLocaleString() || '-'} />
-              <Field label="Tujuan Membeli" value={lead.tujuanMembeli || '-'} />
-              <Field label="Cara Pembayaran" value={lead.caraPembayaran || '-'} />
-              <Field label="Lokasi Klien" value={lead.lokasiKlien || '-'} />
-              <Field label="Lokasi Diinginkan" value={lead.lokasiDiinginkan || '-'} />
-              <Field label="Minat Klien" value={lead.minatKlien || '-'} multiline />
-              <Field label="Catatan" value={lead.catatan || '-'} multiline />
-          </div>
-        </section>
-
-        {/* Properti Diminati */}
-        <section className="space-y-2">
-          <h3 className="text-lg font-bold border-b pb-2 pt-2">Properti Diminati</h3>
-          <div className="text-sm space-y-3">
-            <div>
-              <p className="text-slate-500">Nama Properti</p>
-                <p className="font-semibold">{lead.property?.name || '-'}</p>
-            </div>
-            <div>
-              <p className="text-slate-500">Harga Mulai</p>
-                <p className="font-semibold">{formatIDR(lead.property?.price) || '-'}</p>
-            </div>
-          </div>
+      <div className="bg-white rounded-lg border p-4 grid gap-2 text-sm">
+        <Field label="Umur" value={lead?.umur ?? '-'} />
+        <Field label="Pekerjaan" value={lead?.pekerjaan ?? '-'} />
+        <Field label="Status Pernikahan" value={lead?.statusPernikahan ?? '-'} />
+        <Field label="Anggaran" value={lead?.anggaran?.toLocaleString() ?? '-'} />
+        <Field label="Tujuan Membeli" value={lead?.tujuanMembeli ?? '-'} />
+        <Field label="Cara Pembayaran" value={lead?.caraPembayaran ?? '-'} />
+        <Field label="Lokasi Klien" value={lead?.lokasiKlien ?? '-'} />
+        <Field label="Lokasi Diinginkan" value={lead?.lokasiDiinginkan ?? '-'} />
+        <Field label="Minat Klien" value={lead?.minatKlien ?? '-'} multiline />
+        <Field label="Catatan" value={lead?.catatan ?? '-'} multiline />
+      </div>
         </section>
 
         {/* Penugasan, Tag, Catatan */}
-        <div>
-          <div className="text-xs text-slate-500 mb-1">Penugasan</div>
-          <div className="flex items-center gap-2">
-            <span className={`text-xs px-2 py-1 rounded-full ${conversation.assignedToMe ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"}`}>{conversation.assignedToMe ? "Milik Saya" : "Belum Ditugaskan"}</span>
-            <button onClick={onToggleAssign} className="text-xs px-2 py-1 border rounded-lg hover:bg-white">{conversation.assignedToMe ? "Lepaskan" : "Ambil"}</button>
-          </div>
-        </div>
+        <LeadAssignmentPanel assignedToMe={conversation.assignedToMe} onToggleAssign={onToggleAssign} />
+        
         <div>
           <div className="text-xs text-slate-500 mb-1">Tag</div>
           <div className="flex flex-wrap gap-2">

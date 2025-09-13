@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import ConversationsList from "./ConversationsList";
 import ChatWindow from "./ChatWindow";
 import LeadInfoPanel from "./LeadInfoPanel";
+import ChatInboxSkeleton from "./components/ChatInboxSkeleton";
 
 export default function ChatInboxPageContent() {
   // State untuk pesan yang baru dikirim (pending)
@@ -62,6 +63,27 @@ export default function ChatInboxPageContent() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [showInfo, setShowInfo] = useState(false);
+  // TODO: fetch currentUser dari context/auth
+  const [currentUser, setCurrentUser] = useState(null);
+  console.log("[Page Chat] currentUser", currentUser);
+  useEffect(() => {
+    // Contoh: fetch user login dari endpoint /api/auth/me
+    async function fetchUser() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const data = await res.json();
+          // Jika response berbentuk { user: {...} }
+          if (data.user && data.user._id) {
+            setCurrentUser(data.user);
+          } else {
+            setCurrentUser(data);
+          }
+        }
+      } catch {}
+    }
+    fetchUser();
+  }, []);
 
   // Derived: selected conversation and its messages
   const selected = useMemo(
@@ -69,17 +91,16 @@ export default function ChatInboxPageContent() {
     [conversations, selectedId]
   );
   console.log("[FRONTEND] selected conversation:", selected);
-  const messages = useMemo(
-    () => {
-      if (!selected) return [];
-      const base = messagesById[selected.lead._id] || [];
-      const baseIds = new Set(base.map(m => m._id));
-      // Gabungkan pesan pending jika leadId sama, tapi filter yang _id-nya sudah ada di base
-      const pendings = pendingMessages.filter(m => m.lead === selected.lead._id && (!m._id || !baseIds.has(m._id)));
-      return [...base, ...pendings];
-    },
-    [messagesById, selected, pendingMessages]
-  );
+  const messages = useMemo(() => {
+    if (!selected) return [];
+    const base = messagesById[selected.lead._id] || [];
+    const baseIds = new Set(base.map((m) => m._id));
+    // Gabungkan pesan pending jika leadId sama, tapi filter yang _id-nya sudah ada di base
+    const pendings = pendingMessages.filter(
+      (m) => m.lead === selected.lead._id && (!m._id || !baseIds.has(m._id))
+    );
+    return [...base, ...pendings];
+  }, [messagesById, selected, pendingMessages]);
 
   function selectConversation(id) {
     setSelectedId(id);
@@ -138,8 +159,7 @@ export default function ChatInboxPageContent() {
       .sort((a, b) => (b.lastMessageAt || 0) - (a.lastMessageAt || 0));
   }, [conversations, search, filter]);
 
-  if (isLoading)
-    return <div className="p-8 text-center">Loading percakapan...</div>;
+  if (isLoading || !currentUser) return <ChatInboxSkeleton />;
   if (error)
     return (
       <div className="p-8 text-center text-red-500">
@@ -152,11 +172,12 @@ export default function ChatInboxPageContent() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 md:gap-4 max-w-[1400px] mx-auto h-full min-h-0 overscroll-none">
         {/* Left: Conversations list */}
         <div
-          className={`${
+          className={`$${
             selectedId ? "hidden" : "flex"
           } lg:flex lg:col-span-3 bg-white border border-slate-200 overflow-hidden flex-col h-full min-h-0`}
         >
           <ConversationsList
+            key={currentUser?._id || "no-user"}
             items={filtered}
             selectedId={selectedId}
             onSelect={selectConversation}
@@ -164,6 +185,7 @@ export default function ChatInboxPageContent() {
             setSearch={setSearch}
             filter={filter}
             setFilter={setFilter}
+            currentUser={currentUser}
           />
         </div>
 

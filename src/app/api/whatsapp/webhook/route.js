@@ -51,13 +51,61 @@ export async function POST(req) {
 
   let lead = await Lead.findOne({ contact: From.replace("whatsapp:", "") });
   if (!lead) {
+    // Ambil AgentQueue untuk round-robin
+    const AgentQueue = (await import("@/lib/models/AgentQueue")).default;
+    let queue = await AgentQueue.findOne({});
+    let assignedAgent = null;
+    let nextIndex = -1;
+    if (queue && queue.agents && queue.agents.length > 0) {
+      // Cari agent aktif berikutnya
+      const activeAgents = queue.agents.filter(a => a.active);
+      if (activeAgents.length > 0) {
+        nextIndex = (queue.lastAssignedIndex + 1) % activeAgents.length;
+        assignedAgent = activeAgents[nextIndex].user;
+        // Update pointer rotasi
+        queue.lastAssignedIndex = nextIndex;
+        queue.updatedAt = Date.now();
+        await queue.save();
+      }
+    }
+    // Lead baru: agent belum di-assign, status unassigned
     lead = await Lead.create({
       name: "-",
       contact: From.replace("whatsapp:", ""),
       source: "WhatsApp",
-      status: "Baru"
+      status: "Baru",
+      agent: null // agent diisi saat claim
     });
     console.log("Lead baru dibuat:", From.replace("whatsapp:", ""));
+    // Kirim notifikasi WhatsApp ke agent giliran
+    if (assignedAgent) {
+      // Ambil nomor agent
+      const User = (await import("@/lib/models/User")).default;
+      const agentUser = await User.findById(assignedAgent);
+      if (agentUser && agentUser.phone) {
+        // Kirim pesan WhatsApp via Twilio
+        try {
+          await axios.post(
+            `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
+            querystring.stringify({
+              To: `whatsapp:+6289666000506`,
+              From: `whatsapp:+14155238886`,
+              Body: `Ada lead baru dari WhatsApp (${lead.contact}). Silakan claim untuk merespon.`,
+            }),
+            {
+              auth: {
+                username: process.env.TWILIO_ACCOUNT_SID,
+                password: process.env.TWILIO_AUTH_TOKEN,
+              },
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            }
+          );
+          console.log(`Notifikasi dikirim ke agent ${agentUser.phone}`);
+        } catch (err) {
+          console.error("Gagal kirim notifikasi ke agent:", err);
+        }
+      }
+    }
   } else {
     console.log("Lead sudah ada:", lead.contact);
   }
