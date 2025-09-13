@@ -4,6 +4,10 @@
       "maxDuration": 30,
       "memory": 1024
     },
+    "app/api/conversations/route.js": {
+      "maxDuration": 30,
+      "memory": 1024
+    },
     "app/api/sales-records/route.js": {
       "maxDuration": 30,
       "memory": 1024
@@ -28,20 +32,29 @@
     {
       "source": "/sw.js",
       "headers": [
-        { "key": "cache-control", "value": "public, max-age=0, must-revalidate" }
+        {
+          "key": "cache-control",
+          "value": "public, max-age=0, must-revalidate"
+        }
       ]
     },
     {
       "source": "/custom-sw.js",
       "headers": [
-        { "key": "cache-control", "value": "public, max-age=0, must-revalidate" }
+        {
+          "key": "cache-control",
+          "value": "public, max-age=0, must-revalidate"
+        }
       ]
     },
     {
       "source": "/manifest.webmanifest",
       "headers": [
         { "key": "content-type", "value": "application/manifest+json" },
-        { "key": "cache-control", "value": "public, max-age=0, must-revalidate" }
+        {
+          "key": "cache-control",
+          "value": "public, max-age=0, must-revalidate"
+        }
       ]
     }
   ],
