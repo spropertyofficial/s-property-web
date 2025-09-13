@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { RxAvatar } from "react-icons/rx";
 import Swal from "sweetalert2";
 import axios from "axios";
@@ -14,8 +14,14 @@ export default function ConversationsList({
   setFilter,
   onSimulateIncoming,
   currentUser,
+  escalationMinutes = 5,
 }) {
   const [loadingClaimId, setLoadingClaimId] = useState(null);
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const counts = useMemo(
     () => ({
@@ -39,6 +45,39 @@ export default function ConversationsList({
   console.log("sortedItems", sortedItems);
   console.log("currencyUser", currentUser);
 
+  // Dummy data untuk demo/testing jika items kosong
+  const dummyLeads = [
+    {
+      lead: {
+        _id: "dummy1",
+        name: "Prospek Baru",
+        contact: "08123456789",
+        leadInAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(), // masuk 2 menit lalu
+        agent: null,
+      },
+      messages: [],
+      lastMessageText: "Halo, saya tertarik properti Anda.",
+      unread: 1,
+      isNewAssignment: true,
+    },
+    {
+      lead: {
+        _id: "dummy2",
+        name: "Prospek Eskalasi",
+        contact: "08987654321",
+        leadInAt: new Date(Date.now() - 12 * 60 * 1000).toISOString(), // masuk 12 menit lalu
+        agent: null,
+      },
+      messages: [],
+      lastMessageText: "Apakah masih tersedia?",
+      unread: 2,
+      isNewAssignment: true,
+    },
+  ];
+  // const displayItems = items.length === 0 ? dummyLeads : sortedItems;
+  // const displayItems = dummyLeads;
+  const displayItems = sortedItems;
+  
   return (
     <div className="flex flex-col h-full">
       <div className="p-4 border-b border-slate-200 flex-shrink-0 bg-white">
@@ -107,7 +146,11 @@ export default function ConversationsList({
                     selectedId === (item.lead?._id || item.id)
                       ? "bg-teal-50"
                       : ""
-                  } ${isUnassigned && !isAdmin ? "opacity-60 cursor-not-allowed" : ""}`}
+                  } ${
+                    isUnassigned && !isAdmin
+                      ? "opacity-60 cursor-not-allowed"
+                      : ""
+                  }`}
                 >
                   {selectedId === (item.lead?._id || item.id) && (
                     <span className="absolute left-0 top-0 bottom-0 w-1 bg-teal-600" />
@@ -118,7 +161,7 @@ export default function ConversationsList({
                   </div>
                   <div className="flex-1 min-w-0 relative">
                     {/* Nama user dan nomor hanya jika sudah di-assign atau admin */}
-                    {(isAdmin || !isUnassigned) ? (
+                    {isAdmin || !isUnassigned ? (
                       <div className="flex justify-between items-start">
                         <p className="font-bold text-slate-800 truncate">
                           {getDisplayName(item.lead)}
@@ -129,11 +172,20 @@ export default function ConversationsList({
                       </div>
                     ) : (
                       <div className="flex justify-between items-start">
-                        <p className="font-bold text-slate-400 italic">(Belum diklaim)</p>
+                        <p className="font-bold text-slate-400 italic">
+                          (Belum diklaim)
+                        </p>
                         <p className="text-xs text-slate-400 flex-shrink-0 ml-2 text-right">
                           {formatTime(getLastMessageTime(item))}
                         </p>
                       </div>
+                    )}
+                    {/* TIMER ESKALASI untuk lead belum diklaim */}
+                    {isUnassigned && (
+                      <EscalationTimer
+                        leadInAt={item.lead?.leadInAt}
+                        escalationMinutes={escalationMinutes}
+                      />
                     )}
                     {/* Pesan terakhir */}
                     <div className="flex justify-between items-end mt-1">
@@ -163,7 +215,9 @@ export default function ConversationsList({
                     role="button"
                     tabIndex={0}
                     className={`mx-4 mb-2 px-3 py-1 bg-teal-600 text-white rounded text-xs select-none flex items-center justify-center ${
-                      loadingClaimId === item.lead._id || !currentUser || !currentUser._id
+                      loadingClaimId === item.lead._id ||
+                      !currentUser ||
+                      !currentUser._id
                         ? "opacity-60 cursor-not-allowed"
                         : "cursor-pointer hover:bg-teal-700"
                     }`}
@@ -191,35 +245,70 @@ export default function ConversationsList({
                             icon: "success",
                             title: "Lead berhasil diklaim!",
                           });
-                          // if (typeof window !== "undefined") window.location.reload();
+                          if (typeof window !== "undefined")
+                            window.location.reload();
                         } else {
                           Swal.fire({
-                            icon: "error",
-                            title: res.data.error || "Gagal klaim lead",
+                            icon: "warning",
+                            title: "Gagal klaim lead",
+                            text: "Ini bukan giliran Anda. Silakan tunggu giliran berikutnya.",
                           });
                         }
                       } catch (err) {
-                        Swal.fire({
-                          icon: "error",
-                          title: "Gagal klaim lead",
-                        });
+                        if (err?.response?.status === 403) {
+                          Swal.fire({
+                            icon: "warning",
+                            title: "Gagal klaim lead",
+                            text: "Ini bukan giliran Anda. Silakan tunggu giliran berikutnya.",
+                          });
+                        } else {
+                          Swal.fire({
+                            icon: "error",
+                            title: "Gagal klaim lead",
+                          });
+                        }
                       } finally {
                         setLoadingClaimId(null);
                       }
                     }}
-                    onKeyDown={e => {
-                      if ((e.key === "Enter" || e.key === " ") && !loadingClaimId && currentUser && currentUser._id) {
+                    onKeyDown={(e) => {
+                      if (
+                        (e.key === "Enter" || e.key === " ") &&
+                        !loadingClaimId &&
+                        currentUser &&
+                        currentUser._id
+                      ) {
                         e.preventDefault();
                         e.stopPropagation();
                         e.target.click();
                       }
                     }}
-                    aria-disabled={loadingClaimId === item.lead._id || !currentUser || !currentUser._id}
+                    aria-disabled={
+                      loadingClaimId === item.lead._id ||
+                      !currentUser ||
+                      !currentUser._id
+                    }
                   >
                     {loadingClaimId === item.lead._id ? (
-                      <svg className="animate-spin h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                      <svg
+                        className="animate-spin h-4 w-4 mr-2 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v8z"
+                        ></path>
                       </svg>
                     ) : null}
                     Klaim Lead
@@ -241,6 +330,35 @@ export default function ConversationsList({
     }
     return null;
   }
+}
+
+// Komponen timer eskalasi
+function EscalationTimer({ leadInAt, escalationMinutes = 5 }) {
+  if (!leadInAt) return null;
+  const [totalSeconds, setTotalSeconds] = useState(0);
+  useEffect(() => {
+    const startMs = new Date(leadInAt).getTime();
+    const endMs = startMs + escalationMinutes * 60 * 1000;
+    const tick = () => {
+      const left = Math.max(0, Math.floor((endMs - Date.now()) / 1000));
+      setTotalSeconds(left);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [leadInAt, escalationMinutes]);
+
+  const min = Math.floor(totalSeconds / 60);
+  const sec = totalSeconds % 60;
+  return (
+    <div className="mt-1 text-xs text-orange-600 font-semibold">
+      {totalSeconds > 0
+        ? `Ditutup dalam ${min.toString().padStart(2, "0")}:${sec
+            .toString()
+            .padStart(2, "0")}`
+        : "Menunggu giliran agen..."}
+    </div>
+  );
 }
 
 function formatTime(ts) {

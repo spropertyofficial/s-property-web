@@ -11,6 +11,7 @@ export default function AgentQueuePage() {
   const [editAgents, setEditAgents] = useState([]);
   const [allAgents, setAllAgents] = useState([]);
   const [selectedAgentId, setSelectedAgentId] = useState("");
+  const [escalationMinutes, setEscalationMinutes] = useState(10);
 
   useEffect(() => {
     fetchQueue();
@@ -81,6 +82,7 @@ export default function AgentQueuePage() {
       await axios.post("/api/agent-queue", {
         agents: editAgents,
         lastAssignedIndex,
+        escalationMinutes,
       });
       await fetchQueue();
       Swal.fire({ icon: "success", title: "Perubahan berhasil disimpan" });
@@ -124,6 +126,16 @@ export default function AgentQueuePage() {
             </option>
           ))}
         </select>
+      </div>
+      <div className="mb-4">
+        <label className="block mb-1 mt-4">Durasi waktu eskalasi (menit):</label>
+        <input
+          type="number"
+          min={1}
+          value={escalationMinutes}
+          onChange={e => setEscalationMinutes(parseInt(e.target.value, 10) || 1)}
+          className="border rounded px-2 py-1 w-24"
+        />
       </div>
       {loading ? (
         <div>Loading...</div>

@@ -159,6 +159,20 @@ export default function ChatInboxPageContent() {
       .sort((a, b) => (b.lastMessageAt || 0) - (a.lastMessageAt || 0));
   }, [conversations, search, filter]);
 
+  const [escalationMinutes, setEscalationMinutes] = useState(5);
+  useEffect(() => {
+    async function fetchEscalation() {
+      try {
+        const res = await fetch("/api/agent-queue");
+        if (res.ok) {
+          const data = await res.json();
+          setEscalationMinutes(data.escalationMinutes ?? 5);
+        }
+      } catch {}
+    }
+    fetchEscalation();
+  }, []);
+
   if (isLoading || !currentUser) return <ChatInboxSkeleton />;
   if (error)
     return (
@@ -186,6 +200,7 @@ export default function ChatInboxPageContent() {
             filter={filter}
             setFilter={setFilter}
             currentUser={currentUser}
+            escalationMinutes={escalationMinutes}
           />
         </div>
 
