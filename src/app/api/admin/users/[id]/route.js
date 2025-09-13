@@ -16,7 +16,7 @@ export async function PATCH(req, { params }) {
     await connectDB();
     const { id } = params;
     const body = await req.json();
-    const allowed = ["name", "phone", "type", "isActive"];
+  const allowed = ["name", "phone", "type", "isActive", "allowedProperties"];
     const updates = {};
     for (const k of allowed) if (k in body) updates[k] = body[k];
 
@@ -26,7 +26,20 @@ export async function PATCH(req, { params }) {
     }
 
     const prevType = user.type;
+    // Coerce allowedProperties to ObjectId[] if provided
+    if (Array.isArray(updates.allowedProperties)) {
+      // Only allow set for sales-inhouse or when type will be sales-inhouse
+      const targetType = updates.type || user.type;
+      if (targetType !== 'sales-inhouse') {
+        // If not sales-inhouse, ignore allowedProperties to avoid confusion
+        delete updates.allowedProperties;
+      } else {
+        user.allowedProperties = updates.allowedProperties.filter(Boolean);
+      }
+    }
+
     for (const [k, v] of Object.entries(updates)) {
+      if (k === 'allowedProperties') continue; // already handled
       user[k] = v;
     }
 

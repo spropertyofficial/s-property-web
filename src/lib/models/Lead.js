@@ -22,7 +22,7 @@ const KerabatSchema = new mongoose.Schema(
 const LeadSchema = new mongoose.Schema(
   {
     // Informasi Awal (required minimal saat create)
-  leadInAt: { type: Date, default: Date.now }, // Tanggal lead masuk sistem
+    leadInAt: { type: Date, default: Date.now }, // Tanggal lead masuk sistem
     name: { type: String, required: true, trim: true, maxlength: 150 }, // Nama Prospek
     contact: { type: String, trim: true, maxlength: 50 }, // Nomor Telepon / WA
     email: { type: String, trim: true, lowercase: true, maxlength: 150 },
@@ -32,7 +32,7 @@ const LeadSchema = new mongoose.Schema(
     agent: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
     }, // Agen / Mitra penanggung jawab
     source: { type: String, trim: true, maxlength: 100 }, // Sumber mengetahui proyek
     status: {

@@ -686,6 +686,7 @@ export default function RegisterForm() {
               <option value="semi-agent">Semi Agent</option>
               <option value="agent">Agent</option>
               <option value="sales-inhouse">Sales Inhouse</option>
+              <option value="karyawan">Karyawan</option>
             </select>
             {errors.category && (
               <p className="text-red-500 text-xs mt-1">{errors.category}</p>

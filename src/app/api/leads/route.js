@@ -104,6 +104,24 @@ export async function POST(req) {
       }
     }
 
+    // Sales-inhouse server-side enforcement:
+    if (userAuth.user?.type === 'sales-inhouse') {
+      const allowed = Array.isArray(userAuth.user.allowedProperties) ? userAuth.user.allowedProperties.map(String) : [];
+      // Must select from master list (no free-text), and if selected, must be in allowed list when defined
+      if (!property) {
+        return NextResponse.json(
+          { success: false, error: "Sales Inhouse wajib memilih properti dari daftar" },
+          { status: 400 }
+        );
+      }
+      if (allowed.length > 0 && !allowed.includes(String(property))) {
+        return NextResponse.json(
+          { success: false, error: "Anda tidak diizinkan memilih properti ini" },
+          { status: 403 }
+        );
+      }
+    }
+
     const doc = new Lead({
       leadInAt: leadInAtDate || Date.now(),
       name: name.trim(),
