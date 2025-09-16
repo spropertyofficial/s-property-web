@@ -9,7 +9,7 @@ export async function middleware(request) {
   console.log("Middleware triggered for:", pathname); // Debug log
 
   // Routes that require authentication
-  const protectedRoutes = ["/agent", "/dashboard"];
+const protectedRoutes = ["/agent", "/dashboard", "/chat"];
 
   // Routes that should redirect authenticated users
   const authRoutes = ["/login", "/register"];
@@ -141,6 +141,7 @@ export const config = {
     "/admin/:path*",
     "/agent/:path*",
     "/dashboard/:path*",
+    "/chat/:path*",
     "/login",
     "/register",
   ],

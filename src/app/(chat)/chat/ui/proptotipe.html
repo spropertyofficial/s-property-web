@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototipe - Fitur Chat Terpusat</title>
+
+    <!-- Chosen Palette: Modern Slate & Teal -->
+    <!-- Application Structure Plan: A refined three-panel "Unified Inbox" layout. The left panel lists conversations with avatars and status indicators. The center panel is the active chat window with redesigned message bubbles. The right panel provides contextual lead information in organized cards. This structure is chosen for its high efficiency and clean, modern aesthetic, allowing agents to view context and communicate seamlessly. On mobile, it collapses into a single-column view, prioritizing the conversation list first, then the chat window. -->
+    <!-- Visualization & Content Choices: 
+        - Conversation List -> Organize/Navigate -> List of items with avatars (HTML/JS) -> Interaction: Click to select, subtle hover -> Justification: A more personal and visually engaging navigation for a chat app.
+        - Chat History -> Inform/Organize -> Modern message bubbles (HTML/Tailwind) -> Interaction: Scroll -> Justification: Clean, universally understood format for chat messages.
+        - Lead Details -> Inform -> Cards with icons (HTML/Unicode) -> Interaction: Static display -> Justification: Organizes CRM context into scannable, visually distinct sections.
+        - Escalation Timer -> Inform -> Animated progress bar (HTML/JS) -> Interaction: Visual feedback -> Justification: A more modern and less intrusive way to communicate urgency.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chat-bubble-lead { background-color: #f1f5f9; } /* slate-100 */
+        .chat-bubble-agent { background-color: #0d9488; color: white; } /* teal-600 */
+        #conversation-list > div.active { background-color: #f0fdfa; } /* teal-50 */
+        #conversation-list > div.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background-color: #0d9488; } /* teal-600 */
+        
+        .mobile-chat-view #conversation-list-panel { display: none; }
+        .mobile-chat-view #lead-info-panel { display: none; }
+        .info-panel-mobile-visible { transform: translateX(0) !important; }
+
+        @media (min-width: 1024px) {
+            .mobile-chat-view #conversation-list-panel { display: flex; }
+            .mobile-chat-view #lead-info-panel { display: flex; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 h-screen overflow-hidden">
+
+    <div id="app-container" class="flex h-full bg-white">
+        <!-- Left Panel: Conversation List -->
+        <aside id="conversation-list-panel" class="w-full md:w-80 lg:w-96 flex-shrink-0 border-r border-slate-200 flex flex-col">
+            <div class="p-4 border-b border-slate-200 flex-shrink-0">
+                <h2 class="text-xl font-bold text-slate-800">Kotak Masuk</h2>
+                <input type="text" placeholder="Cari percakapan..." class="w-full mt-3 p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500">
+            </div>
+            <div id="conversation-list" class="overflow-y-auto flex-grow">
+                <!-- Conversation items will be injected here -->
+            </div>
+        </aside>
+
+        <!-- Center Panel: Chat Window -->
+        <main id="chat-window-panel" class="flex-grow flex flex-col h-full hidden md:flex bg-slate-50">
+            <div id="chat-placeholder" class="flex flex-col items-center justify-center h-full text-center text-slate-500">
+                <div class="text-5xl mb-4">💬</div>
+                <h2 class="text-xl font-bold">Pilih Percakapan</h2>
+                <p class="max-w-xs">Pilih salah satu percakapan dari daftar di sebelah kiri untuk memulai.</p>
+            </div>
+            
+            <div id="active-chat-view" class="hidden flex-col h-full">
+                <header class="flex items-center justify-between p-3 border-b border-slate-200 flex-shrink-0 bg-white">
+                    <div class="flex items-center">
+                        <button id="back-to-list-btn" class="md:hidden mr-2 p-2 rounded-full hover:bg-slate-100">←</button>
+                        <div class="w-10 h-10 rounded-full bg-teal-500 text-white flex items-center justify-center font-bold text-lg mr-3" id="chat-header-avatar"></div>
+                        <div>
+                            <h3 id="chat-header-name" class="font-bold text-slate-800"></h3>
+                            <p id="chat-header-property" class="text-xs text-slate-500"></p>
+                        </div>
+                    </div>
+                    <button id="toggle-info-panel" class="p-2 rounded-full hover:bg-slate-100 lg:hidden">ℹ️</button>
+                </header>
+
+                <div id="escalation-timer-bar" class="hidden p-2 bg-yellow-100 text-yellow-800 text-sm text-center relative">
+                    <div id="timer-progress" class="absolute left-0 top-0 bottom-0 bg-yellow-300 transition-all duration-1000"></div>
+                    <span class="relative">Harap respons dalam <span id="timer-countdown" class="font-bold">5:00</span> menit atau lead akan dialihkan.</span>
+                </div>
+
+                <div id="message-container" class="flex-grow p-4 overflow-y-auto space-y-4 flex flex-col">
+                </div>
+
+                <div class="p-4 border-t border-slate-200 bg-white flex-shrink-0">
+                    <form id="message-form" class="flex items-center gap-3">
+                        <input id="message-input" type="text" placeholder="Ketik balasan Anda..." class="w-full p-3 border border-slate-300 bg-slate-100 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent" autocomplete="off">
+                        <button type="submit" class="bg-teal-600 text-white font-bold px-5 py-3 rounded-lg hover:bg-teal-700 transition-transform active:scale-95">Kirim</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Panel: Lead Info -->
+        <aside id="lead-info-panel" class="w-full md:w-80 lg:w-96 flex-shrink-0 border-l border-slate-200 flex-col hidden lg:flex absolute md:relative top-0 right-0 h-full bg-white z-20 md:z-auto transform translate-x-full lg:translate-x-0 transition-transform duration-300">
+             <div class="flex justify-between items-center p-4 border-b flex-shrink-0">
+                <h3 class="text-lg font-bold">Detail Prospek</h3>
+                <button id="close-info-panel" class="lg:hidden text-2xl">&times;</button>
+             </div>
+            <div id="info-placeholder" class="flex flex-col items-center justify-center h-full text-center text-slate-400 p-4">
+                <div class="text-4xl mb-4">👤</div>
+                <h3 class="font-bold">Informasi Lead</h3>
+                <p class="text-sm">Detail kontak dan properti yang diminati akan muncul di sini.</p>
+            </div>
+            <div id="info-content" class="hidden p-4 space-y-4 overflow-y-auto">
+                 <div class="p-4 bg-slate-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div id="info-avatar" class="w-12 h-12 rounded-full bg-teal-500 text-white flex items-center justify-center font-bold text-xl mr-4"></div>
+                        <div>
+                            <p id="info-name" class="font-bold text-lg"></p>
+                            <p id="info-contact" class="text-sm text-slate-500"></p>
+                        </div>
+                    </div>
+                 </div>
+                <div class="text-sm space-y-3">
+                    <div><p class="text-slate-500">Sumber</p><p id="info-source" class="font-semibold"></p></div>
+                    <div><p class="text-slate-500">Status</p><p id="info-status" class="font-semibold"></p></div>
+                </div>
+                <h3 class="text-lg font-bold border-b pb-2 pt-4">Properti Diminati</h3>
+                <div class="text-sm space-y-3">
+                     <div><p class="text-slate-500">Nama Properti</p><p id="info-property-name" class="font-semibold"></p></div>
+                     <div><p class="text-slate-500">Harga Mulai</p><p id="info-property-price" class="font-semibold"></p></div>
+                </div>
+                <div class="mt-6">
+                    <button class="w-full text-center bg-teal-600 text-white py-3 rounded-lg font-semibold hover:bg-teal-700">Lengkapi Detail Lead</button>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mockLeads = {
+                'lead1': { id: 'lead1', name: 'Bapak Budi Santoso', contact: '08123...', source: 'Website', status: 'Hot', propertyId: 'prop1' },
+                'lead2': { id: 'lead2', name: 'Ibu Sinta Dewi', contact: '08134...', source: 'Instagram', status: 'Warm', propertyId: 'prop2' },
+                'lead3': { id: 'lead3', name: 'Calon Pembeli Baru', contact: '08156...', source: 'WhatsApp', status: 'Baru', propertyId: 'prop1' },
+            };
+            const mockProperties = {
+                'prop1': { name: 'Avoria Estate', price: 650000000 },
+                'prop2': { name: 'Ruko Komersial BSD', price: 2500000000 },
+            };
+            const mockConversations = {
+                'conv1': { id: 'conv1', leadId: 'lead1', unread: 0, lastMessage: 'Baik, terima kasih infonya.', timestamp: '10:30' },
+                'conv2': { id: 'conv2', leadId: 'lead2', unread: 1, lastMessage: 'Apakah ada promo KPR?', timestamp: '09:15' },
+                'conv3': { id: 'conv3', leadId: 'lead3', unread: 1, lastMessage: 'Halo, saya tertarik dengan perumahan ini.', timestamp: 'Baru Saja', isNewAssignment: true },
+            };
+            const mockMessages = {
+                'conv1': [ { from: 'lead', text: 'Oke, saya akan diskusikan dengan keluarga.' }, { from: 'agent', text: 'Tentu, Pak Budi. Kami tunggu kabar baiknya.' }, { from: 'lead', text: 'Baik, terima kasih infonya.' } ],
+                'conv2': [ { from: 'lead', text: 'Apakah ada promo KPR?' } ],
+                'conv3': [ { from: 'lead', text: 'Halo, saya tertarik dengan perumahan ini.' } ],
+            };
+
+            const appContainer = document.getElementById('app-container');
+            const conversationList = document.getElementById('conversation-list');
+            const chatPlaceholder = document.getElementById('chat-placeholder');
+            const activeChatView = document.getElementById('active-chat-view');
+            const messageContainer = document.getElementById('message-container');
+            const messageForm = document.getElementById('message-form');
+            const messageInput = document.getElementById('message-input');
+            const leadInfoPanel = document.getElementById('lead-info-panel');
+            const infoContent = document.getElementById('info-content');
+            const infoPlaceholder = document.getElementById('info-placeholder');
+            const escalationTimerBar = document.getElementById('escalation-timer-bar');
+            const timerCountdown = document.getElementById('timer-countdown');
+            const timerProgress = document.getElementById('timer-progress');
+            const backToListBtn = document.getElementById('back-to-list-btn');
+            const toggleInfoPanelBtn = document.getElementById('toggle-info-panel');
+            const closeInfoPanelBtn = document.getElementById('close-info-panel');
+
+            let activeConversationId = null;
+            let timerInterval = null;
+
+            function getInitials(name) {
+                return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            }
+
+            function renderConversationList() {
+                conversationList.innerHTML = '';
+                Object.values(mockConversations).forEach(conv => {
+                    const lead = mockLeads[conv.leadId];
+                    const item = document.createElement('div');
+                    item.className = `relative p-4 border-b border-slate-100 cursor-pointer transition-colors ${activeConversationId === conv.id ? 'active' : ''}`;
+                    item.dataset.convId = conv.id;
+                    item.innerHTML = `
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center font-bold text-lg mr-3 flex-shrink-0">${getInitials(lead.name)}</div>
+                            <div class="flex-grow overflow-hidden">
+                                <div class="flex justify-between items-start">
+                                    <p class="font-bold text-slate-800 truncate">${lead.name}</p>
+                                    <p class="text-xs text-slate-400 flex-shrink-0 ml-2">${conv.timestamp}</p>
+                                </div>
+                                <div class="flex justify-between items-end mt-1">
+                                    <p class="text-sm text-slate-500 truncate">${conv.lastMessage}</p>
+                                    ${conv.unread > 0 ? `<div class="w-5 h-5 bg-teal-500 text-white text-xs rounded-full flex items-center justify-center flex-shrink-0">${conv.unread}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        ${conv.isNewAssignment ? `<div class="mt-2 text-xs font-bold text-red-600 animate-pulse">🔥 TUGAS BARU</div>` : ''}
+                    `;
+                    conversationList.appendChild(item);
+                });
+            }
+
+            function renderChat(convId) {
+                const conversation = mockConversations[convId];
+                const lead = mockLeads[conversation.leadId];
+                const property = mockProperties[lead.propertyId];
+                const messages = mockMessages[convId];
+                
+                document.getElementById('chat-header-avatar').textContent = getInitials(lead.name);
+                document.getElementById('chat-header-name').textContent = lead.name;
+                document.getElementById('chat-header-property').textContent = property.name;
+
+                messageContainer.innerHTML = '';
+                messages.forEach(msg => {
+                    const bubble = document.createElement('div');
+                    bubble.className = `max-w-md p-3 rounded-lg ${msg.from === 'lead' ? 'chat-bubble-lead self-start' : 'chat-bubble-agent self-end'}`;
+                    bubble.textContent = msg.text;
+                    messageContainer.appendChild(bubble);
+                });
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                chatPlaceholder.classList.add('hidden');
+                activeChatView.classList.add('flex');
+                activeChatView.classList.remove('hidden');
+
+                renderLeadInfo(lead.id);
+
+                if (conversation.isNewAssignment) {
+                    startEscalationTimer(convId);
+                } else {
+                    stopEscalationTimer();
+                }
+            }
+            
+            function renderLeadInfo(leadId) {
+                const lead = mockLeads[leadId];
+                const property = mockProperties[lead.propertyId];
+                document.getElementById('info-avatar').textContent = getInitials(lead.name);
+                document.getElementById('info-name').textContent = lead.name;
+                document.getElementById('info-contact').textContent = lead.contact;
+                document.getElementById('info-source').textContent = lead.source;
+                document.getElementById('info-status').textContent = lead.status;
+                document.getElementById('info-property-name').textContent = property.name;
+                document.getElementById('info-property-price').textContent = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(property.price);
+                infoPlaceholder.classList.add('hidden');
+                infoContent.classList.remove('hidden');
+            }
+
+            function startEscalationTimer(convId) {
+                stopEscalationTimer();
+                escalationTimerBar.classList.remove('hidden');
+                let duration = 5 * 60;
+                let totalDuration = duration;
+                timerInterval = setInterval(() => {
+                    const minutes = Math.floor(duration / 60).toString().padStart(2, '0');
+                    const seconds = (duration % 60).toString().padStart(2, '0');
+                    timerCountdown.textContent = `${minutes}:${seconds}`;
+                    timerProgress.style.width = `${(duration / totalDuration) * 100}%`;
+                    
+                    if (--duration < 0) {
+                        stopEscalationTimer();
+                        alert(`Waktu habis! Lead dari ${mockLeads[mockConversations[convId].leadId].name} akan dialihkan ke agen lain.`);
+                        escalationTimerBar.innerHTML = `<p class="font-bold text-red-700">Waktu Habis - Lead Dialihkan</p>`;
+                        messageInput.disabled = true;
+                    }
+                }, 1000);
+            }
+
+            function stopEscalationTimer() {
+                clearInterval(timerInterval);
+                escalationTimerBar.classList.add('hidden');
+                messageInput.disabled = false;
+            }
+
+            conversationList.addEventListener('click', (e) => {
+                const convItem = e.target.closest('[data-conv-id]');
+                if (convItem) {
+                    activeConversationId = convItem.dataset.convId;
+                    mockConversations[activeConversationId].unread = 0;
+                    renderConversationList();
+                    renderChat(activeConversationId);
+                    if (window.innerWidth < 768) {
+                        appContainer.classList.add('mobile-chat-view');
+                    }
+                }
+            });
+
+            messageForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const text = messageInput.value.trim();
+                if (text && activeConversationId) {
+                    mockMessages[activeConversationId].push({ from: 'agent', text });
+                    mockConversations[activeConversationId].lastMessage = text;
+                    mockConversations[activeConversationId].isNewAssignment = false;
+                    renderChat(activeConversationId);
+                    renderConversationList();
+                    messageInput.value = '';
+                }
+            });
+
+            backToListBtn.addEventListener('click', () => {
+                appContainer.classList.remove('mobile-chat-view');
+                activeConversationId = null;
+                renderConversationList();
+            });
+
+            toggleInfoPanelBtn.addEventListener('click', () => leadInfoPanel.classList.toggle('hidden'));
+            closeInfoPanelBtn.addEventListener('click', () => leadInfoPanel.classList.add('hidden'));
+
+            renderConversationList();
+        });
+    </script>
+</body>
+</html>

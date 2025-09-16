@@ -111,6 +111,11 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
   path: "/admin/manage-users",
       icon: <FaUsers />,
     },
+    {
+      name: "Distribusi Agent",
+      path: "/admin/agent-queue",
+      icon: <FaUsersCog />,
+    },
   ];
 
   return (
