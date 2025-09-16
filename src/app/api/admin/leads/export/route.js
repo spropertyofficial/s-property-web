@@ -11,25 +11,36 @@ export async function GET(req) {
 
     await dbConnect();
     const { searchParams } = new URL(req.url);
-  const q = (searchParams.get("q") || "").trim();
-  const status = (searchParams.get("status") || "").trim();
-  const agent = (searchParams.get("agent") || "").trim();
-  const source = (searchParams.get("source") || "").trim();
-  // date filters removed
+    const q = (searchParams.get("q") || "").trim();
+    const status = (searchParams.get("status") || "").trim();
+    const agent = (searchParams.get("agent") || "").trim();
+    const source = (searchParams.get("source") || "").trim();
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
 
     const filter = {};
     if (status) filter.status = status;
-  if (agent) filter.agent = agent;
-  if (source) filter.source = source;
-  // date filters removed
+    if (agent) filter.agent = agent;
+    if (source) filter.source = source;
     if (q) {
       const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
       filter.$or = [{ name: regex }, { contact: regex }, { email: regex }];
     }
+    // Filter rentang tanggal (createdAt = Tanggal Ditambahkan)
+    if (startDate || endDate) {
+      filter.createdAt = {};
+      if (startDate) filter.createdAt.$gte = new Date(startDate);
+      if (endDate) {
+        // Agar rentang inklusif sampai akhir hari
+        const end = new Date(endDate);
+        end.setHours(23,59,59,999);
+        filter.createdAt.$lte = end;
+      }
+    }
 
     const rows = await Lead.find(filter)
-      .sort({ updatedAt: -1 })
-  .select("name contact email status property propertyName unit agent source leadInAt updatedAt createdAt")
+      .sort({ createdAt: 1 }) // urutkan dari terlama ke terbaru
+      .select("name contact email status property propertyName unit agent source leadInAt updatedAt createdAt")
       .populate("property", "name")
       .populate("agent", "name agentCode email")
       .lean();
@@ -49,10 +60,20 @@ export async function GET(req) {
         "Sumber",
       ],
     ];
+    function formatDate(d) {
+      if (!d) return "";
+      const date = new Date(d);
+      if (isNaN(date.getTime())) return "";
+  // Format YYYY-MM-DD
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+    }
     for (const r of rows) {
       data.push([
-        new Date(r.leadInAt || r.createdAt).toISOString(),
-        new Date(r.createdAt).toISOString(),
+        formatDate(r.leadInAt || r.createdAt),
+        formatDate(r.createdAt),
         r.name || "",
         r.contact || "",
         r.email || "",
