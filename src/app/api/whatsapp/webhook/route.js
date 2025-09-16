@@ -90,7 +90,7 @@ export async function POST(req) {
             querystring.stringify({
               To: `whatsapp:+6289666000506`,
               From: `whatsapp:+14155238886`,
-              Body: `Ada lead baru dari WhatsApp (${lead.contact}). Silakan claim untuk merespon.`,
+              Body: `Ada lead baru dari WhatsApp. Silakan claim untuk merespon.`,
             }),
             {
               auth: {

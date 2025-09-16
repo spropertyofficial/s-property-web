@@ -88,7 +88,7 @@ export default function ChatInboxPageContent() {
   const [hasMore, setHasMore] = useState(true);
   const [paginationCursor, setPaginationCursor] = useState(null); // timestamp pesan tertua
 
-  // Fetch messages saat percakapan dipilih
+  // Fetch & polling messages saat percakapan dipilih
   useEffect(() => {
     if (!selected) {
       setMessages([]);
@@ -96,6 +96,7 @@ export default function ChatInboxPageContent() {
       setPaginationCursor(null);
       return;
     }
+    let intervalId;
     const fetchMessages = async () => {
       setIsMessagesLoading(true);
       const params = new URLSearchParams({
@@ -119,7 +120,14 @@ export default function ChatInboxPageContent() {
       setIsMessagesLoading(false);
     };
     fetchMessages();
+    // Polling setiap 2 detik jika percakapan aktif
+    intervalId = setInterval(() => {
+      fetchMessages();
+    }, 2000);
     // Reset cursor saat ganti percakapan
+    return () => {
+      clearInterval(intervalId);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId]);
 
