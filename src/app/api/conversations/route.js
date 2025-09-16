@@ -1,32 +1,48 @@
+
 import dbConnect from "@/lib/mongodb";
 import Lead from "@/lib/models/Lead";
-import ChatMessage from "@/lib/models/ChatMessage";
 
 export async function GET(req) {
   await dbConnect();
   // TODO: Ganti dengan autentikasi agen jika sudah ada
-  // Ambil semua leads dan ringkasan percakapan
-  const leads = await Lead.find({}).lean();
-  const conversations = await Promise.all(
-    leads.map(async (lead) => {
-      // Ambil pesan terakhir
-      const lastMessage = await ChatMessage.findOne({ lead: lead._id })
-        .sort({ sentAt: -1 })
-        .lean();
-      // Hitung jumlah pesan inbound yang belum dibaca
-      const unread = await ChatMessage.countDocuments({
-        lead: lead._id,
-        direction: "inbound",
-        status: "received",
-      });
-      return {
-        lead,
-        lastMessage,
-        lastMessageText: lastMessage?.body || "",
-        lastMessageAt: lastMessage?.sentAt || null,
-        unread,
-      };
-    })
-  );
+  // Ambil ringkasan percakapan dengan aggregation pipeline
+  const conversations = await Lead.aggregate([
+    {
+      $lookup: {
+        from: "chatmessages", // nama koleksi di MongoDB
+        localField: "_id",
+        foreignField: "lead",
+        as: "messages"
+      }
+    },
+    {
+      $addFields: {
+        lastMessage: { $arrayElemAt: ["$messages", -1] },
+        unread: {
+          $size: {
+            $filter: {
+              input: "$messages",
+              as: "msg",
+              cond: {
+                $and: [
+                  { $eq: ["$$msg.direction", "inbound"] },
+                  { $eq: ["$$msg.status", "received"] }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        lead: "$$ROOT",
+        lastMessage: 1,
+        lastMessageText: "$lastMessage.body",
+        lastMessageAt: "$lastMessage.sentAt",
+        unread: 1
+      }
+    }
+  ]);
   return Response.json({ conversations });
 }

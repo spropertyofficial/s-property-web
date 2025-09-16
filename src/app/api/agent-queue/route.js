@@ -7,10 +7,10 @@ import User from "@/lib/models/User";
 export async function GET() {
   await dbConnect();
   const queue = await AgentQueue.findOne({});
-  if (!queue) return NextResponse.json({ agents: [], lastAssignedIndex: -1, escalationMinutes: 10 });
+  if (!queue) return NextResponse.json({ agents: [], lastAssignedIndex: -1, escalationMinutes: 5 });
   // Populate user info
   await queue.populate("agents.user");
-  return NextResponse.json({ agents: queue.agents, lastAssignedIndex: queue.lastAssignedIndex, escalationMinutes: queue.escalationMinutes ?? 10 });
+  return NextResponse.json({ agents: queue.agents, lastAssignedIndex: queue.lastAssignedIndex, escalationMinutes: queue.escalationMinutes ?? 5 });
 }
 
 // POST: Update agent queue (add, remove, reorder, set active)
@@ -20,7 +20,7 @@ export async function POST(req) {
   // agents: [{ user: userId, order: number, active: bool }]
   let queue = await AgentQueue.findOne({});
   if (!queue) {
-    queue = await AgentQueue.create({ agents, lastAssignedIndex: lastAssignedIndex ?? -1, escalationMinutes: escalationMinutes ?? 10 });
+    queue = await AgentQueue.create({ agents, lastAssignedIndex: lastAssignedIndex ?? -1, escalationMinutes: escalationMinutes ?? 5 });
   } else {
     queue.agents = agents;
     if (typeof lastAssignedIndex === "number") queue.lastAssignedIndex = lastAssignedIndex;
