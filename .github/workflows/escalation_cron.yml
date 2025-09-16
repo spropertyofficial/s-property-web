@@ -1,0 +1,16 @@
+name: Check Lead Escalations Cron Job
+
+on:
+  schedule:
+    - cron: '*/5 * * * *' # Setiap 5 menit
+  workflow_dispatch:
+
+jobs:
+  trigger_escalation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel Endpoint
+        run: |
+          curl -X GET \
+          -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+          "${{ secrets.VERCEL_DEPLOYMENT_URL }}/api/cron/check-escalations"

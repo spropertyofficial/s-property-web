@@ -88,9 +88,9 @@ export async function POST(req) {
           await axios.post(
             `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
             querystring.stringify({
-              To: `whatsapp:+6289666000506`,
-              From: `whatsapp:+14155238886`,
-              Body: `Ada lead baru dari WhatsApp. Silakan claim untuk merespon.`,
+              To: `whatsapp:${formatPhone(agentUser.phone)}`,
+              From: `${process.env.TWILIO_WHATSAPP_NUMBER}`,
+              Body: `Ada lead baru dari WhatsApp. Silakan klaim untuk segera merespon.`,
             }),
             {
               auth: {
@@ -161,4 +161,20 @@ export async function POST(req) {
 
   console.log("Pesan berhasil disimpan untuk lead:", lead.contact);
   return NextResponse.json({ success: true });
+}
+
+// Helper untuk format nomor telepon ke +62
+function formatPhone(phone) {
+  if (!phone) return "";
+  let p = phone.trim();
+  // Hilangkan spasi, strip, titik
+  p = p.replace(/[-.\s]/g, "");
+  // Jika sudah +62, return
+  if (p.startsWith("+62")) return p;
+  // Jika 62 tanpa +, tambahkan +
+  if (p.startsWith("62")) return "+" + p;
+  // Jika 08, ubah ke +628
+  if (p.startsWith("08")) return "+62" + p.slice(1);
+  // Default: return apa adanya
+  return p;
 }
