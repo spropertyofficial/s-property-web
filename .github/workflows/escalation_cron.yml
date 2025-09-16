@@ -11,6 +11,6 @@ jobs:
     steps:
       - name: Trigger Vercel Endpoint
         run: |
-          curl -X GET \
+          curl -L -X GET \
           -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
           "${{ secrets.VERCEL_DEPLOYMENT_URL }}/api/cron/check-escalations"
