@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { FaPlay, FaPause, FaPaperclip, FaVideo, FaSpinner } from "react-icons/fa";
 import Swal from 'sweetalert2';
 
-export default function ChatWindow({ conversation, messages, onSend, showEscalation, onStopEscalation, onBack, onToggleInfo, refetchConversations }) {
+export default function ChatWindow({ conversation, messages, onSend, showEscalation, onStopEscalation, onBack, onToggleInfo, refetchConversations, hasMore, isMessagesLoading, onLoadMore }) {
   // Untuk auto-resize textarea maksimal 6 baris
   console.log("[ChatWindow] conversation prop:", conversation);
   function getDisplayName(lead) {
@@ -329,6 +329,23 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
         className="min-h-0 overflow-y-auto p-4 bg-slate-50 overscroll-contain [overflow-anchor:none]"
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
+        {/* Tombol Load More di atas pesan */}
+        {hasMore && !isMessagesLoading && (
+          <div className="flex justify-center mb-2">
+            <button
+              className="px-3 py-1 rounded bg-tosca-300 text-white text-xs font-semibold hover:bg-slate-300"
+              onClick={onLoadMore}
+            >
+              Load more
+            </button>
+          </div>
+        )}
+        {isMessagesLoading && (
+          <div className="flex justify-center mb-2 text-slate-400 text-xs">
+            <FaSpinner className="animate-spin mr-2" />
+            Memuat pesan...
+          </div>
+        )}
         {!localMessages || localMessages.length===0 ? (
           <div className="h-full grid place-items-center text-slate-500">Belum ada pesan</div>
         ) : (

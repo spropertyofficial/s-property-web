@@ -33,18 +33,10 @@ export default function ChatInboxPageContent() {
       );
     }
   }, [data]);
-  // Extract messagesById from backend data
-  const messagesById = useMemo(() => {
-    const map = {};
-    conversations.forEach((conv) => {
-      if (conv.lead && conv.messages) {
-        map[conv.lead._id] = conv.messages;
-      }
-    });
-    return map;
-  }, [conversations]);
+  // Tidak perlu extract messagesById, hanya gunakan ringkasan percakapan
+  // Pilih percakapan pertama yang punya pesan
   const [selectedId, setSelectedId] = useState(
-    conversations[0]?.lead?._id || null
+    conversations.find((c) => c.lastMessage)?.lead?._id || null
   );
   // Mark messages as read whenever selectedId changes (room chat dibuka)
   useEffect(() => {
@@ -85,22 +77,72 @@ export default function ChatInboxPageContent() {
     fetchUser();
   }, []);
 
-  // Derived: selected conversation and its messages
+  // Derived: selected conversation (ringkasan saja)
   const selected = useMemo(
     () => conversations.find((c) => c.lead?._id === selectedId) || null,
     [conversations, selectedId]
   );
-  console.log("[FRONTEND] selected conversation:", selected);
-  const messages = useMemo(() => {
-    if (!selected) return [];
-    const base = messagesById[selected.lead._id] || [];
-    const baseIds = new Set(base.map((m) => m._id));
-    // Gabungkan pesan pending jika leadId sama, tapi filter yang _id-nya sudah ada di base
-    const pendings = pendingMessages.filter(
-      (m) => m.lead === selected.lead._id && (!m._id || !baseIds.has(m._id))
-    );
-    return [...base, ...pendings];
-  }, [messagesById, selected, pendingMessages]);
+  // State untuk pesan yang di-fetch dari backend
+  const [messages, setMessages] = useState([]);
+  const [isMessagesLoading, setIsMessagesLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [paginationCursor, setPaginationCursor] = useState(null); // timestamp pesan tertua
+
+  // Fetch messages saat percakapan dipilih
+  useEffect(() => {
+    if (!selected) {
+      setMessages([]);
+      setHasMore(true);
+      setPaginationCursor(null);
+      return;
+    }
+    const fetchMessages = async () => {
+      setIsMessagesLoading(true);
+      const params = new URLSearchParams({
+        leadId: selected.lead._id,
+        limit: "20",
+      });
+      if (paginationCursor) params.append("before", paginationCursor);
+      const res = await fetch(`/api/messages?${params.toString()}`);
+      const data = await res.json();
+      if (res.ok && Array.isArray(data.messages)) {
+        if (!paginationCursor) {
+          setMessages(data.messages);
+        } else {
+          setMessages((prev) => [...data.messages, ...prev]);
+        }
+        setHasMore(data.messages.length === 20);
+        if (data.messages.length > 0) {
+          setPaginationCursor(data.messages[0].sentAt);
+        }
+      }
+      setIsMessagesLoading(false);
+    };
+    fetchMessages();
+    // Reset cursor saat ganti percakapan
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
+
+  // Handler untuk load more pesan lama
+  async function handleLoadMore() {
+    if (!selected || !hasMore || isMessagesLoading) return;
+    const params = new URLSearchParams({
+      leadId: selected.lead._id,
+      limit: "20",
+      before: paginationCursor,
+    });
+    setIsMessagesLoading(true);
+    const res = await fetch(`/api/messages?${params.toString()}`);
+    const data = await res.json();
+    if (res.ok && Array.isArray(data.messages)) {
+      setMessages((prev) => [...data.messages, ...prev]);
+      setHasMore(data.messages.length === 20);
+      if (data.messages.length > 0) {
+        setPaginationCursor(data.messages[0].sentAt);
+      }
+    }
+    setIsMessagesLoading(false);
+  }
 
   function selectConversation(id) {
     setSelectedId(id);
@@ -126,26 +168,14 @@ export default function ChatInboxPageContent() {
       console.error(err);
     }
   }
-  // Bersihkan pendingMessages setelah data dari backend terupdate
-  useEffect(() => {
-    if (!selected) return;
-    // Jika pesan dari backend sudah memuat pesan yang sama, hapus dari pending
-    const base = messagesById[selected.lead._id] || [];
-    setPendingMessages((prev) =>
-      prev.filter((pm) => {
-        // Jika pesan dengan twilioSid/id sudah ada di base, hapus dari pending
-        if (!pm.twilioSid) return true;
-        return !base.some((bm) => bm.twilioSid === pm.twilioSid);
-      })
-    );
-  }, [messagesById, selected]);
+  // Bersihkan pendingMessages: logika ini dihapus karena messagesById sudah tidak digunakan
 
-  // Filters
+  // Filters: hanya tampilkan lead yang punya pesan (lastMessage)
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return conversations
       .filter((c) => {
-        if (!c.lead) return false;
+        if (!c.lead || !c.lastMessage) return false;
         if (filter === "mine" && !c.assignedToMe) return false;
         if (filter === "unread" && (c.unread || 0) === 0) return false;
         if (filter === "escalating" && !c.escalating) return false;
@@ -203,10 +233,8 @@ export default function ChatInboxPageContent() {
             escalationMinutes={escalationMinutes}
           />
         </div>
-
-        {/* Middle: Chat window */}
         <div
-          className={`${
+          className={`$${
             selectedId ? "flex" : "hidden"
           } lg:flex lg:col-span-6 bg-white border border-slate-200 overflow-hidden flex-col h-full min-h-0`}
         >
@@ -217,6 +245,9 @@ export default function ChatInboxPageContent() {
             onBack={() => setSelectedId(null)}
             onToggleInfo={() => setShowInfo(true)}
             refetchConversations={refetchConversations}
+            isMessagesLoading={isMessagesLoading}
+            onLoadMore={handleLoadMore}
+            hasMore={hasMore}
           />
         </div>
 
