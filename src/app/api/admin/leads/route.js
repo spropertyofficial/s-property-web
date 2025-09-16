@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Lead from "@/lib/models/Lead";
 import { verifyAdmin } from "@/lib/auth";
+import Property from "@/lib/models/Property";
 
 // GET /api/admin/leads - admin-only list with filters & pagination
 export async function GET(req) {
