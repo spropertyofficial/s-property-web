@@ -26,7 +26,9 @@ export default function AdminLeadsPage() {
   const [status, setStatus] = useState("");
   const [agent, setAgent] = useState(""); // Mitra (agent)
   const [source, setSource] = useState("");
-  // date filters removed
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [sortDate, setSortDate] = useState("desc"); // 'desc' = terbaru, 'asc' = terlama
   const [agents, setAgents] = useState([]);
   // sources now static from constants
   const [total, setTotal] = useState(0);
@@ -39,11 +41,14 @@ export default function AdminLeadsPage() {
       const params = new URLSearchParams();
       params.set("page", String(page));
       params.set("limit", String(limit));
-  if (q) params.set("q", q);
-  if (status) params.set("status", status);
-  if (agent) params.set("agent", agent); // requires ObjectId
-  if (source) params.set("source", source);
-  const res = await fetch(`/api/admin/leads?${params.toString()}`);
+      if (q) params.set("q", q);
+      if (status) params.set("status", status);
+      if (agent) params.set("agent", agent); // requires ObjectId
+      if (source) params.set("source", source);
+      if (startDate) params.set("startDate", startDate);
+      if (endDate) params.set("endDate", endDate);
+      params.set("sortDate", sortDate);
+      const res = await fetch(`/api/admin/leads?${params.toString()}`);
       const json = await res.json();
       if (!json.success) throw new Error(json.error || "Gagal memuat");
       setItems(json.data || []);
@@ -54,11 +59,11 @@ export default function AdminLeadsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, limit, q, status, agent, source]);
+  }, [page, limit, q, status, agent, source, sortDate]);
 
   useEffect(() => {
     fetchLeads();
-  }, [fetchLeads]);
+  }, [fetchLeads, startDate, endDate, sortDate]);
 
   // Load Mitra options
   useEffect(() => {
@@ -79,8 +84,10 @@ export default function AdminLeadsPage() {
     if (status) p.set("status", status);
     if (agent) p.set("agent", agent);
     if (source) p.set("source", source);
+    if (startDate) p.set("startDate", startDate);
+    if (endDate) p.set("endDate", endDate);
     return `/api/admin/leads/export?${p.toString()}`;
-  }, [q, status, agent, source]);
+  }, [q, status, agent, source, startDate, endDate]);
 
   return (
     <div className="p-4 sm:p-6 space-y-4">
@@ -93,7 +100,30 @@ export default function AdminLeadsPage() {
             Monitor, filter, dan ekspor semua leads
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <input
+            type="date"
+            value={startDate}
+            onChange={e => {
+              setPage(1);
+              setStartDate(e.target.value);
+            }}
+            className="rounded border border-slate-300 px-3 py-2 text-sm"
+            placeholder="Tanggal mulai"
+            style={{ minWidth: 120 }}
+          />
+          <span className="text-xs text-slate-500">s/d</span>
+          <input
+            type="date"
+            value={endDate}
+            onChange={e => {
+              setPage(1);
+              setEndDate(e.target.value);
+            }}
+            className="rounded border border-slate-300 px-3 py-2 text-sm"
+            placeholder="Tanggal akhir"
+            style={{ minWidth: 120 }}
+          />
           <a
             href={exportUrl}
             className="px-3 py-2 rounded bg-emerald-600 text-white text-sm"
@@ -158,7 +188,6 @@ export default function AdminLeadsPage() {
               </option>
             ))}
           </select>
-          {/* date filters removed */}
           <div className="flex items-center gap-2">
             <select
               value={limit}
@@ -243,7 +272,14 @@ export default function AdminLeadsPage() {
           <thead className="bg-slate-50 text-left">
             <tr>
               <th className="px-3 py-2">Tanggal Lead Masuk</th>
-              <th className="px-3 py-2">Tanggal Ditambahkan</th>
+              <th className="px-3 py-2 cursor-pointer select-none flex items-center gap-1"
+                  onClick={() => setSortDate(sortDate === "desc" ? "asc" : "desc")}
+              >
+                Tanggal Ditambahkan
+                <span >
+                  {sortDate === "desc" ? "▼" : "▲"}
+                </span>
+              </th>
               <th className="px-3 py-2">Nama</th>
               <th className="px-3 py-2">Kontak</th>
               <th className="px-3 py-2">Properti</th>

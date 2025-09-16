@@ -14,15 +14,16 @@ export default function UsersTable({ items, loading, onChange, page, perPage, to
               <th className="p-3 font-medium text-gray-600">Telepon</th>
               <th className="p-3 font-medium text-gray-600">Tipe</th>
               <th className="p-3 font-medium text-gray-600">Kode Agen</th>
+              <th className="p-3 font-medium text-gray-600">Proyek Diizinkan</th>
               <th className="p-3 font-medium text-gray-600">Aktif</th>
               <th className="p-3 font-medium text-gray-600">Aksi</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td className="p-6 text-center text-gray-500" colSpan={7}>Memuat data...</td></tr>
+              <tr><td className="p-6 text-center text-gray-500" colSpan={8}>Memuat data...</td></tr>
             ) : items.length === 0 ? (
-              <tr><td className="p-6 text-center text-gray-500" colSpan={7}>Tidak ada data</td></tr>
+              <tr><td className="p-6 text-center text-gray-500" colSpan={8}>Tidak ada data</td></tr>
             ) : (
               items.map((u) => (
                 <UserRow key={u._id} user={u} onChange={onChange} />

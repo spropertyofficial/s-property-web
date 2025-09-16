@@ -42,6 +42,7 @@ export async function GET(req) {
       .skip((page - 1) * perPage)
       .limit(perPage)
       .select("-password")
+      .populate('allowedProperties','name')
       .lean();
 
     return NextResponse.json({ success: true, items, total, page, perPage });
