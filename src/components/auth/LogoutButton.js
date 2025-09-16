@@ -101,6 +101,12 @@ export default function LogoutButton({
               Leads
             </Link>
             <Link
+              href="/chat"
+              className="w-full px-4 py-2 bg-tosca-100 hover:bg-tosca-200 text-white rounded-md transition-colors font-medium text-center block"
+            >
+              Chat
+            </Link>
+            <Link
               href="/log-activity"
               className="w-full px-4 py-2 bg-tosca-100 hover:bg-tosca-200 text-white rounded-md transition-colors font-medium text-center block"
             >
