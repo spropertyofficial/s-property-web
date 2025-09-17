@@ -211,6 +211,15 @@ export default function LogoutButton({
               <span>Leads</span>
             </Link>
             <Link
+              href="/chat"
+              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3 transition-colors"
+              onClick={() => setIsDropdownOpen(false)}
+              role="menuitem"
+            >
+              <User size={16} className="text-gray-500" />
+              <span>Chat</span>
+            </Link>
+            <Link
               href="/log-activity"
               className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3 transition-colors"
               onClick={() => setIsDropdownOpen(false)}
