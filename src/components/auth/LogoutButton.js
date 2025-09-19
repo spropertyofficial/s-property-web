@@ -101,6 +101,12 @@ export default function LogoutButton({
               Leads
             </Link>
             <Link
+              href="/chat"
+              className="w-full px-4 py-2 bg-tosca-100 hover:bg-tosca-200 text-white rounded-md transition-colors font-medium text-center block"
+            >
+              Chat
+            </Link>
+            <Link
               href="/log-activity"
               className="w-full px-4 py-2 bg-tosca-100 hover:bg-tosca-200 text-white rounded-md transition-colors font-medium text-center block"
             >
@@ -203,6 +209,15 @@ export default function LogoutButton({
             >
               <User size={16} className="text-gray-500" />
               <span>Leads</span>
+            </Link>
+            <Link
+              href="/chat"
+              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3 transition-colors"
+              onClick={() => setIsDropdownOpen(false)}
+              role="menuitem"
+            >
+              <User size={16} className="text-gray-500" />
+              <span>Chat</span>
             </Link>
             <Link
               href="/log-activity"
