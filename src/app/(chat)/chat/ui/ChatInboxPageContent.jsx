@@ -6,7 +6,7 @@ import LeadInfoPanel from "./LeadInfoPanel";
 import ChatInboxSkeleton from "./components/ChatInboxSkeleton";
 import Swal from "sweetalert2";
 
-export default function ChatInboxPageContent({currentUser}) {
+export default function ChatInboxPageContent({ currentUser }) {
   // State untuk pesan yang baru dikirim (pending)
   const [pendingMessages, setPendingMessages] = useState([]);
   // Fetch conversations from backend
@@ -35,9 +35,30 @@ export default function ChatInboxPageContent({currentUser}) {
     }
   }, [data]);
   // Pilih percakapan pertama yang punya pesan
-  const [selectedId, setSelectedId] = useState(
-    conversations.find((c) => c.lastMessage)?.lead?._id || null
-  );
+  const [selectedId, setSelectedId] = useState(null);
+
+  // Sync selectedId dengan conversations setiap kali conversations berubah
+  useEffect(() => {
+    if (!selectedId && conversations.length > 0) {
+      const firstId =
+        conversations.find((c) => c.lastMessage)?.lead?._id ||
+        conversations[0]?.lead?._id ||
+        null;
+      setSelectedId(firstId);
+      console.log("[DEBUG] Auto-select first conversation:", firstId);
+    } else if (
+      selectedId &&
+      !conversations.some((c) => c.lead?._id === selectedId)
+    ) {
+      // Jika selectedId tidak ditemukan di conversations, reset ke percakapan pertama
+      const firstId =
+        conversations.find((c) => c.lastMessage)?.lead?._id ||
+        conversations[0]?.lead?._id ||
+        null;
+      setSelectedId(firstId);
+      console.log("[DEBUG] Reset selectedId, not found. New:", firstId);
+    }
+  }, [conversations, selectedId]);
   // Mark messages as read whenever selectedId changes (room chat dibuka)
   useEffect(() => {
     if (selectedId) {
@@ -57,56 +78,70 @@ export default function ChatInboxPageContent({currentUser}) {
   const [showInfo, setShowInfo] = useState(false);
 
   // Derived: selected conversation (ringkasan saja)
-  const selected = useMemo(
-    () => conversations.find((c) => c.lead?._id === selectedId) || null,
-    [conversations, selectedId]
-  );
+  const selected = useMemo(() => {
+    const sel = conversations.find((c) => c.lead?._id === selectedId) || null;
+    console.log("[DEBUG] selectedId:", selectedId, "selected:", sel);
+    return sel;
+  }, [conversations, selectedId]);
+  console.log("[DEBUG] conversations:", conversations);
   // State untuk pesan yang di-fetch dari backend
   const [messages, setMessages] = useState([]);
   const [isMessagesLoading, setIsMessagesLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [paginationCursor, setPaginationCursor] = useState(null); // timestamp pesan tertua
+  const beforeId = messages[0]?._id; // Ambil _id pesan paling awal
+
+  console.log("[DEBUG] selected:", selected);
+  console.log("[DEBUG] messages:", messages);
 
   // Fetch & polling messages saat percakapan dipilih
   useEffect(() => {
     if (!selected) {
       setMessages([]);
+      setMessages([]);
       setHasMore(true);
+    } else {
       setPaginationCursor(null);
-      return;
-    }
-    let intervalId;
-    const fetchMessages = async () => {
-      setIsMessagesLoading(true);
-      const params = new URLSearchParams({
-        leadId: selected.lead._id,
-        limit: "20",
-      });
-      if (paginationCursor) params.append("before", paginationCursor);
-      const res = await fetch(`/api/messages?${params.toString()}`);
-      const data = await res.json();
-      if (res.ok && Array.isArray(data.messages)) {
-        if (!paginationCursor) {
+      let firstFetch = true;
+      let intervalId;
+      const fetchMessages = async () => {
+        setIsMessagesLoading(true);
+        const params = new URLSearchParams({
+          leadId: selected.lead._id,
+          limit: "20",
+        });
+        // Hanya gunakan cursor jika bukan fetch pertama setelah ganti percakapan
+        if (!firstFetch && paginationCursor)
+          params.append("before", paginationCursor);
+        console.log(
+          "[DEBUG] fetchMessages cursor:",
+          paginationCursor,
+          "firstFetch:",
+          firstFetch
+        );
+        const res = await fetch(`/api/messages?${params.toString()}`);
+        const data = await res.json();
+        console.log("[DEBUG] fetched messages:", data.messages);
+        if (res.ok && Array.isArray(data.messages)) {
+          // Polling dan fetch pertama: replace messages
           setMessages(data.messages);
-        } else {
-          setMessages((prev) => [...data.messages, ...prev]);
+          // Simpan _id pesan paling awal sebagai cursor
+          setPaginationCursor(
+            data.messages.length > 0 ? data.messages[0]._id : null
+          );
+          setHasMore(data.messages.length === 20);
+          firstFetch = false;
         }
-        setHasMore(data.messages.length === 20);
-        if (data.messages.length > 0) {
-          setPaginationCursor(data.messages[0].sentAt);
-        }
-      }
-      setIsMessagesLoading(false);
-    };
-    fetchMessages();
-    // Polling setiap 2 detik jika percakapan aktif
-    intervalId = setInterval(() => {
+        setIsMessagesLoading(false);
+      };
       fetchMessages();
-    }, 2000);
-    // Reset cursor saat ganti percakapan
-    return () => {
-      clearInterval(intervalId);
-    };
+      intervalId = setInterval(() => {
+        fetchMessages();
+      }, 2000);
+      return () => {
+        clearInterval(intervalId);
+      };
+    }
   }, [selectedId]);
 
   // Handler untuk load more pesan lama
@@ -124,7 +159,7 @@ export default function ChatInboxPageContent({currentUser}) {
       setMessages((prev) => [...data.messages, ...prev]);
       setHasMore(data.messages.length === 20);
       if (data.messages.length > 0) {
-        setPaginationCursor(data.messages[0].sentAt);
+        setPaginationCursor(data.messages[0]._id);
       }
     }
     setIsMessagesLoading(false);
@@ -268,10 +303,10 @@ export default function ChatInboxPageContent({currentUser}) {
                 </button>
               </div>
               <div className="flex-1 overflow-hidden">
-                {/* <LeadInfoPanel
+                <LeadInfoPanel
                   conversation={selected}
                   // TODO: implementasi assign ke backend jika diperlukan
-                /> */}
+                />
               </div>
             </div>
           </div>
