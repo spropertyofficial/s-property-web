@@ -325,7 +325,6 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
           <span className="font-bold">{conversation.unread}</span>
         </button>
       )}
-  {/* ...existing code... */}
       {previewImg && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center" onClick={closePreviewImg}>
           <img src={previewImg} alt="Preview" className="max-w-[90%] max-h-[90%] rounded-lg shadow-lg" onClick={e => e.stopPropagation()} />
