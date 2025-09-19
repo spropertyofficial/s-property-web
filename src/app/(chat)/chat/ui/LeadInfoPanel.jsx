@@ -67,7 +67,9 @@ export default function LeadInfoPanel({ conversation, onToggleAssign }){
         <Field label="Nama" value={lead?.name ?? '-'} />
         <Field label="Kontak" value={lead?.contact ?? '-'} />
         <Field label="Email" value={lead?.email ?? '-'} />
-        <Field label="Status" value={lead?.status ?? '-'} />
+  <Field label="Status" value={lead?.status ?? '-'} />
+  <Field label="Sudah Diklaim" value={lead?.isClaimed ? 'Ya' : 'Belum'} />
+  <Field label="Agent" value={lead?.agent ? lead.agent.name || lead.agent.email || '-' : '-'} />
         <Field label="Properti" value={lead?.property?.name ?? lead?.propertyName ?? '-'} />
         <Field label="Unit" value={lead?.unit ?? '-'} />
         <Field label="Sumber" value={lead?.source ?? '-'} />

@@ -6,6 +6,9 @@ import querystring from "querystring";
 import axios from "axios";
 import streamifier from "streamifier";
 import cloudinary from "@/lib/cloudinary";
+import AgentQueue from "@/lib/models/AgentQueue";
+import User from "@/lib/models/User";
+import { sendMail } from "@/lib/email/sendMail";
 
 export async function POST(req) {
   await dbConnect();
@@ -28,14 +31,22 @@ export async function POST(req) {
     Timestamp
   );
 
+  // Filter pesan notifikasi agar tidak diproses lebih lanjut
+  if (Body && Body.toLowerCase().includes("notifikasi")) {
+    console.log("Pesan notifikasi terdeteksi, tidak diproses lebih lanjut.");
+    return NextResponse.json({ success: true, skipped: "notifikasi" });
+  }
+
   // Jika webhook untuk status outbound (MessageStatus & MessageSid), update status pesan
   if (MessageSid && MessageStatus) {
     // Update status pesan outbound sesuai MessageSid
     await ChatMessage.findOneAndUpdate(
       { twilioSid: MessageSid },
-      { status: MessageStatus },
+      { status: MessageStatus }
     );
-    console.log(`Update status ChatMessage SID ${MessageSid} => ${MessageStatus}`);
+    console.log(
+      `Update status ChatMessage SID ${MessageSid} => ${MessageStatus}`
+    );
     return NextResponse.json({ success: true });
   }
   // Jika webhook inbound (pesan masuk dari user)
@@ -49,60 +60,84 @@ export async function POST(req) {
     );
   }
 
-  let lead = await Lead.findOne({ contact: From.replace("whatsapp:", "") });
-  if (!lead) {
-    // Ambil AgentQueue untuk round-robin
-    const AgentQueue = (await import("@/lib/models/AgentQueue")).default;
-    let queue = await AgentQueue.findOne({});
-    let assignedAgent = null;
-    let nextIndex = -1;
-    if (queue && queue.agents && queue.agents.length > 0) {
-      // Cari agent aktif berikutnya
-      const activeAgents = queue.agents.filter(a => a.active);
-      if (activeAgents.length > 0) {
-        nextIndex = (queue.lastAssignedIndex + 1) % activeAgents.length;
-        assignedAgent = activeAgents[nextIndex].user;
-        // Update pointer rotasi
-        queue.lastAssignedIndex = nextIndex;
-        queue.updatedAt = Date.now();
-        await queue.save();
+  if (Body && !Body.toLowerCase().includes("notifikasi")) {
+    let lead = await Lead.findOne({ contact: From.replace("whatsapp:", "") });
+    if (!lead) {
+      // Ambil AgentQueue untuk round-robin
+      let queue = await AgentQueue.findOne({});
+      let assignedAgent = null;
+      let nextIndex = -1;
+      if (queue && queue.agents && queue.agents.length > 0) {
+        // Cari agent aktif berikutnya
+        const activeAgents = queue.agents.filter((a) => a.active);
+        if (activeAgents.length > 0) {
+          nextIndex = (queue.lastAssignedIndex + 1) % activeAgents.length;
+          assignedAgent = activeAgents[nextIndex].user;
+          // Update pointer rotasi
+          queue.lastAssignedIndex = nextIndex;
+          queue.updatedAt = Date.now();
+          await queue.save();
+        }
       }
-    }
-    // Lead baru: agent belum di-assign, status unassigned
-    lead = await Lead.create({
-      name: "-",
-      contact: From.replace("whatsapp:", ""),
-      source: "WhatsApp",
-      status: "Baru",
-      agent: null // agent diisi saat claim
-    });
-    console.log("Lead baru dibuat:", From.replace("whatsapp:", ""));
-    // Kirim notifikasi WhatsApp ke agent giliran
-    if (assignedAgent) {
-      // Ambil nomor agent
-      const User = (await import("@/lib/models/User")).default;
-      const agentUser = await User.findById(assignedAgent);
-      if (agentUser && agentUser.phone) {
-        // Kirim pesan WhatsApp via Twilio
-        try {
-          await axios.post(
-            `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
-            querystring.stringify({
-              To: `whatsapp:${formatPhone(agentUser.phone)}`,
-              From: `${process.env.TWILIO_WHATSAPP_NUMBER}`,
-              Body: `Ada lead baru dari WhatsApp. Silakan klaim untuk segera merespon.`,
-            }),
-            {
-              auth: {
-                username: process.env.TWILIO_ACCOUNT_SID,
-                password: process.env.TWILIO_AUTH_TOKEN,
-              },
-              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            }
-          );
-          console.log(`Notifikasi dikirim ke agent ${agentUser.phone}`);
-        } catch (err) {
-          console.error("Gagal kirim notifikasi ke agent:", err);
+      // Lead baru: langsung di-assign ke agent giliran, status belum diklaim
+      lead = await Lead.create({
+        name: "-",
+        contact: From.replace("whatsapp:", ""),
+        source: "WhatsApp",
+        status: "Baru",
+        agent: assignedAgent || null,
+        isClaimed: false,
+        leadInAt: Date.now(),
+      });
+
+      console.log("Lead baru dibuat:", From.replace("whatsapp:", ""));
+      // Kirim notifikasi WhatsApp ke agent giliran
+      if (assignedAgent) {
+        // Ambil nomor agent
+        const agentUser = await User.findById(assignedAgent);
+        if (agentUser && agentUser.phone) {
+          // Kirim pesan WhatsApp via Twilio
+          try {
+            await axios.post(
+              `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
+              querystring.stringify({
+                To: `whatsapp:${formatPhone(agentUser.phone)}`,
+                From: `${process.env.TWILIO_WHATSAPP_NUMBER}`,
+                Body: `Ada lead baru dari WhatsApp. Silakan klaim untuk segera merespon.`,
+              }),
+              {
+                auth: {
+                  username: process.env.TWILIO_ACCOUNT_SID,
+                  password: process.env.TWILIO_AUTH_TOKEN,
+                },
+                headers: {
+                  "Content-Type": "application/x-www-form-urlencoded",
+                },
+              }
+            );
+            console.log(`Notifikasi dikirim ke agent ${agentUser.phone}`);
+          } catch (err) {
+            console.error("Gagal kirim notifikasi ke agent:", err);
+          }
+        } else {
+          // Kirim notifikasi fallback ke email jika nomor agent tidak ditemukan
+          const emailTo = "devranmalik82@gmail.com";
+          const subject = `Gagal Notifikasi WhatsApp Lead Baru untuk Agent ${
+            agentUser?.name || "(Unknown)"
+          }`;
+          const html = `<p>Ada lead baru dari WhatsApp, tapi gagal kirim notifikasi ke agent <b>${
+            agentUser?.name || "(Unknown)"
+          }</b> karena nomor WhatsApp tidak ditemukan.</p> <p>Lead: ${
+            lead?.contact || "(Unknown)"
+          }</p>`;
+          try {
+            await sendMail({ to: emailTo, subject, html });
+          } catch (mailErr) {
+            console.error(
+              "Gagal kirim email fallback notifikasi agent:",
+              mailErr
+            );
+          }
         }
       }
     }
@@ -143,21 +178,21 @@ export async function POST(req) {
         console.error("Gagal download/upload media Twilio:", err);
       }
     }
-    if (body[`MediaContentType${i}`]) mediaTypes.push(body[`MediaContentType${i}`]);
+    if (body[`MediaContentType${i}`])
+      mediaTypes.push(body[`MediaContentType${i}`]);
   }
 
-  await ChatMessage.create({
-    lead: lead._id,
-    from: From,
-    to: To,
-    body: Body,
-    direction: "inbound",
-    status: "received",
-    sentAt: Timestamp ? new Date(Timestamp) : Date.now(),
-    twilioSid: MessageSid,
-    mediaUrls,
-    mediaTypes,
-  });
+  if (Body && !Body.toLowerCase().includes("notifikasi")) {
+    await ChatMessage.create({
+      ...body,
+      lead: lead._id,
+      direction: "inbound",
+      status: "received",
+      sentAt: Timestamp ? new Date(Timestamp) : Date.now(),
+      mediaUrls,
+      mediaTypes,
+    });
+  }
 
   console.log("Pesan berhasil disimpan untuk lead:", lead.contact);
   return NextResponse.json({ success: true });

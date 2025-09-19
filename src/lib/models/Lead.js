@@ -50,6 +50,7 @@ const LeadSchema = new mongoose.Schema(
       default: "Baru",
       required: true,
     },
+    isClaimed: { type: Boolean, default: false }, // Penanda lead sudah diklaim agent atau belum
 
     // Informasi Lanjutan (optional awalnya, diisi setelah follow up)
     umur: { type: Number, min: 0, max: 120 },
@@ -72,8 +73,6 @@ const LeadSchema = new mongoose.Schema(
 // Indexes for common queries
 LeadSchema.index({ status: 1, agent: 1, createdAt: -1 });
 LeadSchema.index({ name: 1 });
-// Removed plain contact index to avoid duplication with partial unique contact index below
-// Prevent duplicate active leads (allow reuse after Closing). Partial unique indexes.
 try {
   LeadSchema.index(
     { contact: 1 },

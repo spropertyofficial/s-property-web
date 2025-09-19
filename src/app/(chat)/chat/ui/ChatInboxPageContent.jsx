@@ -4,8 +4,9 @@ import ConversationsList from "./ConversationsList";
 import ChatWindow from "./ChatWindow";
 import LeadInfoPanel from "./LeadInfoPanel";
 import ChatInboxSkeleton from "./components/ChatInboxSkeleton";
+import Swal from "sweetalert2";
 
-export default function ChatInboxPageContent() {
+export default function ChatInboxPageContent({currentUser}) {
   // State untuk pesan yang baru dikirim (pending)
   const [pendingMessages, setPendingMessages] = useState([]);
   // Fetch conversations from backend
@@ -33,7 +34,6 @@ export default function ChatInboxPageContent() {
       );
     }
   }, [data]);
-  // Tidak perlu extract messagesById, hanya gunakan ringkasan percakapan
   // Pilih percakapan pertama yang punya pesan
   const [selectedId, setSelectedId] = useState(
     conversations.find((c) => c.lastMessage)?.lead?._id || null
@@ -55,27 +55,6 @@ export default function ChatInboxPageContent() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [showInfo, setShowInfo] = useState(false);
-  // TODO: fetch currentUser dari context/auth
-  const [currentUser, setCurrentUser] = useState(null);
-  console.log("[Page Chat] currentUser", currentUser);
-  useEffect(() => {
-    // Contoh: fetch user login dari endpoint /api/auth/me
-    async function fetchUser() {
-      try {
-        const res = await fetch("/api/auth/me");
-        if (res.ok) {
-          const data = await res.json();
-          // Jika response berbentuk { user: {...} }
-          if (data.user && data.user._id) {
-            setCurrentUser(data.user);
-          } else {
-            setCurrentUser(data);
-          }
-        }
-      } catch {}
-    }
-    fetchUser();
-  }, []);
 
   // Derived: selected conversation (ringkasan saja)
   const selected = useMemo(
@@ -128,7 +107,6 @@ export default function ChatInboxPageContent() {
     return () => {
       clearInterval(intervalId);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId]);
 
   // Handler untuk load more pesan lama
@@ -164,8 +142,17 @@ export default function ChatInboxPageContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ leadId: selected.lead._id, message: text }),
       });
-      if (!res.ok) throw new Error("Gagal mengirim pesan");
       const result = await res.json();
+      if (!res.ok) {
+        // Tampilkan error dari backend jika ada
+        const errorMsg = result?.error || "Gagal mengirim pesan";
+        Swal.fire({
+          icon: "error",
+          title: "Gagal",
+          text: errorMsg,
+        });
+        throw new Error(errorMsg);
+      }
       // Tambahkan pesan ke pending agar langsung tampil
       if (result.chatMsg) {
         setPendingMessages((prev) => [...prev, result.chatMsg]);
@@ -176,8 +163,6 @@ export default function ChatInboxPageContent() {
       console.error(err);
     }
   }
-  // Bersihkan pendingMessages: logika ini dihapus karena messagesById sudah tidak digunakan
-
   // Filters: hanya tampilkan lead yang punya pesan (lastMessage)
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -239,6 +224,7 @@ export default function ChatInboxPageContent() {
             setFilter={setFilter}
             currentUser={currentUser}
             escalationMinutes={escalationMinutes}
+            refetchConversations={refetchConversations}
           />
         </div>
         <div

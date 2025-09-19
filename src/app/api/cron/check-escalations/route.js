@@ -3,6 +3,7 @@ import dbConnect from '@/lib/mongodb';
 import Lead from '@/lib/models/Lead';
 import AgentQueue from '@/lib/models/AgentQueue';
 import querystring from 'querystring';
+import User from '@/lib/models/User';
 import axios from 'axios';
 
 export async function GET(req) {
@@ -18,9 +19,9 @@ export async function GET(req) {
   const escalationMinutes = queue?.escalationMinutes ?? 5;
   const activeAgents = queue?.agents?.filter(a => a.active) || [];
 
-  // Cari leads yang belum diklaim (agent == null) dan sudah masuk lebih lama dari waktu eskalasi
+  // Cari leads yang belum diklaim (isClaimed == false, source WhatsApp) dan sudah masuk lebih lama dari waktu eskalasi
   const threshold = Date.now() - escalationMinutes * 60 * 1000;
-  const unclaimedLeads = await Lead.find({ agent: null, leadInAt: { $lte: new Date(threshold) } });
+  const unclaimedLeads = await Lead.find({ isClaimed: false, source: "WhatsApp", leadInAt: { $lte: new Date(threshold) } });
 
   let escalated = [];
   for (const lead of unclaimedLeads) {
@@ -28,9 +29,11 @@ export async function GET(req) {
     if (activeAgents.length > 0) {
       let nextIndex = (queue.lastAssignedIndex + 1) % activeAgents.length;
       const nextAgentId = activeAgents[nextIndex].user;
+      // Update agent pada lead (cabut dan isi agent baru)
+      lead.agent = nextAgentId;
+      await lead.save();
       // Kirim notifikasi WhatsApp ke agent berikutnya
       try {
-        const User = (await import('@/lib/models/User')).default;
         const agentUser = await User.findById(nextAgentId);
         if (agentUser && agentUser.phone) {
           await axios.post(
