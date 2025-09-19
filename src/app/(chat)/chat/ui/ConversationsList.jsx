@@ -184,7 +184,6 @@ export default function ConversationsList({
           sortedItems.map((item) => {
             const isAssignedToMe = item.lead?.agent === currentUser?._id;
             const isAdmin = currentUser?.role;
-            const isUnassigned = !item.lead?.agent;
             const isNotClaimed = item.lead?.isClaimed === false;
             // Helper: tampilkan nama/nomor hanya jika sudah di-assign atau admin
             const displayName =

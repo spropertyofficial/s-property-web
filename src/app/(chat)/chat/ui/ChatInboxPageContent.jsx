@@ -7,6 +7,8 @@ import ChatInboxSkeleton from "./components/ChatInboxSkeleton";
 import Swal from "sweetalert2";
 
 export default function ChatInboxPageContent({ currentUser }) {
+  // State untuk tracking posisi scroll chat
+  const [isAtBottom, setIsAtBottom] = useState(true);
   // State untuk pesan yang baru dikirim (pending)
   const [pendingMessages, setPendingMessages] = useState([]);
   // Fetch conversations from backend
@@ -94,55 +96,45 @@ export default function ChatInboxPageContent({ currentUser }) {
   console.log("[DEBUG] selected:", selected);
   console.log("[DEBUG] messages:", messages);
 
-  // Fetch & polling messages saat percakapan dipilih
+  // Polling messages hanya aktif jika user di bawah chat
   useEffect(() => {
     if (!selected) {
       setMessages([]);
-      setMessages([]);
       setHasMore(true);
-    } else {
-      setPaginationCursor(null);
-      let firstFetch = true;
-      let intervalId;
-      const fetchMessages = async () => {
-        setIsMessagesLoading(true);
-        const params = new URLSearchParams({
-          leadId: selected.lead._id,
-          limit: "20",
-        });
-        // Hanya gunakan cursor jika bukan fetch pertama setelah ganti percakapan
-        if (!firstFetch && paginationCursor)
-          params.append("before", paginationCursor);
-        console.log(
-          "[DEBUG] fetchMessages cursor:",
-          paginationCursor,
-          "firstFetch:",
-          firstFetch
-        );
-        const res = await fetch(`/api/messages?${params.toString()}`);
-        const data = await res.json();
-        console.log("[DEBUG] fetched messages:", data.messages);
-        if (res.ok && Array.isArray(data.messages)) {
-          // Polling dan fetch pertama: replace messages
-          setMessages(data.messages);
-          // Simpan _id pesan paling awal sebagai cursor
-          setPaginationCursor(
-            data.messages.length > 0 ? data.messages[0]._id : null
-          );
-          setHasMore(data.messages.length === 20);
-          firstFetch = false;
-        }
-        setIsMessagesLoading(false);
-      };
-      fetchMessages();
-      intervalId = setInterval(() => {
-        fetchMessages();
-      }, 2000);
-      return () => {
-        clearInterval(intervalId);
-      };
+      return;
     }
-  }, [selectedId]);
+    if (!isAtBottom) return; // polling hanya aktif jika user di bawah
+    setPaginationCursor(null);
+    let firstFetch = true;
+    let intervalId;
+    const fetchMessages = async () => {
+      setIsMessagesLoading(true);
+      const params = new URLSearchParams({
+        leadId: selected.lead._id,
+        limit: "20",
+      });
+      if (!firstFetch && paginationCursor)
+        params.append("before", paginationCursor);
+      const res = await fetch(`/api/messages?${params.toString()}`);
+      const data = await res.json();
+      if (res.ok && Array.isArray(data.messages)) {
+        setMessages(data.messages);
+        setPaginationCursor(
+          data.messages.length > 0 ? data.messages[0]._id : null
+        );
+        setHasMore(data.messages.length === 20);
+        firstFetch = false;
+      }
+      setIsMessagesLoading(false);
+    };
+    fetchMessages();
+    intervalId = setInterval(() => {
+      fetchMessages();
+    }, 2000);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [selectedId, isAtBottom]);
 
   // Handler untuk load more pesan lama
   async function handleLoadMore() {
@@ -277,6 +269,8 @@ export default function ChatInboxPageContent({ currentUser }) {
             isMessagesLoading={isMessagesLoading}
             onLoadMore={handleLoadMore}
             hasMore={hasMore}
+            isAtBottom={isAtBottom}
+            setIsAtBottom={setIsAtBottom}
           />
         </div>
 

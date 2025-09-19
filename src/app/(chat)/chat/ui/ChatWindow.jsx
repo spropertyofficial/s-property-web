@@ -1,11 +1,37 @@
 "use client";
-import { ArrowLeft, Files, Images, Video } from "lucide-react";
+import { ArrowDownCircle, ArrowLeft, Files, Images, Video } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { FaPlay, FaPause, FaPaperclip, FaVideo, FaSpinner } from "react-icons/fa";
 import Swal from 'sweetalert2';
 
-export default function ChatWindow({ conversation, messages, onSend, showEscalation, onStopEscalation, onBack, onToggleInfo, refetchConversations, hasMore, isMessagesLoading, onLoadMore }) {
+export default function ChatWindow({ conversation, messages, onSend, showEscalation, onStopEscalation, onBack, onToggleInfo, refetchConversations, hasMore, isMessagesLoading, onLoadMore, isAtBottom, setIsAtBottom }) {
+  // State untuk polling dan scroll
+  const scrollerRef = useRef(null);
+  // Pantau scroll posisi
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    function handleScroll() {
+      const threshold = 60; // px dari bawah
+      const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+      setIsAtBottom(atBottom);
+    }
+    el.addEventListener('scroll', handleScroll);
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [messages, conversation?.id, setIsAtBottom]);
+
+  // Tidak perlu deteksi pesan baru, unread badge diambil dari conversation.unread
+
+  // Handler klik tombol panah
+  function handleScrollToBottom() {
+    const el = scrollerRef.current;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+      setIsAtBottom(true);
+      // Unread badge akan reset via backend polling dan prop conversation.unread
+    }
+  }
   // Untuk auto-resize textarea maksimal 6 baris
   console.log("[ChatWindow] conversation prop:", conversation);
   function getDisplayName(lead) {
@@ -29,7 +55,6 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
     setInputRows(Math.min(maxRows, lines));
   }
   // Debug: tampilkan isi conversation di console
-  console.log('[ChatWindow] conversation:', conversation);
   useEffect(() => {
     if (!conversation || !messages || messages.length === 0) return;
     const lastMsg = messages[messages.length - 1];
@@ -46,7 +71,6 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
     }
   }, [messages, conversation?.id, refetchConversations]);
   const [text, setText] = useState("");
-  const scrollerRef = useRef(null);
   const inputRef = useRef(null);
   const [kbOffset, setKbOffset] = useState(0);
   const composerRef = useRef(null);
@@ -289,8 +313,19 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   }
 
   return (
-    <div className="grid grid-rows-[auto,1fr,auto] h-full min-h-0 overflow-hidden">
-      {/* Modal preview gambar */}
+    <div className="grid grid-rows-[auto,1fr,auto] h-full min-h-0 overflow-hidden relative">
+      {/* Tombol panah + badge unread mengambang di atas form input */}
+      {!isAtBottom && conversation?.unread > 0 && (
+        <button
+          className="absolute right-6 z-30 bg-teal-600 border-teal-600 text-white rounded-full shadow-lg flex items-center px-4 py-2 gap-2 hover:bg-teal-700"
+          style={{ bottom: '80px', transition: 'all 0.2s' }}
+          onClick={handleScrollToBottom}
+        >
+          <ArrowDownCircle className="w-5 h-5" />
+          <span className="font-bold">{conversation.unread}</span>
+        </button>
+      )}
+  {/* ...existing code... */}
       {previewImg && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center" onClick={closePreviewImg}>
           <img src={previewImg} alt="Preview" className="max-w-[90%] max-h-[90%] rounded-lg shadow-lg" onClick={e => e.stopPropagation()} />
@@ -324,6 +359,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
         </div>
       )}
 
+      {/* Daftar pesan */}
       <div
         ref={scrollerRef}
         className="min-h-0 overflow-y-auto p-4 bg-slate-50 overscroll-contain [overflow-anchor:none]"
