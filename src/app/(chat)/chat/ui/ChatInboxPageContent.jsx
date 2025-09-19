@@ -113,17 +113,33 @@ export default function ChatInboxPageContent({ currentUser }) {
         leadId: selected.lead._id,
         limit: "20",
       });
-      if (!firstFetch && paginationCursor)
+      // Only send 'before' for load more, not for polling
+      if (!firstFetch && false) {
+        // never send 'before' during polling
         params.append("before", paginationCursor);
+      }
       const res = await fetch(`/api/messages?${params.toString()}`);
       const data = await res.json();
       if (res.ok && Array.isArray(data.messages)) {
-        setMessages(data.messages);
-        setPaginationCursor(
-          data.messages.length > 0 ? data.messages[0]._id : null
-        );
-        setHasMore(data.messages.length === 20);
-        firstFetch = false;
+        if (firstFetch) {
+          setMessages(data.messages);
+          setPaginationCursor(
+            data.messages.length > 0 ? data.messages[0]._id : null
+          );
+          setHasMore(data.messages.length === 20);
+          firstFetch = false;
+        } else {
+          // Merge only new messages (those with _id greater than last in state)
+          setMessages((prev) => {
+            if (!prev || prev.length === 0) return data.messages;
+            const lastId = prev[prev.length - 1]?._id;
+            // Find new messages (those not in prev)
+            const newMessages = data.messages.filter(
+              (msg) => !prev.some((m) => m._id === msg._id)
+            );
+            return [...prev, ...newMessages];
+          });
+        }
       }
       setIsMessagesLoading(false);
     };
