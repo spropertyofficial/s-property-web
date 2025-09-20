@@ -9,7 +9,7 @@ export async function POST() {
   });
 
   // Clear cookie
-  response.cookies.set("token", "", {
+  response.cookies.set("auth-token", "", {
     httpOnly: true,
     path: "/",
     expires: new Date(0), // Set to past date to delete

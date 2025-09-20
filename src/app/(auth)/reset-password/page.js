@@ -13,7 +13,7 @@ function ResetPasswordForm() {
   const [error, setError] = useState("");
   const router = useRouter();
   const params = useSearchParams();
-  const token = params.get("token") ? decodeURIComponent(params.get("token")) : null;
+  const token = params.get("auth-token") ? decodeURIComponent(params.get("auth-token")) : null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

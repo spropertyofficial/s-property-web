@@ -16,7 +16,7 @@ export function verifyJWT(token) {
 }
 
 export function verifyToken(req) {
-  const token = req.cookies.get("token")?.value;
+  const token = req.cookies.get("auth-token")?.value;
   if (!token) return null;
 
   try {
@@ -31,7 +31,7 @@ export async function verifyAdminWithRole(request, requiredRoles = []) {
   try {
     await connectDB();
     
-    const token = request.cookies.get("token")?.value;
+  const token = request.cookies.get("auth-token")?.value;
     
     if (!token) {
       return {
@@ -91,7 +91,7 @@ export async function verifyAdmin(req) {
 
   try {
     const admin = await Admin.findById(
-      decodedToken.id || decodedToken.adminId
+      decodedToken.userId || decodedToken.adminId
     ).select("-password");
 
     if (!admin) {

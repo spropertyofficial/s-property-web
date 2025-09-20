@@ -29,7 +29,7 @@ const protectedRoutes = ["/agent", "/dashboard", "/chat"];
   // Protect admin routes (existing logic)
   if (pathname.startsWith("/admin")) {
     try {
-      const token = request.cookies.get("token");
+      const token = request.cookies.get("auth-token");
       console.log("Admin token found:", token ? "YES" : "NO");
 
       if (!token) {

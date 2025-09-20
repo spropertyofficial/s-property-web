@@ -8,9 +8,9 @@ import User from "@/lib/models/User";
 export async function POST(req, { params }) {
   await dbConnect();
   const { id } = await params;
-  const { agentId } = await req.json(); // agentId dikirim dari frontend (harus sudah login)
+  const { agentId } = await req.json();
   if (!agentId) {
-    return NextResponse.json({ success: false, error: "agentId wajib diisi" }, { status: 400 });
+    return NextResponse.json({ success: false, error: "agentId kosong" }, { status: 400 });
   }
 
   // Validasi: lead harus belum di-assign
@@ -28,9 +28,9 @@ export async function POST(req, { params }) {
   if (agentId !== expectedAgent)
     return NextResponse.json({ success: false, error: "Bukan giliran agent ini" }, { status: 403 });
 
-  // Assign lead ke agent dan catat waktu
+  // Assign lead ke agent, catat waktu, dan tandai sudah diklaim
   lead.agent = agentId;
-  lead.assignedAt = Date.now();
+  lead.isClaimed = true;
   await lead.save();
 
   return NextResponse.json({ success: true, lead });

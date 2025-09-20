@@ -20,7 +20,7 @@ export async function POST(req) {
       );
     }
 
-    const token = jwt.sign({ id: admin._id, role: admin.role }, JWT_SECRET, {
+    const token = jwt.sign({ userId: admin._id, type: "admin", role: admin.role }, JWT_SECRET, {
       expiresIn: "7d",
     });
 
@@ -31,8 +31,8 @@ export async function POST(req) {
       success: true,
     });
 
-    // Set cookie dengan options yang benar
-    res.cookies.set("token", token, {
+    // Set cookie dengan nama 'auth-token' agar konsisten dengan user
+    res.cookies.set("auth-token", token, {
       httpOnly: true,
       path: "/",
       secure: process.env.NODE_ENV === "production",

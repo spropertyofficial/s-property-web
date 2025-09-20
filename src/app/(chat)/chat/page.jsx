@@ -49,7 +49,7 @@ export default function ChatInboxPage() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ChatInboxPageContent />
+      <ChatInboxPageContent currentUser={user} />
     </QueryClientProvider>
   );
 }

@@ -4,8 +4,11 @@ import ConversationsList from "./ConversationsList";
 import ChatWindow from "./ChatWindow";
 import LeadInfoPanel from "./LeadInfoPanel";
 import ChatInboxSkeleton from "./components/ChatInboxSkeleton";
+import Swal from "sweetalert2";
 
-export default function ChatInboxPageContent() {
+export default function ChatInboxPageContent({ currentUser }) {
+  // State untuk tracking posisi scroll chat
+  const [isAtBottom, setIsAtBottom] = useState(true);
   // State untuk pesan yang baru dikirim (pending)
   const [pendingMessages, setPendingMessages] = useState([]);
   // Fetch conversations from backend
@@ -33,11 +36,31 @@ export default function ChatInboxPageContent() {
       );
     }
   }, [data]);
-  // Tidak perlu extract messagesById, hanya gunakan ringkasan percakapan
   // Pilih percakapan pertama yang punya pesan
-  const [selectedId, setSelectedId] = useState(
-    conversations.find((c) => c.lastMessage)?.lead?._id || null
-  );
+  const [selectedId, setSelectedId] = useState(null);
+
+  // Sync selectedId dengan conversations setiap kali conversations berubah
+  useEffect(() => {
+    if (!selectedId && conversations.length > 0) {
+      const firstId =
+        conversations.find((c) => c.lastMessage)?.lead?._id ||
+        conversations[0]?.lead?._id ||
+        null;
+      setSelectedId(firstId);
+      console.log("[DEBUG] Auto-select first conversation:", firstId);
+    } else if (
+      selectedId &&
+      !conversations.some((c) => c.lead?._id === selectedId)
+    ) {
+      // Jika selectedId tidak ditemukan di conversations, reset ke percakapan pertama
+      const firstId =
+        conversations.find((c) => c.lastMessage)?.lead?._id ||
+        conversations[0]?.lead?._id ||
+        null;
+      setSelectedId(firstId);
+      console.log("[DEBUG] Reset selectedId, not found. New:", firstId);
+    }
+  }, [conversations, selectedId]);
   // Mark messages as read whenever selectedId changes (room chat dibuka)
   useEffect(() => {
     if (selectedId) {
@@ -55,47 +78,34 @@ export default function ChatInboxPageContent() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [showInfo, setShowInfo] = useState(false);
-  // TODO: fetch currentUser dari context/auth
-  const [currentUser, setCurrentUser] = useState(null);
-  console.log("[Page Chat] currentUser", currentUser);
-  useEffect(() => {
-    // Contoh: fetch user login dari endpoint /api/auth/me
-    async function fetchUser() {
-      try {
-        const res = await fetch("/api/auth/me");
-        if (res.ok) {
-          const data = await res.json();
-          // Jika response berbentuk { user: {...} }
-          if (data.user && data.user._id) {
-            setCurrentUser(data.user);
-          } else {
-            setCurrentUser(data);
-          }
-        }
-      } catch {}
-    }
-    fetchUser();
-  }, []);
 
   // Derived: selected conversation (ringkasan saja)
-  const selected = useMemo(
-    () => conversations.find((c) => c.lead?._id === selectedId) || null,
-    [conversations, selectedId]
-  );
+  const selected = useMemo(() => {
+    const sel = conversations.find((c) => c.lead?._id === selectedId) || null;
+    console.log("[DEBUG] selectedId:", selectedId, "selected:", sel);
+    return sel;
+  }, [conversations, selectedId]);
+  console.log("[DEBUG] conversations:", conversations);
   // State untuk pesan yang di-fetch dari backend
   const [messages, setMessages] = useState([]);
   const [isMessagesLoading, setIsMessagesLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [paginationCursor, setPaginationCursor] = useState(null); // timestamp pesan tertua
+  const beforeId = messages[0]?._id; // Ambil _id pesan paling awal
 
-  // Fetch & polling messages saat percakapan dipilih
+  console.log("[DEBUG] selected:", selected);
+  console.log("[DEBUG] messages:", messages);
+
+  // Polling messages hanya aktif jika user di bawah chat
   useEffect(() => {
     if (!selected) {
       setMessages([]);
       setHasMore(true);
-      setPaginationCursor(null);
       return;
     }
+    if (!isAtBottom) return; // polling hanya aktif jika user di bawah
+    setPaginationCursor(null);
+    let firstFetch = true;
     let intervalId;
     const fetchMessages = async () => {
       setIsMessagesLoading(true);
@@ -103,33 +113,44 @@ export default function ChatInboxPageContent() {
         leadId: selected.lead._id,
         limit: "20",
       });
-      if (paginationCursor) params.append("before", paginationCursor);
+      // Only send 'before' for load more, not for polling
+      if (!firstFetch && false) {
+        // never send 'before' during polling
+        params.append("before", paginationCursor);
+      }
       const res = await fetch(`/api/messages?${params.toString()}`);
       const data = await res.json();
       if (res.ok && Array.isArray(data.messages)) {
-        if (!paginationCursor) {
+        if (firstFetch) {
           setMessages(data.messages);
+          setPaginationCursor(
+            data.messages.length > 0 ? data.messages[0]._id : null
+          );
+          setHasMore(data.messages.length === 20);
+          firstFetch = false;
         } else {
-          setMessages((prev) => [...data.messages, ...prev]);
-        }
-        setHasMore(data.messages.length === 20);
-        if (data.messages.length > 0) {
-          setPaginationCursor(data.messages[0].sentAt);
+          // Merge only new messages (those with _id greater than last in state)
+          setMessages((prev) => {
+            if (!prev || prev.length === 0) return data.messages;
+            const lastId = prev[prev.length - 1]?._id;
+            // Find new messages (those not in prev)
+            const newMessages = data.messages.filter(
+              (msg) => !prev.some((m) => m._id === msg._id)
+            );
+            return [...prev, ...newMessages];
+          });
         }
       }
       setIsMessagesLoading(false);
     };
     fetchMessages();
-    // Polling setiap 2 detik jika percakapan aktif
     intervalId = setInterval(() => {
       fetchMessages();
     }, 2000);
-    // Reset cursor saat ganti percakapan
     return () => {
       clearInterval(intervalId);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedId]);
+  }, [selectedId, isAtBottom]);
 
   // Handler untuk load more pesan lama
   async function handleLoadMore() {
@@ -146,7 +167,7 @@ export default function ChatInboxPageContent() {
       setMessages((prev) => [...data.messages, ...prev]);
       setHasMore(data.messages.length === 20);
       if (data.messages.length > 0) {
-        setPaginationCursor(data.messages[0].sentAt);
+        setPaginationCursor(data.messages[0]._id);
       }
     }
     setIsMessagesLoading(false);
@@ -164,8 +185,17 @@ export default function ChatInboxPageContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ leadId: selected.lead._id, message: text }),
       });
-      if (!res.ok) throw new Error("Gagal mengirim pesan");
       const result = await res.json();
+      if (!res.ok) {
+        // Tampilkan error dari backend jika ada
+        const errorMsg = result?.error || "Gagal mengirim pesan";
+        Swal.fire({
+          icon: "error",
+          title: "Gagal",
+          text: errorMsg,
+        });
+        throw new Error(errorMsg);
+      }
       // Tambahkan pesan ke pending agar langsung tampil
       if (result.chatMsg) {
         setPendingMessages((prev) => [...prev, result.chatMsg]);
@@ -176,8 +206,6 @@ export default function ChatInboxPageContent() {
       console.error(err);
     }
   }
-  // Bersihkan pendingMessages: logika ini dihapus karena messagesById sudah tidak digunakan
-
   // Filters: hanya tampilkan lead yang punya pesan (lastMessage)
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -239,6 +267,7 @@ export default function ChatInboxPageContent() {
             setFilter={setFilter}
             currentUser={currentUser}
             escalationMinutes={escalationMinutes}
+            refetchConversations={refetchConversations}
           />
         </div>
         <div
@@ -256,6 +285,8 @@ export default function ChatInboxPageContent() {
             isMessagesLoading={isMessagesLoading}
             onLoadMore={handleLoadMore}
             hasMore={hasMore}
+            isAtBottom={isAtBottom}
+            setIsAtBottom={setIsAtBottom}
           />
         </div>
 
@@ -282,10 +313,10 @@ export default function ChatInboxPageContent() {
                 </button>
               </div>
               <div className="flex-1 overflow-hidden">
-                {/* <LeadInfoPanel
+                <LeadInfoPanel
                   conversation={selected}
                   // TODO: implementasi assign ke backend jika diperlukan
-                /> */}
+                />
               </div>
             </div>
           </div>
