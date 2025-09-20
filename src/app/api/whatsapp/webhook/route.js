@@ -60,8 +60,9 @@ export async function POST(req) {
     );
   }
 
+  let lead;
   if (Body && !Body.toLowerCase().includes("notifikasi")) {
-    let lead = await Lead.findOne({ contact: From.replace("whatsapp:", "") });
+    lead = await Lead.findOne({ contact: From.replace("whatsapp:", "") });
     if (!lead) {
       // Ambil AgentQueue untuk round-robin
       let queue = await AgentQueue.findOne({});
@@ -140,9 +141,9 @@ export async function POST(req) {
           }
         }
       }
+    } else {
+      console.log("Lead sudah ada:", lead.contact);
     }
-  } else {
-    console.log("Lead sudah ada:", lead.contact);
   }
 
   // Ambil media jika ada

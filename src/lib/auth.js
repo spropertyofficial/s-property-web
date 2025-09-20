@@ -43,7 +43,7 @@ export async function verifyAdminWithRole(request, requiredRoles = []) {
     }
 
     const decoded = jwt.verify(token, JWT_SECRET);
-    const admin = await Admin.findById(decoded.id).select('-password');
+    const admin = await Admin.findById(decoded.userId).select('-password');
     
     if (!admin) {
       return {
