@@ -185,13 +185,16 @@ export async function POST(req) {
 
   if (Body && !Body.toLowerCase().includes("notifikasi")) {
     await ChatMessage.create({
-      ...body,
       lead: lead._id,
+      from: From.replace("whatsapp:", ""),
+      to: To.replace("whatsapp:", ""),
+      body: Body,
       direction: "inbound",
       status: "received",
       sentAt: Timestamp ? new Date(Timestamp) : Date.now(),
       mediaUrls,
       mediaTypes,
+      ...body,
     });
   }
 
