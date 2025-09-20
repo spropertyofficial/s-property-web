@@ -41,24 +41,32 @@ export default function ChatInboxPageContent({ currentUser }) {
 
   // Sync selectedId dengan conversations setiap kali conversations berubah
   useEffect(() => {
-    if (!selectedId && conversations.length > 0) {
-      const firstId =
-        conversations.find((c) => c.lastMessage)?.lead?._id ||
-        conversations[0]?.lead?._id ||
-        null;
-      setSelectedId(firstId);
-      console.log("[DEBUG] Auto-select first conversation:", firstId);
-    } else if (
-      selectedId &&
-      !conversations.some((c) => c.lead?._id === selectedId)
-    ) {
-      // Jika selectedId tidak ditemukan di conversations, reset ke percakapan pertama
-      const firstId =
-        conversations.find((c) => c.lastMessage)?.lead?._id ||
-        conversations[0]?.lead?._id ||
-        null;
-      setSelectedId(firstId);
-      console.log("[DEBUG] Reset selectedId, not found. New:", firstId);
+    const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
+    if (isDesktop) {
+      if (!selectedId && conversations.length > 0) {
+        const firstId =
+          conversations.find((c) => c.lastMessage)?.lead?._id ||
+          conversations[0]?.lead?._id ||
+          null;
+        setSelectedId(firstId);
+        console.log("[DEBUG] Auto-select first conversation (desktop):", firstId);
+      } else if (
+        selectedId &&
+        !conversations.some((c) => c.lead?._id === selectedId)
+      ) {
+        // Jika selectedId tidak ditemukan di conversations, reset ke percakapan pertama
+        const firstId =
+          conversations.find((c) => c.lastMessage)?.lead?._id ||
+          conversations[0]?.lead?._id ||
+          null;
+        setSelectedId(firstId);
+        console.log("[DEBUG] Reset selectedId, not found. New (desktop):", firstId);
+      }
+    } else {
+      // On mobile, do not auto-select
+      if (selectedId && !conversations.some((c) => c.lead?._id === selectedId)) {
+        setSelectedId(null);
+      }
     }
   }, [conversations, selectedId]);
   // Mark messages as read whenever selectedId changes (room chat dibuka)
@@ -249,55 +257,80 @@ export default function ChatInboxPageContent({ currentUser }) {
 
   return (
     <div className="p-0 md:p-4 bg-slate-100 h-[100svh] md:h-screen overflow-hidden">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 md:gap-4 max-w-[1400px] mx-auto h-full min-h-0 overscroll-none">
-        {/* Left: Conversations list */}
-        <div
-          className={`$${
-            selectedId ? "hidden" : "flex"
-          } lg:flex lg:col-span-3 bg-white border border-slate-200 overflow-hidden flex-col h-full min-h-0`}
-        >
-          <ConversationsList
-            key={currentUser?._id || "no-user"}
-            items={filtered}
-            selectedId={selectedId}
-            onSelect={selectConversation}
-            search={search}
-            setSearch={setSearch}
-            filter={filter}
-            setFilter={setFilter}
-            currentUser={currentUser}
-            escalationMinutes={escalationMinutes}
-            refetchConversations={refetchConversations}
-          />
+      <div className="max-w-[1400px] mx-auto h-full min-h-0 overscroll-none">
+        {/* MOBILE: hanya tampilkan satu panel */}
+        <div className="block lg:hidden h-full min-h-0">
+          {selectedId ? (
+            <ChatWindow
+              conversation={selected}
+              messages={messages}
+              onSend={handleSend}
+              onBack={() => setSelectedId(null)}
+              onToggleInfo={() => setShowInfo(true)}
+              refetchConversations={refetchConversations}
+              isMessagesLoading={isMessagesLoading}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              isAtBottom={isAtBottom}
+              setIsAtBottom={setIsAtBottom}
+            />
+          ) : (
+            <ConversationsList
+              key={currentUser?._id || "no-user"}
+              items={filtered}
+              selectedId={selectedId}
+              onSelect={selectConversation}
+              search={search}
+              setSearch={setSearch}
+              filter={filter}
+              setFilter={setFilter}
+              currentUser={currentUser}
+              escalationMinutes={escalationMinutes}
+              refetchConversations={refetchConversations}
+            />
+          )}
         </div>
-        <div
-          className={`$${
-            selectedId ? "flex" : "hidden"
-          } lg:flex lg:col-span-6 bg-white border border-slate-200 overflow-hidden flex-col h-full min-h-0`}
-        >
-          <ChatWindow
-            conversation={selected}
-            messages={messages}
-            onSend={handleSend}
-            onBack={() => setSelectedId(null)}
-            onToggleInfo={() => setShowInfo(true)}
-            refetchConversations={refetchConversations}
-            isMessagesLoading={isMessagesLoading}
-            onLoadMore={handleLoadMore}
-            hasMore={hasMore}
-            isAtBottom={isAtBottom}
-            setIsAtBottom={setIsAtBottom}
-          />
+        {/* DESKTOP: grid layout */}
+        <div className="hidden lg:grid grid-cols-12 gap-0 md:gap-4 h-full min-h-0">
+          {/* Left: Conversations list */}
+          <div className="col-span-3 bg-white border border-slate-200 overflow-hidden flex-col h-full min-h-0">
+            <ConversationsList
+              key={currentUser?._id || "no-user"}
+              items={filtered}
+              selectedId={selectedId}
+              onSelect={selectConversation}
+              search={search}
+              setSearch={setSearch}
+              filter={filter}
+              setFilter={setFilter}
+              currentUser={currentUser}
+              escalationMinutes={escalationMinutes}
+              refetchConversations={refetchConversations}
+            />
+          </div>
+          <div className="col-span-6 bg-white border border-slate-200 overflow-hidden flex-col h-full min-h-0">
+            <ChatWindow
+              conversation={selected}
+              messages={messages}
+              onSend={handleSend}
+              onBack={() => setSelectedId(null)}
+              onToggleInfo={() => setShowInfo(true)}
+              refetchConversations={refetchConversations}
+              isMessagesLoading={isMessagesLoading}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              isAtBottom={isAtBottom}
+              setIsAtBottom={setIsAtBottom}
+            />
+          </div>
+          {/* Right: Lead info */}
+          <div className="col-span-3 bg-white border border-slate-200 overflow-hidden h-full min-h-0">
+            <LeadInfoPanel
+              conversation={selected}
+              // TODO: implementasi assign ke backend jika diperlukan
+            />
+          </div>
         </div>
-
-        {/* Right: Lead info */}
-        <div className="hidden lg:block lg:col-span-3 bg-white border border-slate-200 overflow-hidden h-full min-h-0">
-          <LeadInfoPanel
-            conversation={selected}
-            // TODO: implementasi assign ke backend jika diperlukan
-          />
-        </div>
-
         {/* Mobile Info Overlay */}
         {showInfo && (
           <div className="lg:hidden fixed inset-0 z-50">
