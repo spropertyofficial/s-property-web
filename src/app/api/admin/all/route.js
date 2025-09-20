@@ -8,12 +8,12 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 export async function GET(req) {
   await connectDB();
 
-  const token = req.cookies.get('token')?.value;
+  const token = req.cookies.get('auth-token')?.value;
   if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    const requester = await Admin.findById(decoded.id);
+    const requester = await Admin.findById(decoded.userId);
 
     if (requester.role !== 'superadmin') {
       return NextResponse.json({ message: 'Forbidden' }, { status: 403 });

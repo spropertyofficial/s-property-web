@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
   const checkAuth = async () => {
     try {
       console.log("🔍 Checking auth...");
-      const response = await fetch("/api/auth/me");
+      let response = await fetch("/api/auth/me");
       console.log("📡 Auth response status:", response.status);
 
       if (response.ok) {
@@ -34,6 +34,16 @@ export const AuthProvider = ({ children }) => {
       } else {
         const errorData = await response.json();
         console.log("❌ Auth failed:", errorData);
+      }
+
+      response = await fetch("/api/admin/me");
+      if(response.ok) {
+        const data = await response.json();
+        console.log("✅ Admin auth data received:", data);
+        setUser(data);
+      } else {
+        const errorData = await response.json();
+        console.log("❌ Admin auth failed:", errorData);
       }
     } catch (error) {
       console.error("🚫 Auth check failed:", error);
@@ -56,7 +66,6 @@ export const AuthProvider = ({ children }) => {
 
       if (response.ok) {
         setUser(data.user);
-        // Simpan token ke localStorage jika perlu
         if (typeof window !== "undefined" && data.token) {
           localStorage.setItem("auth-token", data.token);
         }

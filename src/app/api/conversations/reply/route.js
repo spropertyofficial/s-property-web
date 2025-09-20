@@ -50,12 +50,19 @@ export async function POST(req) {
     const twilioPayload = {
       from: process.env.TWILIO_WHATSAPP_NUMBER,
       to: `whatsapp:${toNumber}`,
-      statusCallback: `${process.env.NEXT_PUBLIC_BASE_URL || "https://af12a559e28b.ngrok-free.app"}/api/whatsapp/webhook`,
+      statusCallback: `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.sproperty.co.id"}/api/whatsapp/webhook`,
     };
     if (message) twilioPayload.body = message;
     if (mediaUrl) twilioPayload.mediaUrl = mediaUrl;
-    const twilioRes = await client.messages.create(twilioPayload);
-    // Simpan pesan ke ChatMessage
+    let twilioRes;
+    try {
+      twilioRes = await client.messages.create(twilioPayload);
+    } catch (twilioErr) {
+      // Jika gagal kirim ke Twilio, jangan simpan ChatMessage, kembalikan error
+      console.error("Error kirim pesan via Twilio:", twilioErr);
+      return Response.json({ error: "Gagal kirim pesan WhatsApp: "}, { status: 500 });
+    }
+    // Jika berhasil, simpan ChatMessage
     const chatMsg = await ChatMessage.create({
       lead: lead._id,
       from: process.env.TWILIO_WHATSAPP_NUMBER,
