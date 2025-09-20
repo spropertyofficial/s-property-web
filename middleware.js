@@ -39,7 +39,7 @@ const protectedRoutes = ["/agent", "/dashboard", "/chat"];
 
       // Verify JWT token for admin
       const decoded = jwt.verify(token.value, JWT_SECRET);
-      console.log("Admin token verified for user:", decoded.id);
+      console.log("Admin token verified for user:", decoded.userId);
 
       return NextResponse.next();
     } catch (error) {
