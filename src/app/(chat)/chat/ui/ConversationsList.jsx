@@ -16,7 +16,7 @@ export default function ConversationsList({
   onSimulateIncoming,
   currentUser,
   escalationMinutes = 5,
-  fetchConversations,
+  refetchConversations,
 }) {
   const [loadingClaimId, setLoadingClaimId] = useState(null);
   const [now, setNow] = useState(Date.now());
@@ -43,7 +43,9 @@ export default function ConversationsList({
   const counts = useMemo(
     () => ({
       all: isAdmin ? items.length : filteredItems.length,
-      unread: isAdmin ? items.filter((i) => (i.unread || 0) > 0).length : filteredItems.filter((i) => (i.unread || 0) > 0).length,
+      unread: isAdmin
+        ? items.filter((i) => (i.unread || 0) > 0).length
+        : filteredItems.filter((i) => (i.unread || 0) > 0).length,
     }),
     [filteredItems]
   );
@@ -78,12 +80,12 @@ export default function ConversationsList({
       const res = await axios.post(`/api/leads/${leadId}/assign`, {
         agentId: currentUser._id,
       });
-      if (res.data.success) {
+      if (res.data && res.data.success) {
         Swal.fire({
           icon: "success",
           title: "Lead berhasil diklaim!",
         });
-        fetchConversations(); // Refresh daftar percakapan
+        refetchConversations(); // Refresh daftar percakapan
       } else {
         Swal.fire({
           icon: "warning",
@@ -95,7 +97,6 @@ export default function ConversationsList({
       const message = err.response?.data?.error;
       const status = err.response?.status;
 
-      // Gabungkan penanganan error berdasarkan pesan dan status
       if (status === 403 || message === "Bukan giliran agent ini") {
         Swal.fire({
           icon: "warning",
@@ -108,7 +109,7 @@ export default function ConversationsList({
           title: "Gagal",
           text: "Lead tidak ditemukan",
         });
-      } else if (status === 409 || message === "Lead sudah di-assign") {
+      } else if (status === 409 || message === "Lead sudah di-assign" || message === "Lead sudah diklaim") {
         Swal.fire({
           icon: "error",
           title: "Gagal",
@@ -187,15 +188,18 @@ export default function ConversationsList({
             const isNotClaimed = item.lead?.isClaimed === false;
             // Helper: tampilkan nama/nomor hanya jika sudah di-assign atau admin
             const displayName =
-              isAdmin || isAssignedToMe
+              isAdmin || (isAssignedToMe && item.lead?.isClaimed === true)
                 ? getDisplayName(item.lead)
                 : "(Belum diklaim)";
+            // Disabled jika giliran saya, belum diklaim, dan bukan admin
+            const isDisabled = isAssignedToMe && isNotClaimed && !isAdmin;
+
             return (
               <div key={item.lead?._id || item.id} className="relative">
                 <button
-                  disabled={!isAssignedToMe && !isAdmin}
+                  disabled={isDisabled}
                   onClick={() => {
-                    if (!isAssignedToMe && !isAdmin) {
+                    if ((isAssignedToMe && isNotClaimed) || isAdmin) {
                       Swal.fire({
                         icon: "info",
                         title: "Klaim dulu lead ini untuk membuka percakapan!",
@@ -208,11 +212,7 @@ export default function ConversationsList({
                     selectedId === (item.lead?._id || item.id)
                       ? "bg-teal-50"
                       : ""
-                  } ${
-                    !isAssignedToMe && !isAdmin
-                      ? "opacity-60 cursor-not-allowed"
-                      : ""
-                  }`}
+                  } ${isDisabled ? "opacity-60 cursor-not-allowed" : ""}`}
                 >
                   {selectedId === (item.lead?._id || item.id) && (
                     <span className="absolute left-0 top-0 bottom-0 w-1 bg-teal-600" />
@@ -238,7 +238,7 @@ export default function ConversationsList({
                       </p>
                     </div>
                     {/* TIMER ESKALASI untuk lead belum diklaim */}
-                    {(!isAssignedToMe && isNotClaimed) && (
+                    {!isAssignedToMe && isNotClaimed && (
                       <EscalationTimer
                         leadInAt={item.lead?.leadInAt}
                         escalationMinutes={escalationMinutes}
@@ -284,8 +284,7 @@ export default function ConversationsList({
                     const isDisabled =
                       loadingClaimId === item.lead._id ||
                       !currentUser ||
-                      !currentUser._id ||
-                      isExpired;
+                      !currentUser._id
                     return (
                       <div
                         role="button"
@@ -300,18 +299,6 @@ export default function ConversationsList({
                             ? undefined
                             : (e) => handleClaimLead(e, item.lead?._id)
                         }
-                        onKeyDown={(e) => {
-                          if (
-                            (e.key === "Enter" || e.key === " ") &&
-                            !isDisabled &&
-                            currentUser &&
-                            currentUser._id
-                          ) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            e.target.click();
-                          }
-                        }}
                         aria-disabled={isDisabled}
                       >
                         {loadingClaimId === item.lead._id ? (
@@ -320,11 +307,11 @@ export default function ConversationsList({
                           </span>
                         ) : null}
                         Klaim Lead
-                        {isExpired && (
+                        {/* {isExpired && (
                           <span className="ml-2 text-orange-200">
                             (Sudah lewat waktu klaim)
                           </span>
-                        )}
+                        )} */}
                       </div>
                     );
                   })()}

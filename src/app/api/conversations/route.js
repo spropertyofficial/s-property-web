@@ -71,6 +71,7 @@ export async function GET(req) {
           attachments: "$attachments",
           createdAt: "$createdAt",
           updatedAt: "$updatedAt",
+          isClaimed: "$isClaimed",
           unread: "$unread",
         },
         lastMessage: 1,

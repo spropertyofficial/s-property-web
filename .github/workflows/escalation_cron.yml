@@ -2,7 +2,7 @@ name: Check Lead Escalations Cron Job
 
 on:
   schedule:
-    - cron: '*/3 23,0-17 * * *'
+    - cron: '*/3 6-23 * * *'
   workflow_dispatch:
 
 jobs:
@@ -12,6 +12,6 @@ jobs:
       - name: Trigger Vercel Endpoint
         run: |
           curl -L -X GET \
-          -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-          -H "x-vercel-protection-bypass: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" \
-          "${{ secrets.VERCEL_DEPLOYMENT_URL }}/api/cron/check-escalations"
+          -H "Authorization: Bearer ${ secrets.CRON_SECRET }" \
+          -H "x-vercel-protection-bypass: ${ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }" \
+          "${ secrets.VERCEL_DEPLOYMENT_URL }/api/cron/check-escalations"

@@ -5,6 +5,7 @@ import ChatWindow from "./ChatWindow";
 import LeadInfoPanel from "./LeadInfoPanel";
 import ChatInboxSkeleton from "./components/ChatInboxSkeleton";
 import Swal from "sweetalert2";
+import { FaTimes, FaTimesCircle } from "react-icons/fa";
 
 export default function ChatInboxPageContent({ currentUser }) {
   // State untuk tracking posisi scroll chat
@@ -340,9 +341,8 @@ export default function ChatInboxPageContent({ currentUser }) {
             />
             <div className="absolute right-0 top-0 h-full w-full sm:w-[85%] bg-white border-l border-slate-200 flex flex-col">
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
-                <div className="font-medium">Detail Prospek</div>
                 <button className="text-2xl" onClick={() => setShowInfo(false)}>
-                  &times;
+                  <FaTimesCircle />
                 </button>
               </div>
               <div className="flex-1 overflow-hidden">
