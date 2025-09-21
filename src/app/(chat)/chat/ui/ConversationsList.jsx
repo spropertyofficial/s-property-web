@@ -199,7 +199,7 @@ export default function ConversationsList({
                 <button
                   disabled={isDisabled}
                   onClick={() => {
-                    if ((isAssignedToMe && isNotClaimed) || !isAdmin) {
+                    if (isAssignedToMe && isNotClaimed && !isAdmin) {
                       Swal.fire({
                         icon: "info",
                         title: "Klaim dulu lead ini untuk membuka percakapan!",
