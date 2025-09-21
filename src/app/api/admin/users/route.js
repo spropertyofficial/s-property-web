@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import connectDB from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import { verifyAdminWithRole } from "@/lib/auth";
+import Property from "@/lib/models/Property";
 
 // GET /api/admin/users - list users (admin roles can read)
 // Query: q, type, isActive, page=1, perPage=20
