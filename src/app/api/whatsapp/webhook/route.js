@@ -141,6 +141,67 @@ export async function POST(req) {
           }
         }
       }
+      // Lead baru: langsung di-assign ke agent giliran, status belum diklaim
+      lead = await Lead.create({
+        name: "-",
+        contact: From.replace("whatsapp:", ""),
+        source: "WhatsApp",
+        status: "Baru",
+        agent: assignedAgent || null,
+        isClaimed: false,
+        leadInAt: Date.now(),
+      });
+
+      console.log("Lead baru dibuat:", From.replace("whatsapp:", ""));
+      // Kirim notifikasi WhatsApp ke agent giliran
+      if (assignedAgent) {
+        // Ambil nomor agent
+        const agentUser = await User.findById(assignedAgent);
+        if (agentUser && agentUser.phone) {
+          // Kirim pesan WhatsApp via Twilio
+          try {
+            await axios.post(
+              `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
+              querystring.stringify({
+                To: `whatsapp:${formatPhone(agentUser.phone)}`,
+                From: `${process.env.TWILIO_WHATSAPP_NUMBER}`,
+                Body: `Ada lead baru dari WhatsApp. Silakan klaim untuk segera merespon.`,
+              }),
+              {
+                auth: {
+                  username: process.env.TWILIO_ACCOUNT_SID,
+                  password: process.env.TWILIO_AUTH_TOKEN,
+                },
+                headers: {
+                  "Content-Type": "application/x-www-form-urlencoded",
+                },
+              }
+            );
+            console.log(`Notifikasi dikirim ke agent ${agentUser.phone}`);
+          } catch (err) {
+            console.error("Gagal kirim notifikasi ke agent:", err);
+          }
+        } else {
+          // Kirim notifikasi fallback ke email jika nomor agent tidak ditemukan
+          const emailTo = "devranmalik82@gmail.com";
+          const subject = `Gagal Notifikasi WhatsApp Lead Baru untuk Agent ${
+            agentUser?.name || "(Unknown)"
+          }`;
+          const html = `<p>Ada lead baru dari WhatsApp, tapi gagal kirim notifikasi ke agent <b>${
+            agentUser?.name || "(Unknown)"
+          }</b> karena nomor WhatsApp tidak ditemukan.</p> <p>Lead: ${
+            lead?.contact || "(Unknown)"
+          }</p>`;
+          try {
+            await sendMail({ to: emailTo, subject, html });
+          } catch (mailErr) {
+            console.error(
+              "Gagal kirim email fallback notifikasi agent:",
+              mailErr
+            );
+          }
+        }
+      }
     } else {
       console.log("Lead sudah ada:", lead.contact);
     }

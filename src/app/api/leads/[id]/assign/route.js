@@ -16,7 +16,8 @@ export async function POST(req, { params }) {
   // Validasi: lead harus belum di-assign
   const lead = await Lead.findById(id);
   if (!lead) return NextResponse.json({ success: false, error: "Lead tidak ditemukan" }, { status: 404 });
-  if (lead.agent) return NextResponse.json({ success: false, error: "Lead sudah di-assign" }, { status: 400 });
+  // Logika baru: cek apakah lead sudah diklaim
+  if (lead.isClaimed) return NextResponse.json({ success: false, error: "Lead sudah diklaim" }, { status: 400 });
 
   // Validasi: agentId harus agent yang dapat giliran
   const queue = await AgentQueue.findOne({});
