@@ -1,11 +1,34 @@
 "use client";
 import { ArrowDownCircle, ArrowLeft, Files, Images, Video } from "lucide-react";
+import { CgSpinner } from "react-icons/cg";
+import { BsExclamationSquare } from "react-icons/bs";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { FaPlay, FaPause, FaPaperclip, FaVideo, FaSpinner } from "react-icons/fa";
-import Swal from 'sweetalert2';
+import {
+  FaPlay,
+  FaPause,
+  FaPaperclip,
+  FaVideo,
+  FaSpinner,
+  FaExclamationCircle,
+} from "react-icons/fa";
+import Swal from "sweetalert2";
 
-export default function ChatWindow({ conversation, messages, onSend, showEscalation, onStopEscalation, onBack, onToggleInfo, refetchConversations, hasMore, isMessagesLoading, onLoadMore, isAtBottom, setIsAtBottom }) {
+export default function ChatWindow({
+  conversation,
+  messages,
+  onSend,
+  showEscalation,
+  onStopEscalation,
+  onBack,
+  onToggleInfo,
+  refetchConversations,
+  hasMore,
+  isMessagesLoading,
+  onLoadMore,
+  isAtBottom,
+  setIsAtBottom,
+}) {
   // State untuk polling dan scroll
   const scrollerRef = useRef(null);
   // Pantau scroll posisi
@@ -14,11 +37,12 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
     if (!el) return;
     function handleScroll() {
       const threshold = 60; // px dari bawah
-      const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+      const atBottom =
+        el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
       setIsAtBottom(atBottom);
     }
-    el.addEventListener('scroll', handleScroll);
-    return () => el.removeEventListener('scroll', handleScroll);
+    el.addEventListener("scroll", handleScroll);
+    return () => el.removeEventListener("scroll", handleScroll);
   }, [messages, conversation?.id, setIsAtBottom]);
 
   // Tidak perlu deteksi pesan baru, unread badge diambil dari conversation.unread
@@ -51,7 +75,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   function handleInputChange(e) {
     setText(e.target.value);
     // Hitung jumlah baris
-    const lines = e.target.value.split('\n').length;
+    const lines = e.target.value.split("\n").length;
     setInputRows(Math.min(maxRows, lines));
   }
   // Debug: tampilkan isi conversation di console
@@ -62,7 +86,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
       fetch("/api/conversations/read", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leadId: conversation.lead._id })
+        body: JSON.stringify({ leadId: conversation.lead._id }),
       }).then(() => {
         if (typeof refetchConversations === "function") {
           refetchConversations();
@@ -96,17 +120,19 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   useEffect(() => {
     // On mobile, focus the input when a chat is opened to bring up the keyboard
     if (!conversation) return;
-  const m = typeof window !== 'undefined' && window.innerWidth < 1024;
-  if (m) {
+    const m = typeof window !== "undefined" && window.innerWidth < 1024;
+    if (m) {
       setTimeout(() => {
-        try { inputRef.current?.focus({ preventScroll: true }); } catch {}
+        try {
+          inputRef.current?.focus({ preventScroll: true });
+        } catch {}
       }, 0);
     }
   }, [conversation?.id]);
 
   useEffect(() => {
     // Adjust bottom padding to sit above the soft keyboard using VisualViewport when available
-    if (typeof window === 'undefined' || !window.visualViewport) return;
+    if (typeof window === "undefined" || !window.visualViewport) return;
     const vv = window.visualViewport;
     const handler = () => {
       const innerH = window.innerHeight || 0;
@@ -114,23 +140,24 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
       setKbOffset(overlap);
     };
     handler();
-    vv.addEventListener('resize', handler);
-    vv.addEventListener('scroll', handler);
+    vv.addEventListener("resize", handler);
+    vv.addEventListener("scroll", handler);
     return () => {
-      vv.removeEventListener('resize', handler);
-      vv.removeEventListener('scroll', handler);
+      vv.removeEventListener("resize", handler);
+      vv.removeEventListener("scroll", handler);
     };
   }, []);
 
   // Track mobile viewport changes
   useEffect(() => {
-    const handler = () => setIsMobile(typeof window !== 'undefined' && window.innerWidth < 1024);
+    const handler = () =>
+      setIsMobile(typeof window !== "undefined" && window.innerWidth < 1024);
     handler();
-    window.addEventListener('resize', handler);
-    window.addEventListener('orientationchange', handler);
+    window.addEventListener("resize", handler);
+    window.addEventListener("orientationchange", handler);
     return () => {
-      window.removeEventListener('resize', handler);
-      window.removeEventListener('orientationchange', handler);
+      window.removeEventListener("resize", handler);
+      window.removeEventListener("orientationchange", handler);
     };
   }, []);
 
@@ -140,7 +167,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
     const el = composerRef.current;
     const update = () => setComposerH(el.offsetHeight || 56);
     update();
-    if (typeof ResizeObserver !== 'undefined'){
+    if (typeof ResizeObserver !== "undefined") {
       const ro = new ResizeObserver(update);
       ro.observe(el);
       return () => ro.disconnect();
@@ -156,7 +183,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   }, [messages]);
 
   function addPendingMessage({ text, mediaUrls = [], mediaTypes = [] }) {
-    setLocalMessages(prev => [
+    setLocalMessages((prev) => [
       ...prev,
       {
         _id: `pending-${Date.now()}-${Math.random()}`,
@@ -170,7 +197,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
     ]);
   }
 
-  function handleSubmit(e){
+  function handleSubmit(e) {
     e.preventDefault();
     const trimmed = text.trim();
     // Hide preview immediately after send
@@ -188,7 +215,11 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
         const caption = i === 0 ? text : "";
         const url = attachmentPreviews[i]?.url || "";
         const type = file.type;
-        addPendingMessage({ text: caption, mediaUrls: url ? [url] : [], mediaTypes: type ? [type] : [] });
+        addPendingMessage({
+          text: caption,
+          mediaUrls: url ? [url] : [],
+          mediaTypes: type ? [type] : [],
+        });
       }
       // Kirim satu per satu, hanya file pertama dengan caption
       const sendAll = async () => {
@@ -213,12 +244,18 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
     if (typeof refetchConversations === "function") refetchConversations();
   }
 
-  function handlePreviewImg(url) { setPreviewImg(url); }
-  function closePreviewImg() { setPreviewImg(null); }
+  function handlePreviewImg(url) {
+    setPreviewImg(url);
+  }
+  function closePreviewImg() {
+    setPreviewImg(null);
+  }
   function handleAttachmentClick(e) {
     setShowAttachmentType(true);
   }
-  function closeAttachmentType() { setShowAttachmentType(false); }
+  function closeAttachmentType() {
+    setShowAttachmentType(false);
+  }
   function handleAttachmentTypeSelect(type) {
     setAttachmentType(type);
     setShowAttachmentType(false);
@@ -229,12 +266,13 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
   async function handleSendMedia({ file, type, text }) {
     if (!file || !type) return;
     // Konversi file ke base64
-    const toBase64 = file => new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(',')[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+    const toBase64 = (file) =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
     const base64 = await toBase64(file);
     // Kirim ke backend
     const res = await fetch("/api/conversations/reply", {
@@ -245,7 +283,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
         message: text || "",
         mediaFile: base64,
         mediaType: type,
-      })
+      }),
     });
     const data = await res.json();
     if (data.success) {
@@ -261,7 +299,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
     if (!files.length) return;
     const MAX_SIZE = 10485760; // 10 MB
     let oversized = false;
-    const validFiles = files.filter(file => {
+    const validFiles = files.filter((file) => {
       if (file.size > MAX_SIZE) {
         oversized = true;
         return false;
@@ -270,43 +308,54 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
     });
     if (oversized) {
       Swal.fire({
-        icon: 'warning',
-        title: 'Ukuran file terlalu besar',
-        text: 'Ukuran file tidak boleh lebih dari 10 MB.',
-        confirmButtonText: 'OK',
+        icon: "warning",
+        title: "Ukuran file terlalu besar",
+        text: "Ukuran file tidak boleh lebih dari 10 MB.",
+        confirmButtonText: "OK",
       });
     }
     if (!validFiles.length) return;
-    setAttachmentFiles(prev => [...prev, ...validFiles]);
+    setAttachmentFiles((prev) => [...prev, ...validFiles]);
     setAttachmentType(attachmentType); // tetap simpan tipe
     // Preview semua file
-    const previews = validFiles.map(file => {
-      if (file.type.startsWith('image')) {
-        return { url: URL.createObjectURL(file), type: 'image', name: file.name };
-      } else if (file.type.startsWith('video')) {
-        return { url: URL.createObjectURL(file), type: 'video', name: file.name };
-      } else if (file.type === 'application/pdf') {
-        return { url: '', type: 'document', name: file.name };
+    const previews = validFiles.map((file) => {
+      if (file.type.startsWith("image")) {
+        return {
+          url: URL.createObjectURL(file),
+          type: "image",
+          name: file.name,
+        };
+      } else if (file.type.startsWith("video")) {
+        return {
+          url: URL.createObjectURL(file),
+          type: "video",
+          name: file.name,
+        };
+      } else if (file.type === "application/pdf") {
+        return { url: "", type: "document", name: file.name };
       } else {
-        return { url: '', type: 'document', name: file.name };
+        return { url: "", type: "document", name: file.name };
       }
     });
-    setAttachmentPreviews(prev => [...prev, ...previews]);
+    setAttachmentPreviews((prev) => [...prev, ...previews]);
     e.target.value = "";
   }
 
   function handleRemovePreview(idx) {
-    setAttachmentPreviews(prev => prev.filter((_, i) => i !== idx));
-    setAttachmentFiles(prev => prev.filter((_, i) => i !== idx));
+    setAttachmentPreviews((prev) => prev.filter((_, i) => i !== idx));
+    setAttachmentFiles((prev) => prev.filter((_, i) => i !== idx));
   }
 
-  if(!conversation){
+  if (!conversation) {
     return (
       <div className="h-full grid place-items-center text-slate-500">
         <div className="text-5xl mb-4">💬</div>
         <div className="text-center">
           <h2 className="text-xl font-bold">Pilih Percakapan</h2>
-          <p className="max-w-xs">Pilih salah satu percakapan dari daftar di sebelah kiri untuk memulai.</p>
+          <p className="max-w-xs">
+            Pilih salah satu percakapan dari daftar di sebelah kiri untuk
+            memulai.
+          </p>
         </div>
       </div>
     );
@@ -318,7 +367,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
       {!isAtBottom && conversation?.unread > 0 && (
         <button
           className="absolute right-6 z-30 bg-teal-600 border-teal-600 text-white rounded-full shadow-lg flex items-center px-4 py-2 gap-2 hover:bg-teal-700"
-          style={{ bottom: '80px', transition: 'all 0.2s' }}
+          style={{ bottom: "80px", transition: "all 0.2s" }}
           onClick={handleScrollToBottom}
         >
           <ArrowDownCircle className="w-5 h-5" />
@@ -326,35 +375,66 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
         </button>
       )}
       {previewImg && (
-        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center" onClick={closePreviewImg}>
-          <img src={previewImg} alt="Preview" className="max-w-[90%] max-h-[90%] rounded-lg shadow-lg" onClick={e => e.stopPropagation()} />
-          <button className="absolute top-4 right-4 text-white text-2xl bg-black/50 rounded-full px-3 py-1" onClick={closePreviewImg}>&times;</button>
+        <div
+          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center"
+          onClick={closePreviewImg}
+        >
+          <img
+            src={previewImg}
+            alt="Preview"
+            className="max-w-[90%] max-h-[90%] rounded-lg shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            className="absolute top-4 right-4 text-white text-2xl bg-black/50 rounded-full px-3 py-1"
+            onClick={closePreviewImg}
+          >
+            &times;
+          </button>
         </div>
       )}
 
       <div className="px-3 py-3 border-b border-slate-200 bg-white flex items-center justify-between">
         <div className="flex items-center">
-          <button onClick={onBack} className="lg:hidden mr-2 p-2 rounded-full hover:bg-slate-100"><ArrowLeft/></button>
-          <div className="w-10 h-10 rounded-full bg-teal-500 text-white flex items-center justify-center font-bold text-lg mr-3">{getInitials(conversation.lead.name)}</div>
+          <button
+            onClick={onBack}
+            className="lg:hidden mr-2 p-2 rounded-full hover:bg-slate-100"
+          >
+            <ArrowLeft />
+          </button>
+          <div className="w-10 h-10 rounded-full bg-teal-500 text-white flex items-center justify-center font-bold text-lg mr-3">
+            {getInitials(conversation.lead.name)}
+          </div>
           <div>
-            <div className="font-bold text-slate-800">{getDisplayName(conversation.lead)}</div>
-            <div className="text-xs text-slate-500">{conversation.lead.property?.name || conversation.lead.contact}</div>
+            <div className="font-bold text-slate-800">
+              {getDisplayName(conversation.lead)}
+            </div>
+            <div className="text-xs text-slate-500">
+              {conversation.lead.property?.name || conversation.lead.contact}
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {conversation.assignedToMe ? (
-            <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">Milik Saya</span>
-          ) : (
-            <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600">Tidak Ditugaskan</span>
-          )}
-          <button onClick={onToggleInfo} className="lg:hidden p-2 rounded-full hover:bg-slate-100" title="Info">ℹ️</button>
+          <button
+            onClick={onToggleInfo}
+            className="lg:hidden p-2 hover:bg-slate-100"
+            title="Info"
+          >
+            <BsExclamationSquare className="w-6 h-6" />
+            </button>
         </div>
       </div>
 
       {showEscalation && (
         <div className="p-2 bg-yellow-100 text-yellow-800 text-sm text-center relative">
-          <div className="absolute left-0 top-0 bottom-0 bg-yellow-300 transition-all duration-1000" style={{ width: "50%" }}></div>
-          <span className="relative">Harap respons dalam <span className="font-bold">5:00</span> menit atau lead akan dialihkan.</span>
+          <div
+            className="absolute left-0 top-0 bottom-0 bg-yellow-300 transition-all duration-1000"
+            style={{ width: "50%" }}
+          ></div>
+          <span className="relative">
+            Harap respons dalam <span className="font-bold">5:00</span> menit
+            atau lead akan dialihkan.
+          </span>
         </div>
       )}
 
@@ -362,7 +442,7 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
       <div
         ref={scrollerRef}
         className="min-h-0 overflow-y-auto p-4 bg-slate-50 overscroll-contain [overflow-anchor:none]"
-        style={{ WebkitOverflowScrolling: 'touch' }}
+        style={{ WebkitOverflowScrolling: "touch" }}
       >
         {/* Tombol Load More di atas pesan */}
         {hasMore && !isMessagesLoading && (
@@ -376,34 +456,51 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
           </div>
         )}
         {isMessagesLoading && (
-          <div className="flex justify-center mb-2 text-slate-400 text-xs">
-            <FaSpinner className="animate-spin mr-2" />
-            Memuat pesan...
+          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 mb-2 text-slate-400 text-xs ">
+            <CgSpinner className="animate-spin h-auto w-[50px]" />
           </div>
         )}
-        {!localMessages || localMessages.length===0 ? (
-          <div className="h-full grid place-items-center text-slate-500">Belum ada pesan</div>
+        {!localMessages || localMessages.length === 0 ? (
+          <div className="h-full grid place-items-center text-slate-500">
+            Belum ada pesan
+          </div>
         ) : (
           // Kelompokkan pesan per tanggal
           (() => {
             const groups = {};
-            localMessages.forEach(m => {
-              const d = new Date(m.ts || m.sentAt || m.createdAt || m.receivedAt);
-              const dateStr = isNaN(d.getTime()) ? "" : d.toLocaleDateString("id-ID", { year: 'numeric', month: 'long', day: 'numeric' });
+            localMessages.forEach((m) => {
+              const d = new Date(
+                m.ts || m.sentAt || m.createdAt || m.receivedAt
+              );
+              const dateStr = isNaN(d.getTime())
+                ? ""
+                : d.toLocaleDateString("id-ID", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  });
               if (!groups[dateStr]) groups[dateStr] = [];
               groups[dateStr].push(m);
             });
             return Object.entries(groups).map(([date, msgs]) => (
               <div key={date}>
                 <div className="flex justify-center my-4">
-                  <span className="px-4 py-1 rounded-full bg-slate-200 text-xs text-slate-700 font-semibold shadow">{date}</span>
+                  <span className="px-4 py-1 rounded-full bg-slate-200 text-xs text-slate-700 font-semibold shadow">
+                    {date}
+                  </span>
                 </div>
-                {msgs.map(m => (
-                  <MessageBubble 
-                    key={m._id ? m._id : m.twilioSid ? `pending-${m.twilioSid}` : `pending-${Math.random()}`}
-                    {...m} 
-                    mine={m.direction === "outbound"} 
-                    text={m.body} 
+                {msgs.map((m) => (
+                  <MessageBubble
+                    key={
+                      m._id
+                        ? m._id
+                        : m.twilioSid
+                        ? `pending-${m.twilioSid}`
+                        : `pending-${Math.random()}`
+                    }
+                    {...m}
+                    mine={m.direction === "outbound"}
+                    text={m.body}
                     onPreviewImg={handlePreviewImg}
                   />
                 ))}
@@ -419,13 +516,20 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
       <form
         ref={composerRef}
         onSubmit={handleSubmit}
-        className={`${isMobile ? 'fixed left-0 right-0 z-20' : ''} p-3 border-t bg-white`}
+        className={`${
+          isMobile ? "fixed left-0 right-0 z-20" : ""
+        } p-3 border-t bg-white`}
         style={isMobile ? { bottom: `${kbOffset}px` } : undefined}
       >
-        <div className="flex items-end gap-2" style={{ position: 'relative' }}>
+        <div className="flex items-end gap-2" style={{ position: "relative" }}>
           {/* Button lampiran */}
-          <div style={{ position: 'relative' }}>
-            <button type="button" className="p-2 rounded-full bg-slate-200 text-slate-600 hover:bg-slate-300" title="Lampirkan file" onClick={handleAttachmentClick}>
+          <div style={{ position: "relative" }}>
+            <button
+              type="button"
+              className="p-2 rounded-full bg-slate-200 text-slate-600 hover:bg-slate-300"
+              title="Lampirkan file"
+              onClick={handleAttachmentClick}
+            >
               <FaPaperclip />
             </button>
             {/* Popup pilihan tipe lampiran di atas button, scoped ke button */}
@@ -434,11 +538,34 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
                 className="absolute z-50 left-[30%] bottom-12 w-44"
                 onClick={closeAttachmentType}
               >
-                <div className="bg-white rounded-lg shadow-lg p-4 flex flex-col gap-2 w-fit" onClick={e => e.stopPropagation()}>
-                  <button className="py-2 px-4 rounded bg-teal-600 text-white font-semibold hover:bg-teal-700 w-fit" onClick={() => handleAttachmentTypeSelect('image')}><Images /></button>
-                  <button className="py-2 px-4 rounded bg-teal-600 text-white font-semibold hover:bg-teal-700 w-fit" onClick={() => handleAttachmentTypeSelect('video')}><Video/></button>
-                  <button className="py-2 px-4 rounded bg-teal-600 text-white font-semibold hover:bg-teal-700 w-fit" onClick={() => handleAttachmentTypeSelect('document')}><Files /></button>
-                  <button className="mt-2 text-xs text-slate-500 hover:underline" onClick={closeAttachmentType}>Batal</button>
+                <div
+                  className="bg-white rounded-lg shadow-lg p-4 flex flex-col gap-2 w-fit"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    className="py-2 px-4 rounded bg-teal-600 text-white font-semibold hover:bg-teal-700 w-fit"
+                    onClick={() => handleAttachmentTypeSelect("image")}
+                  >
+                    <Images />
+                  </button>
+                  <button
+                    className="py-2 px-4 rounded bg-teal-600 text-white font-semibold hover:bg-teal-700 w-fit"
+                    onClick={() => handleAttachmentTypeSelect("video")}
+                  >
+                    <Video />
+                  </button>
+                  <button
+                    className="py-2 px-4 rounded bg-teal-600 text-white font-semibold hover:bg-teal-700 w-fit"
+                    onClick={() => handleAttachmentTypeSelect("document")}
+                  >
+                    <Files />
+                  </button>
+                  <button
+                    className="mt-2 text-xs text-slate-500 hover:underline"
+                    onClick={closeAttachmentType}
+                  >
+                    Batal
+                  </button>
                 </div>
               </div>
             )}
@@ -446,8 +573,16 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
             <input
               ref={fileInputRef}
               type="file"
-              style={{ display: 'none' }}
-              accept={attachmentType === 'image' ? 'image/*' : attachmentType === 'video' ? 'video/*' : attachmentType === 'document' ? '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar' : ''}
+              style={{ display: "none" }}
+              accept={
+                attachmentType === "image"
+                  ? "image/*"
+                  : attachmentType === "video"
+                  ? "video/*"
+                  : attachmentType === "document"
+                  ? ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar"
+                  : ""
+              }
               multiple
               onChange={handleFileChange}
             />
@@ -461,7 +596,10 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
               onChange={handleInputChange}
               placeholder="Keterangan (opsional)"
               className="flex-1 resize-none rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-              style={{maxHeight: `${maxRows * 24}px`, overflowY: inputRows === maxRows ? 'auto' : 'hidden'}}
+              style={{
+                maxHeight: `${maxRows * 24}px`,
+                overflowY: inputRows === maxRows ? "auto" : "hidden",
+              }}
               inputMode="text"
               enterKeyHint="send"
               autoCorrect="on"
@@ -476,7 +614,10 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
               onChange={handleInputChange}
               placeholder="Tulis pesan..."
               className="flex-1 resize-none rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-              style={{maxHeight: `${maxRows * 24}px`, overflowY: inputRows === maxRows ? 'auto' : 'hidden'}}
+              style={{
+                maxHeight: `${maxRows * 24}px`,
+                overflowY: inputRows === maxRows ? "auto" : "hidden",
+              }}
               inputMode="text"
               enterKeyHint="send"
               autoCorrect="on"
@@ -492,35 +633,76 @@ export default function ChatWindow({ conversation, messages, onSend, showEscalat
                   {attachmentPreviews.map((preview, idx) => (
                     <div
                       key={idx}
-                      className={`relative flex flex-col items-center min-w-[110px] max-w-[140px] cursor-pointer ${activePreviewIdx === idx ? 'border-2 border-teal-500' : 'border'} rounded-lg bg-white`}
+                      className={`relative flex flex-col items-center min-w-[110px] max-w-[140px] cursor-pointer ${
+                        activePreviewIdx === idx
+                          ? "border-2 border-teal-500"
+                          : "border"
+                      } rounded-lg bg-white`}
                       onClick={() => setActivePreviewIdx(idx)}
                     >
-                      {preview.type === 'image' && (
-                        <img src={preview.url} alt="preview" className="w-[100px] h-[100px] object-cover rounded-lg" />
+                      {preview.type === "image" && (
+                        <img
+                          src={preview.url}
+                          alt="preview"
+                          className="w-[100px] h-[100px] object-cover rounded-lg"
+                        />
                       )}
-                      {preview.type === 'video' && (
-                        <video src={preview.url} controls className="w-[100px] h-[100px] rounded-lg object-cover" />
+                      {preview.type === "video" && (
+                        <video
+                          src={preview.url}
+                          controls
+                          className="w-[100px] h-[100px] rounded-lg object-cover"
+                        />
                       )}
-                      {preview.type === 'document' && (
-                        <span className="inline-block px-3 py-2 bg-slate-200 rounded text-xs text-slate-700 border w-[100px] text-center">{preview.name}</span>
+                      {preview.type === "document" && (
+                        <span className="inline-block px-3 py-2 bg-slate-200 rounded text-xs text-slate-700 border w-[100px] text-center">
+                          {preview.name}
+                        </span>
                       )}
-                      <button type="button" className="absolute top-2 right-2 bg-black/60 text-white rounded-full px-2 py-0.5 text-xs" onClick={e => { e.stopPropagation(); handleRemovePreview(idx); }}>&times;</button>
+                      <button
+                        type="button"
+                        className="absolute top-2 right-2 bg-black/60 text-white rounded-full px-2 py-0.5 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemovePreview(idx);
+                        }}
+                      >
+                        &times;
+                      </button>
                     </div>
                   ))}
                 </div>
                 <div className="flex gap-2 justify-end mt-1">
-                  <button type="button" className="px-3 py-1 rounded bg-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-300" onClick={() => {
-                    setAttachmentPreviews([]);
-                    setAttachmentFiles([]);
-                    setAttachmentType(null);
-                    setActivePreviewIdx(0);
-                  }}>Batal</button>
-                  <button type="button" className="px-3 py-1 rounded bg-teal-500 text-white text-xs font-bold hover:bg-teal-600" onClick={() => fileInputRef.current?.click()}>+ Tambah</button>
+                  <button
+                    type="button"
+                    className="px-3 py-1 rounded bg-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-300"
+                    onClick={() => {
+                      setAttachmentPreviews([]);
+                      setAttachmentFiles([]);
+                      setAttachmentType(null);
+                      setActivePreviewIdx(0);
+                    }}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    className="px-3 py-1 rounded bg-teal-500 text-white text-xs font-bold hover:bg-teal-600"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    + Tambah
+                  </button>
                 </div>
               </div>
             </div>
           )}
-          <button type="submit" className="px-5 py-2 rounded-lg bg-teal-600 text-white text-sm font-bold hover:bg-teal-700 disabled:opacity-50 active:scale-95 flex items-center justify-center" disabled={isSending || (!text.trim() && attachmentPreviews.length === 0)}>
+          <button
+            type="submit"
+            className="px-5 py-2 rounded-lg bg-teal-600 text-white text-sm font-bold hover:bg-teal-700 disabled:opacity-50 active:scale-95 flex items-center justify-center"
+            disabled={
+              isSending || (!text.trim() && attachmentPreviews.length === 0)
+            }
+          >
             {isSending ? <FaSpinner className="animate-spin mr-2" /> : null}
             Kirim
           </button>
@@ -545,13 +727,13 @@ function SimpleAudioPlayer({ url }) {
       setPlaying(false);
       setCurrentTime(0); // Reset ke awal setelah selesai
     };
-    audio.addEventListener('timeupdate', updateTime);
-    audio.addEventListener('loadedmetadata', setAudioDuration);
-    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener("timeupdate", updateTime);
+    audio.addEventListener("loadedmetadata", setAudioDuration);
+    audio.addEventListener("ended", handleEnded);
     return () => {
-      audio.removeEventListener('timeupdate', updateTime);
-      audio.removeEventListener('loadedmetadata', setAudioDuration);
-      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener("timeupdate", updateTime);
+      audio.removeEventListener("loadedmetadata", setAudioDuration);
+      audio.removeEventListener("ended", handleEnded);
     };
   }, []);
 
@@ -565,21 +747,43 @@ function SimpleAudioPlayer({ url }) {
       audioRef.current.currentTime = 0;
       setCurrentTime(0);
     }
-    setPlaying(p => !p);
+    setPlaying((p) => !p);
   }
 
   return (
     <div className="flex items-center gap-2">
-      <button type="button" onClick={togglePlay} className="p-2 rounded-full bg-teal-600 text-white">
+      <button
+        type="button"
+        onClick={togglePlay}
+        className="p-2 rounded-full bg-teal-600 text-white"
+      >
         {playing ? <FaPause /> : <FaPlay />}
       </button>
-      <audio ref={audioRef} src={url} preload="metadata" style={{ display: 'none' }} />
-      <span className="text-xs text-slate-500 min-w-[40px]">{formatAudioTime(currentTime)} / {formatAudioTime(duration)}</span>
+      <audio
+        ref={audioRef}
+        src={url}
+        preload="metadata"
+        style={{ display: "none" }}
+      />
+      <span className="text-xs text-slate-500 min-w-[40px]">
+        {formatAudioTime(currentTime)} / {formatAudioTime(duration)}
+      </span>
     </div>
   );
 }
 
-function MessageBubble({ mine, text, ts, status, sentAt, createdAt, receivedAt, mediaUrls, mediaTypes, ...payload }){
+function MessageBubble({
+  mine,
+  text,
+  ts,
+  status,
+  sentAt,
+  createdAt,
+  receivedAt,
+  mediaUrls,
+  mediaTypes,
+  ...payload
+}) {
   // Pilih waktu pesan yang valid
   const time = ts || sentAt || createdAt || receivedAt;
   // Ambil fungsi preview dari props jika ada
@@ -591,45 +795,96 @@ function MessageBubble({ mine, text, ts, status, sentAt, createdAt, receivedAt, 
   return (
     <div className={`flex ${mine ? "justify-end" : "justify-start"} mb-2`}>
       <div
-        className={`max-w-md px-4 py-3 rounded-2xl shadow-md border ${mine ? "bg-teal-600 text-white border-teal-300" : "bg-white text-slate-800 border-slate-200"}`}
+        className={`max-w-md px-4 py-3 rounded-2xl shadow-md border ${
+          mine
+            ? "bg-teal-600 text-white border-teal-300"
+            : "bg-white text-slate-800 border-slate-200"
+        }`}
       >
         {/* Tampilkan media jika ada */}
-        {hasMedia && mediaUrls.map((url, idx) => {
-          const type = mediaTypes[idx] || "";
-          if (type.startsWith("image")) {
+        {hasMedia &&
+          mediaUrls.map((url, idx) => {
+            const type = mediaTypes[idx] || "";
+            if (type.startsWith("image")) {
+              return (
+                <span
+                  key={url}
+                  className="mb-2 block cursor-pointer"
+                  onClick={() => onPreviewImg?.(url)}
+                >
+                  <Image
+                    src={url}
+                    alt="media"
+                    width={200}
+                    height={200}
+                    className="max-w-xs max-h-60 rounded transition-transform hover:scale-105"
+                  />
+                </span>
+              );
+            }
+            if (type.startsWith("video")) {
+              return (
+                <video
+                  key={url}
+                  src={url}
+                  controls
+                  className="mb-2 max-w-xs max-h-60 rounded"
+                />
+              );
+            }
+            if (type.startsWith("audio")) {
+              return <SimpleAudioPlayer key={url} url={url} />;
+            }
+            if (type === "application/pdf") {
+              return (
+                <a
+                  key={url}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mb-2 block text-blue-600 underline"
+                >
+                  Lihat PDF
+                </a>
+              );
+            }
+            // Default: link download
             return (
-              <span key={url} className="mb-2 block cursor-pointer" onClick={() => onPreviewImg?.(url)}>
-                <Image src={url} alt="media" width={200} height={200} className="max-w-xs max-h-60 rounded transition-transform hover:scale-105" />
-              </span>
+              <a
+                key={url}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mb-2 block text-blue-600 underline"
+              >
+                Download File
+              </a>
             );
-          }
-          if (type.startsWith("video")) {
-            return <video key={url} src={url} controls className="mb-2 max-w-xs max-h-60 rounded" />;
-          }
-          if (type.startsWith("audio")) {
-            return <SimpleAudioPlayer key={url} url={url} />;
-          }
-          if (type === "application/pdf") {
-            return <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="mb-2 block text-blue-600 underline">Lihat PDF</a>;
-          }
-          // Default: link download
-          return <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="mb-2 block text-blue-600 underline">Download File</a>;
-        })}
+          })}
         {hasText && <div className="whitespace-pre-wrap text-sm">{text}</div>}
-        <div className={`mt-1 text-[10px] ${mine ? "text-white/70" : "text-slate-400"}`}>
-          {formatTime(time)}{mine ? ` • ${status}` : ""}
+        <div
+          className={`mt-1 text-[10px] ${
+            mine ? "text-white/70" : "text-slate-400"
+          }`}
+        >
+          {formatTime(time)}
+          {mine ? ` • ${status}` : ""}
         </div>
       </div>
     </div>
   );
 }
 
-function formatTime(ts){
+function formatTime(ts) {
   // Untuk waktu pesan (jam:menit)
   if (!ts) return "";
   const d = new Date(ts);
   if (isNaN(d.getTime())) return "";
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  return d.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
 }
 
 function formatAudioTime(secs) {
@@ -637,9 +892,16 @@ function formatAudioTime(secs) {
   if (!secs || isNaN(secs)) return "00:00";
   const min = Math.floor(secs / 60);
   const sec = Math.floor(secs % 60);
-  return `${min.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
+  return `${min.toString().padStart(2, "0")}:${sec
+    .toString()
+    .padStart(2, "0")}`;
 }
 
-function getInitials(name){
-  return name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+function getInitials(name) {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 }
