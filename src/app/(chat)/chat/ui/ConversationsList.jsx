@@ -272,12 +272,14 @@ export default function ConversationsList({
                   isAssignedToMe &&
                   !isAdmin &&
                   (() => {
-                    // Hitung waktu eskalasi dari leadInAt (waktu terakhir di-assign)
                     const leadInAt = item.lead?.leadInAt;
                     const nowMs = Date.now();
-                    const assignMs = leadInAt ? new Date(leadInAt).getTime() : 0;
-                    // Jika leadInAt berubah (lead di-assign ulang), timer akan otomatis reset
-                    const minutesSinceAssign = leadInAt ? (nowMs - assignMs) / 1000 / 60 : 0;
+                    const assignMs = leadInAt
+                      ? new Date(leadInAt).getTime()
+                      : 0;
+                    const minutesSinceAssign = leadInAt
+                      ? (nowMs - assignMs) / 1000 / 60
+                      : 0;
                     const isExpired = minutesSinceAssign >= escalationMinutes;
                     const isDisabled =
                       loadingClaimId === item.lead._id ||
@@ -305,11 +307,11 @@ export default function ConversationsList({
                           </span>
                         ) : null}
                         Klaim Lead
-                        {isExpired && (
+                        {/* {isExpired && (
                           <span className="ml-2 text-orange-200">
                             (Sudah lewat waktu klaim)
                           </span>
-                        )}
+                        )} */}
                       </div>
                     );
                   })()}

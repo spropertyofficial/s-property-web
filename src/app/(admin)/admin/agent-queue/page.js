@@ -11,7 +11,7 @@ export default function AgentQueuePage() {
   const [editAgents, setEditAgents] = useState([]);
   const [allAgents, setAllAgents] = useState([]);
   const [selectedAgentId, setSelectedAgentId] = useState("");
-  const [escalationMinutes, setEscalationMinutes] = useState(10);
+  const [escalationMinutes, setEscalationMinutes] = useState(5);
 
   useEffect(() => {
     fetchQueue();
