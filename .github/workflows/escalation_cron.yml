@@ -2,7 +2,8 @@ name: Check Lead Escalations Cron Job
 
 on:
   schedule:
-    - cron: '*/3 6-23 * * *'
+    - cron: '*/3 23-23 * * *'
+    - cron: '*/3 0-6 * * *'
   workflow_dispatch:
 
 jobs:
