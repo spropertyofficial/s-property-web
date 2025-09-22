@@ -7,4 +7,5 @@ export const SOURCES = [
   "Instagram",
   "Tiktok",
   "Facebook",
+  "WhatsApp"
 ];
