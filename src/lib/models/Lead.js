@@ -23,6 +23,7 @@ const LeadSchema = new mongoose.Schema(
   {
     // Informasi Awal (required minimal saat create)
     leadInAt: { type: Date, default: Date.now }, // Tanggal lead masuk sistem
+    assignedAt: { type: Date }, // Tanggal lead terakhir kali diberikan ke agent
     name: { type: String, required: true, trim: true, maxlength: 150 }, // Nama Prospek
     contact: { type: String, trim: true, maxlength: 50 }, // Nomor Telepon / WA
     email: { type: String, trim: true, lowercase: true, maxlength: 150 },

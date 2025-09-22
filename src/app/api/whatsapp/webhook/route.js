@@ -89,6 +89,7 @@ export async function POST(req) {
         agent: assignedAgent || null,
         isClaimed: false,
         leadInAt: Date.now(),
+        assignedAt: Date.now(),
       });
 
       console.log("Lead baru dibuat:", From.replace("whatsapp:", ""));
@@ -142,15 +143,7 @@ export async function POST(req) {
         }
       }
       // Lead baru: langsung di-assign ke agent giliran, status belum diklaim
-      lead = await Lead.create({
-        name: "-",
-        contact: From.replace("whatsapp:", ""),
-        source: "WhatsApp",
-        status: "Baru",
-        agent: assignedAgent || null,
-        isClaimed: false,
-        leadInAt: Date.now(),
-      });
+      // Sudah dibuat di atas, tidak perlu duplikasi create lead
 
       console.log("Lead baru dibuat:", From.replace("whatsapp:", ""));
       // Kirim notifikasi WhatsApp ke agent giliran
