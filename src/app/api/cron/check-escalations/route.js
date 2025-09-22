@@ -26,10 +26,10 @@ export async function GET(req) {
   let escalated = [];
   for (const lead of unclaimedLeads) {
     if (activeAgents.length > 0) {
-      // Gunakan assignedIndex di lead, default ke 0 jika belum ada
-      let assignedIndex = typeof lead.assignedIndex === 'number' ? lead.assignedIndex : 0;
-      // Rotasi ke agent berikutnya
-      let nextIndex = (assignedIndex + 1) % activeAgents.length;
+      // Cari index agent saat ini di daftar activeAgents
+      const currentAgentIndex = activeAgents.findIndex(a => a.user.toString() === lead.agent?.toString());
+      // Jika agent tidak ditemukan, default ke 0
+      const nextIndex = currentAgentIndex >= 0 ? (currentAgentIndex + 1) % activeAgents.length : 0;
       const nextAgentId = activeAgents[nextIndex].user;
       // Update agent dan assignedIndex pada lead
       lead.agent = nextAgentId;
