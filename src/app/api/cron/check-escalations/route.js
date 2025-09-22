@@ -25,12 +25,15 @@ export async function GET(req) {
 
   let escalated = [];
   for (const lead of unclaimedLeads) {
-    // Rotasi ke agent berikutnya
     if (activeAgents.length > 0) {
-      let nextIndex = (queue.lastAssignedIndex + 1) % activeAgents.length;
+      // Gunakan assignedIndex di lead, default ke 0 jika belum ada
+      let assignedIndex = typeof lead.assignedIndex === 'number' ? lead.assignedIndex : 0;
+      // Rotasi ke agent berikutnya
+      let nextIndex = (assignedIndex + 1) % activeAgents.length;
       const nextAgentId = activeAgents[nextIndex].user;
-      // Update agent pada lead (cabut dan isi agent baru)
+      // Update agent dan assignedIndex pada lead
       lead.agent = nextAgentId;
+      lead.assignedIndex = nextIndex;
       await lead.save();
       // Kirim notifikasi WhatsApp ke agent berikutnya
       try {
@@ -55,10 +58,6 @@ export async function GET(req) {
       } catch (err) {
         console.error('Gagal kirim notifikasi ke agent:', err);
       }
-      // Update pointer rotasi
-      queue.lastAssignedIndex = nextIndex;
-      queue.updatedAt = Date.now();
-      await queue.save();
       escalated.push({ leadId: lead._id, nextAgent: nextAgentId });
     }
   }
