@@ -240,7 +240,7 @@ export default function ConversationsList({
                     {/* TIMER ESKALASI untuk lead belum diklaim */}
                     {!isAssignedToMe && isNotClaimed && (
                       <EscalationTimer
-                        leadInAt={item.lead?.leadInAt}
+                        leadInAt={item.lead?.assignedAt || item.lead?.leadInAt}
                         escalationMinutes={escalationMinutes}
                       />
                     )}
@@ -272,14 +272,11 @@ export default function ConversationsList({
                   isAssignedToMe &&
                   !isAdmin &&
                   (() => {
-                    const leadInAt = item.lead?.leadInAt;
+                    // Gunakan assignedAt untuk expiry
+                    const assignedAt = item.lead?.assignedAt || item.lead?.leadInAt;
                     const nowMs = Date.now();
-                    const assignMs = leadInAt
-                      ? new Date(leadInAt).getTime()
-                      : 0;
-                    const minutesSinceAssign = leadInAt
-                      ? (nowMs - assignMs) / 1000 / 60
-                      : 0;
+                    const assignMs = assignedAt ? new Date(assignedAt).getTime() : 0;
+                    const minutesSinceAssign = assignedAt ? (nowMs - assignMs) / 1000 / 60 : 0;
                     const isExpired = minutesSinceAssign >= escalationMinutes;
                     const isDisabled =
                       loadingClaimId === item.lead._id ||
@@ -307,11 +304,11 @@ export default function ConversationsList({
                           </span>
                         ) : null}
                         Klaim Lead
-                        {/* {isExpired && (
+                        {isExpired && (
                           <span className="ml-2 text-orange-200">
                             (Sudah lewat waktu klaim)
                           </span>
-                        )} */}
+                        )}
                       </div>
                     );
                   })()}
@@ -335,10 +332,13 @@ export default function ConversationsList({
 
 // Komponen timer eskalasi
 function EscalationTimer({ leadInAt, escalationMinutes = 5 }) {
-  if (!leadInAt) return null;
+  // Ubah agar menerima assignedAt, bukan leadInAt
+  // Backward compatible: jika assignedAt tidak ada, fallback ke leadInAt
+  const assignedAt = leadInAt;
+  if (!assignedAt) return null;
   const [totalSeconds, setTotalSeconds] = useState(0);
   useEffect(() => {
-    const startMs = new Date(leadInAt).getTime();
+    const startMs = new Date(assignedAt).getTime();
     const endMs = startMs + escalationMinutes * 60 * 1000;
     const tick = () => {
       const left = Math.max(0, Math.floor((endMs - Date.now()) / 1000));
@@ -347,7 +347,7 @@ function EscalationTimer({ leadInAt, escalationMinutes = 5 }) {
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [leadInAt, escalationMinutes]);
+  }, [assignedAt, escalationMinutes]);
 
   const min = Math.floor(totalSeconds / 60);
   const sec = totalSeconds % 60;
