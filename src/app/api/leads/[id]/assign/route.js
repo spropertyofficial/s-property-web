@@ -26,8 +26,8 @@ export async function POST(req, { params }) {
   const activeAgents = queue.agents.filter(a => a.active);
   const nextIndex = queue.lastAssignedIndex;
   const expectedAgent = activeAgents[nextIndex]?.user?.toString();
-  if (agentId !== expectedAgent)
-    return NextResponse.json({ success: false, error: "Bukan giliran agent ini" }, { status: 403 });
+  // if (agentId !== expectedAgent)
+  //   return NextResponse.json({ success: false, error: "Bukan giliran agent ini" }, { status: 403 });
 
   // Assign lead ke agent, catat waktu, dan tandai sudah diklaim
   lead.agent = agentId;
