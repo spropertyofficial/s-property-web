@@ -19,11 +19,13 @@ export async function GET(req) {
   const escalationMinutes = queue?.escalationMinutes ?? 5;
   const activeAgents = queue?.agents?.filter(a => a.active) || [];
 
-  // Cari leads yang belum diklaim (isClaimed == false, source WhatsApp) dan sudah masuk lebih lama dari waktu eskalasi
+  // Cari leads yang belum diklaim (isClaimed == false, source WhatsApp) dan assignedAt sudah lewat threshold eskalasi
   const threshold = Date.now() - escalationMinutes * 60 * 1000;
-  const unclaimedLeads = await Lead.find({ isClaimed: false, source: "WhatsApp", leadInAt: { $lte: new Date(threshold) } });
+  const unclaimedLeads = await Lead.find({ isClaimed: false, source: "WhatsApp", assignedAt: { $lte: new Date(threshold) } });
 
   let escalated = [];
+  // Ambil AgentQueue untuk update pointer
+  // queue sudah dideklarasikan di atas, tidak perlu deklarasi ulang
   for (const lead of unclaimedLeads) {
     if (activeAgents.length > 0) {
       // Cari index agent saat ini di daftar activeAgents
@@ -31,10 +33,17 @@ export async function GET(req) {
       // Jika agent tidak ditemukan, default ke 0
       const nextIndex = currentAgentIndex >= 0 ? (currentAgentIndex + 1) % activeAgents.length : 0;
       const nextAgentId = activeAgents[nextIndex].user;
-      // Update agent dan assignedIndex pada lead
+      // Update agent, assignedIndex, dan assignedAt pada lead
       lead.agent = nextAgentId;
       lead.assignedIndex = nextIndex;
+      lead.assignedAt = Date.now();
       await lead.save();
+      // Advance pointer global lastAssignedIndex di AgentQueue
+      if (queue) {
+        queue.lastAssignedIndex = nextIndex;
+        queue.updatedAt = Date.now();
+        await queue.save();
+      }
       // Kirim notifikasi WhatsApp ke agent berikutnya
       try {
         const agentUser = await User.findById(nextAgentId);
