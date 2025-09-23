@@ -72,6 +72,7 @@ export async function GET(req) {
           createdAt: "$createdAt",
           updatedAt: "$updatedAt",
           isClaimed: "$isClaimed",
+          assignedAt: "$assignedAt",
           unread: "$unread",
         },
         lastMessage: 1,
