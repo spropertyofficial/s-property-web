@@ -29,5 +29,5 @@ export async function POST(req) {
     await queue.save();
   }
   await queue.populate("agents.user");
-  return NextResponse.json({ success: true, agents: queue.agents, lastAssignedIndex: queue.lastAssignedIndex, escalationMinutes: queue.escalationMinutes ?? 10 });
+  return NextResponse.json({ success: true, agents: queue.agents, lastAssignedIndex: queue.lastAssignedIndex, escalationMinutes: queue.escalationMinutes ?? 5 });
 }
