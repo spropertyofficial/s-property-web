@@ -2,6 +2,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { RxAvatar } from "react-icons/rx";
 import { FaSpinner } from "react-icons/fa";
+import { ImWarning } from "react-icons/im";
 import Swal from "sweetalert2";
 import axios from "axios";
 
@@ -109,7 +110,11 @@ export default function ConversationsList({
           title: "Gagal",
           text: "Lead tidak ditemukan",
         });
-      } else if (status === 409 || message === "Lead sudah di-assign" || message === "Lead sudah diklaim") {
+      } else if (
+        status === 409 ||
+        message === "Lead sudah di-assign" ||
+        message === "Lead sudah diklaim"
+      ) {
         Swal.fire({
           icon: "error",
           title: "Gagal",
@@ -238,7 +243,7 @@ export default function ConversationsList({
                       </p>
                     </div>
                     {/* TIMER ESKALASI untuk lead belum diklaim */}
-                    {!isAssignedToMe && isNotClaimed && (
+                    {isNotClaimed && (
                       <EscalationTimer
                         leadInAt={item.lead?.assignedAt || item.lead?.leadInAt}
                         escalationMinutes={escalationMinutes}
@@ -273,15 +278,21 @@ export default function ConversationsList({
                   !isAdmin &&
                   (() => {
                     // Gunakan assignedAt untuk expiry
-                    const assignedAt = item.lead?.assignedAt || item.lead?.leadInAt;
+                    const assignedAt =
+                      item.lead?.assignedAt || item.lead?.leadInAt;
                     const nowMs = Date.now();
-                    const assignMs = assignedAt ? new Date(assignedAt).getTime() : 0;
-                    const minutesSinceAssign = assignedAt ? (nowMs - assignMs) / 1000 / 60 : 0;
+                    const assignMs = assignedAt
+                      ? new Date(assignedAt).getTime()
+                      : 0;
+                    const minutesSinceAssign = assignedAt
+                      ? (nowMs - assignMs) / 1000 / 60
+                      : 0;
                     const isExpired = minutesSinceAssign >= escalationMinutes;
                     const isDisabled =
                       loadingClaimId === item.lead._id ||
                       !currentUser ||
-                      !currentUser._id
+                      !currentUser._id ||
+                      isExpired;
                     return (
                       <div
                         role="button"
@@ -303,11 +314,13 @@ export default function ConversationsList({
                             <FaSpinner className="animate-spin h-4 w-4 text-white" />
                           </span>
                         ) : null}
-                        Klaim Lead
-                        {isExpired && (
-                          <span className="ml-2 text-orange-200">
-                            (Sudah lewat waktu klaim)
+                        {isExpired ? (
+                          <span className="ml-">
+                            <ImWarning className="inline-block mr-1" />
+                            Waktu habis
                           </span>
+                        ) : (
+                          <span>Klaim Lead</span>
                         )}
                       </div>
                     );
