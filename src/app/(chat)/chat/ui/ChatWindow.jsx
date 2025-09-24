@@ -13,6 +13,7 @@ import {
   FaExclamationCircle,
 } from "react-icons/fa";
 import Swal from "sweetalert2";
+import axios from "axios";
 
 export default function ChatWindow({
   conversation,
@@ -197,7 +198,7 @@ export default function ChatWindow({
     ]);
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     const trimmed = text.trim();
     // Hide preview immediately after send
@@ -207,6 +208,51 @@ export default function ChatWindow({
       setAttachmentType(null);
       setActivePreviewIdx(0);
     }
+    // Jika window tutup, kirim template message
+    if (conversation && conversation.windowOpen === false) {
+      setIsSending(true);
+      try {
+        // Kirim template message via endpoint
+        const res = await axios.post("/api/conversations/send-template", {
+          contact: conversation.lead?.contact,
+          leadId: conversation.lead?._id,
+          templateKey: "followup",
+        });
+
+        const data = res.data;
+        if (data.success) {
+          // Tampilkan di chat sebagai pesan outbound
+          addPendingMessage({
+            text: "Pesan follow up telah dikirim ke user menggunakan template WhatsApp.",
+          });
+          Swal.fire({
+            icon: "success",
+            title: "Template message dikirim",
+            text: "Pesan follow up telah dikirim ke user menggunakan template WhatsApp.",
+          });
+          // Refetch conversations agar windowOpen langsung update
+          if (typeof refetchConversations === "function") {
+            setTimeout(() => refetchConversations(), 500);
+          }
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Gagal kirim template",
+            text: data.error || "Terjadi kesalahan.",
+          });
+        }
+      } catch (err) {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal kirim template",
+          text: err.message || "Terjadi kesalahan.",
+        });
+      }
+      setIsSending(false);
+      setText("");
+      return;
+    }
+    // Jika window masih terbuka, kirim pesan seperti biasa
     if (attachmentFiles.length > 0 && attachmentType) {
       setIsSending(true);
       // Optimistic UI: tampilkan lampiran di chat window sebagai pending
@@ -421,7 +467,7 @@ export default function ChatWindow({
             title="Info"
           >
             <BsExclamationSquare className="w-6 h-6" />
-            </button>
+          </button>
         </div>
       </div>
 
@@ -604,7 +650,7 @@ export default function ChatWindow({
               enterKeyHint="send"
               autoCorrect="on"
               autoCapitalize="sentences"
-              disabled={isSending}
+              disabled={isSending || (conversation && !conversation.windowOpen)}
             />
           ) : (
             <textarea
@@ -612,7 +658,11 @@ export default function ChatWindow({
               rows={inputRows}
               value={text}
               onChange={handleInputChange}
-              placeholder="Tulis pesan..."
+              placeholder={
+                conversation && !conversation.windowOpen
+                  ? "Chat ditutup, tekan tombol kirim untuk follow up"
+                  : "Tulis pesan..."
+              }
               className="flex-1 resize-none rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
               style={{
                 maxHeight: `${maxRows * 24}px`,
@@ -622,7 +672,7 @@ export default function ChatWindow({
               enterKeyHint="send"
               autoCorrect="on"
               autoCapitalize="sentences"
-              disabled={isSending}
+              disabled={isSending || (conversation && !conversation.windowOpen)}
             />
           )}
           {/* Tampilkan preview di composer sebelum kirim */}
@@ -700,7 +750,11 @@ export default function ChatWindow({
             type="submit"
             className="px-5 py-2 rounded-lg bg-teal-600 text-white text-sm font-bold hover:bg-teal-700 disabled:opacity-50 active:scale-95 flex items-center justify-center"
             disabled={
-              isSending || (!text.trim() && attachmentPreviews.length === 0)
+              isSending ||
+              (conversation &&
+                conversation.windowOpen !== false &&
+                !text.trim() &&
+                attachmentPreviews.length === 0)
             }
           >
             {isSending ? <FaSpinner className="animate-spin mr-2" /> : null}
