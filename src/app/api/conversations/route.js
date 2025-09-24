@@ -1,5 +1,6 @@
 import dbConnect from "@/lib/mongodb";
 import Lead from "@/lib/models/Lead";
+import ChatMessage from "@/lib/models/ChatMessage";
 
 export async function GET(req) {
   await dbConnect();
@@ -29,7 +30,7 @@ export async function GET(req) {
     );
   }
   // Ambil ringkasan percakapan dengan aggregation pipeline
-  const conversations = await Lead.aggregate([
+  const conversationsRaw = await Lead.aggregate([
     {
       $lookup: {
         from: "chatmessages", // nama koleksi di MongoDB
@@ -82,5 +83,40 @@ export async function GET(req) {
       },
     },
   ]);
+
+  // Untuk setiap conversation, tambahkan status window
+  const conversations = await Promise.all(
+    conversationsRaw.map(async (conv) => {
+      const leadId = conv.lead._id;
+      // Ambil pesan inbound terakhir (user) dan template outbound terakhir
+      const lastInbound = await ChatMessage.getLastInboundMessage(leadId);
+      const lastTemplate = await ChatMessage.getLastTemplateMessage(leadId);
+      const now = Date.now();
+      let windowOpen = false;
+      let lastWindowTime = null;
+      if (lastInbound && lastInbound.sentAt) {
+        lastWindowTime = new Date(lastInbound.sentAt).getTime();
+        // Jika ada pesan inbound setelah template, window direset oleh user
+        if (lastTemplate && lastTemplate.sentAt) {
+          const lastTemplateTime = new Date(lastTemplate.sentAt).getTime();
+          if (lastInbound.sentAt > lastTemplate.sentAt) {
+            // User membalas setelah template, window direset oleh user
+            windowOpen = (now - lastWindowTime) <= 24 * 60 * 60 * 1000;
+          } else {
+            // Tidak ada inbound setelah template, window dari template
+            windowOpen = (now - lastTemplateTime) <= 24 * 60 * 60 * 1000;
+          }
+        } else {
+          // Tidak ada template, window dari inbound
+          windowOpen = (now - lastWindowTime) <= 24 * 60 * 60 * 1000;
+        }
+      } else if (lastTemplate && lastTemplate.sentAt) {
+        // Tidak ada inbound, window dari template
+        const lastTemplateTime = new Date(lastTemplate.sentAt).getTime();
+        windowOpen = (now - lastTemplateTime) <= 24 * 60 * 60 * 1000;
+      }
+      return { ...conv, windowOpen };
+    })
+  );
   return Response.json({ conversations });
 }
