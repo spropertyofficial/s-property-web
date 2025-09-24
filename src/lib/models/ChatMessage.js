@@ -19,7 +19,8 @@ const ChatMessageSchema = new mongoose.Schema(
     },
     sentAt: { type: Date, default: Date.now },
     receivedAt: { type: Date, default: Date.now },
-    twilioSid: { type: String }, // SID dari Twilio (opsional)
+  twilioSid: { type: String }, // SID dari Twilio (opsional)
+  isTemplate: { type: Boolean, default: false }, // True jika pesan outbound adalah template message
     mediaUrls: [{ type: String }], // Array URL media
     mediaTypes: [{ type: String }], // Array tipe media
   },
@@ -28,6 +29,40 @@ const ChatMessageSchema = new mongoose.Schema(
     strict: false,
   }
 );
+
+
+/**
+ * Static method untuk mengambil pesan inbound terakhir per lead.
+ * Digunakan untuk identifikasi window 24 jam WhatsApp.
+ * @param {ObjectId} leadId - ID lead yang ingin dicek
+ * @returns {Promise<ChatMessage|null>} Pesan inbound terakhir atau null jika tidak ada
+ */
+ChatMessageSchema.statics.getLastInboundMessage = async function(leadId) {
+  return await this.findOne({ lead: leadId, direction: "inbound" })
+    .sort({ sentAt: -1 });
+};
+
+/**
+ * Static method untuk mengambil pesan outbound terakhir per lead.
+ * Digunakan untuk identifikasi window 24 jam WhatsApp (Twilio: window dibuka setelah outbound).
+ * @param {ObjectId} leadId - ID lead yang ingin dicek
+ * @returns {Promise<ChatMessage|null>} Pesan outbound terakhir atau null jika tidak ada
+ */
+ChatMessageSchema.statics.getLastOutboundMessage = async function(leadId) {
+  return await this.findOne({ lead: leadId, direction: "outbound" })
+    .sort({ sentAt: -1 });
+};
+
+/**
+ * Static method untuk mengambil template message outbound terakhir per lead.
+ * Digunakan untuk identifikasi window 24 jam WhatsApp (hanya template message yang membuka window).
+ * @param {ObjectId} leadId - ID lead yang ingin dicek
+ * @returns {Promise<ChatMessage|null>} Pesan template outbound terakhir atau null jika tidak ada
+ */
+ChatMessageSchema.statics.getLastTemplateMessage = async function(leadId) {
+  return await this.findOne({ lead: leadId, direction: "outbound", isTemplate: true })
+    .sort({ sentAt: -1 });
+};
 
 export default mongoose.models.ChatMessage ||
   mongoose.model("ChatMessage", ChatMessageSchema);

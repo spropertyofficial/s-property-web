@@ -19,6 +19,11 @@ const KerabatSchema = new mongoose.Schema(
   { _id: false }
 );
 
+/**
+ * Schema Lead
+ * Relasi ke ChatMessage: field _id (Lead) digunakan sebagai foreign key di ChatMessage.lead
+ * Untuk identifikasi window 24 jam WhatsApp, gunakan ChatMessage.getLastInboundMessage(lead._id)
+ */
 const LeadSchema = new mongoose.Schema(
   {
     // Informasi Awal (required minimal saat create)
