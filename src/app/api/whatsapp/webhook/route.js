@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Lead from "@/lib/models/Lead";
 import ChatMessage from "@/lib/models/ChatMessage";
-import querystring from "querystring";
 import axios from "axios";
 import streamifier from "streamifier";
 import cloudinary from "@/lib/cloudinary";
@@ -191,7 +190,10 @@ export async function POST(req) {
       mediaTypes.push(body[`MediaContentType${i}`]);
   }
 
-  if (Body && !Body.toLowerCase().includes("notifikasi")) {
+  if (
+    (Body || numMedia > 0) &&
+    !(Body && Body.toLowerCase().includes("notifikasi"))
+  ) {
     await ChatMessage.create({
       lead: lead._id,
       from: From.replace("whatsapp:", ""),
