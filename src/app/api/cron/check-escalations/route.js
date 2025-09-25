@@ -61,25 +61,10 @@ export async function GET(req) {
       try {
         const agentUser = await User.findById(nextAgentId);
         if (agentUser && agentUser.phone) {
-          // await axios.post(
-          //   `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
-          //   querystring.stringify({
-          //     To: `whatsapp:${formatPhone(agentUser.phone)}`,
-          //     From: `${process.env.TWILIO_WHATSAPP_NUMBER}`,
-          //     Body: `Ada lead yang belum diambil. Silakan klaim untuk segera merespon.`,
-          //   }),
-          //   {
-          //     auth: {
-          //       username: process.env.TWILIO_ACCOUNT_SID,
-          //       password: process.env.TWILIO_AUTH_TOKEN,
-          //     },
-          //     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          //   }
-          // );
           await twilioClient.messages.create({
             to: `whatsapp:${formatPhone(agentUser.phone)}`,
             from: `${process.env.TWILIO_WHATSAPP_NUMBER}`,
-            contentSid: "HX7613b742bdb85644f8605084f23a9cc3",
+            contentSid: "HX7740d1d335adc91e00ea12d9515a97dd",
           });
         }
       } catch (err) {
