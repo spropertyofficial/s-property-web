@@ -8,9 +8,7 @@ import {
   FaPlay,
   FaPause,
   FaPaperclip,
-  FaVideo,
   FaSpinner,
-  FaExclamationCircle,
 } from "react-icons/fa";
 import Swal from "sweetalert2";
 import axios from "axios";
