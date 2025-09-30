@@ -69,6 +69,9 @@ export async function POST(req) {
       // 1. Identifikasi proyek dari nomor tujuan (To)
       let normalizedTo = (To || "").replace("whatsapp:", "").trim();
       const project = await Project.findOne({ whatsappNumber: normalizedTo }).populate("agentQueue");
+      // logging proyek
+      console.log("exist agentQueue check:", project ? project : "tidak ada");
+
 
       // 2. Ambil queue proyek jika ada, else fallback ke queue umum (tanpa projectId)
       let queue = null;
@@ -80,6 +83,8 @@ export async function POST(req) {
         queue = await AgentQueue.findOne({ projectId: { $exists: false } });
         if (!queue) queue = await AgentQueue.findOne({ projectId: null });
       }
+      // logging queue
+      console.log("Queue untuk lead baru:", queue ? queue : "tidak ada");
 
       // 3. Round-robin di queue yang ditemukan
       let assignedAgent = null;

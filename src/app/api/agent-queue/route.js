@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import AgentQueue from "@/lib/models/AgentQueue";
 import User from "@/lib/models/User";
+import Project from "@/lib/models/Project";
 
 // GET: Ambil agent queue per proyek
 export async function GET(req) {
@@ -31,6 +32,10 @@ export async function POST(req) {
     await queue.save();
   } else {
     queue = await AgentQueue.create({ agents, lastAssignedIndex: lastAssignedIndex ?? -1, escalationMinutes: escalationMinutes ?? 5, projectId });
+  }
+  // Update Project.agentQueue agar selalu terisi
+  if (queue.projectId) {
+    await Project.findByIdAndUpdate(queue.projectId, { agentQueue: queue._id });
   }
   await queue.populate("agents.user");
   return NextResponse.json({ success: true, agents: queue.agents, lastAssignedIndex: queue.lastAssignedIndex, escalationMinutes: queue.escalationMinutes ?? 5, projectId: queue.projectId });
