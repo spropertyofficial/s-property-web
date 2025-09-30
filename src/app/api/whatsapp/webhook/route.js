@@ -6,6 +6,7 @@ import axios from "axios";
 import streamifier from "streamifier";
 import cloudinary from "@/lib/cloudinary";
 import AgentQueue from "@/lib/models/AgentQueue";
+import Project from "@/lib/models/Project";
 import User from "@/lib/models/User";
 import { sendMail } from "@/lib/email/sendMail";
 import twilioClient from "@/lib/twilioClient";
@@ -62,25 +63,39 @@ export async function POST(req) {
 
   let lead;
   if (Body && !Body.toLowerCase().includes("notifikasi")) {
+    // Cari lead existing by contact
     lead = await Lead.findOne({ contact: From.replace("whatsapp:", "") });
     if (!lead) {
-      // Ambil AgentQueue untuk round-robin
-      let queue = await AgentQueue.findOne({});
+      // 1. Identifikasi proyek dari nomor tujuan (To)
+      let normalizedTo = (To || "").replace("whatsapp:", "").trim();
+      const project = await Project.findOne({ whatsappNumber: normalizedTo }).populate("agentQueue");
+
+      // 2. Ambil queue proyek jika ada, else fallback ke queue umum (tanpa projectId)
+      let queue = null;
+      if (project && project.agentQueue) {
+        queue = await AgentQueue.findById(project.agentQueue);
+      }
+      if (!queue) {
+        // fallback queue umum (legacy)
+        queue = await AgentQueue.findOne({ projectId: { $exists: false } });
+        if (!queue) queue = await AgentQueue.findOne({ projectId: null });
+      }
+
+      // 3. Round-robin di queue yang ditemukan
       let assignedAgent = null;
       let nextIndex = -1;
       if (queue && queue.agents && queue.agents.length > 0) {
-        // Cari agent aktif berikutnya
         const activeAgents = queue.agents.filter((a) => a.active);
         if (activeAgents.length > 0) {
           nextIndex = (queue.lastAssignedIndex + 1) % activeAgents.length;
           assignedAgent = activeAgents[nextIndex].user;
-          // Update pointer rotasi
           queue.lastAssignedIndex = nextIndex;
           queue.updatedAt = Date.now();
           await queue.save();
         }
       }
-      // Lead baru: langsung di-assign ke agent giliran, status belum diklaim
+
+      // 4. Create lead baru
       lead = await Lead.create({
         name: "-",
         contact: From.replace("whatsapp:", ""),
@@ -90,15 +105,14 @@ export async function POST(req) {
         isClaimed: false,
         leadInAt: Date.now(),
         assignedAt: Date.now(),
+        propertyName: project ? project.name : undefined,
       });
+      console.log("Lead baru dibuat:", lead.contact, project ? `(project=${project.name})` : "(no project)");
 
-      console.log("Lead baru dibuat:", From.replace("whatsapp:", ""));
-      // Kirim notifikasi WhatsApp ke agent giliran
+      // 5. Notifikasi ke agent yang ditugaskan (jika ada)
       if (assignedAgent) {
-        // Ambil nomor agent
         const agentUser = await User.findById(assignedAgent);
         if (agentUser && agentUser.phone) {
-          // Kirim pesan WhatsApp via Twilio SDK
           try {
             await twilioClient.messages.create({
               to: `whatsapp:${formatPhone(agentUser.phone)}`,
@@ -108,43 +122,10 @@ export async function POST(req) {
             console.log(`Notifikasi dikirim ke agent ${agentUser.phone}`);
           } catch (err) {
             console.error("Gagal kirim notifikasi ke agent:", err);
-            // Fallback: kirim email jika WhatsApp gagal
             const emailTo = "devranmalik82@gmail.com";
-            const subject = `Gagal Notifikasi WhatsApp Lead Baru untuk Agent ${
-              agentUser?.name || "(Unknown)"
-            }`;
-            const html = `<p>Ada lead baru dari WhatsApp, tapi gagal kirim notifikasi ke agent <b>${
-              agentUser?.name || "(Unknown)"
-            }</b> karena nomor WhatsApp tidak ditemukan atau Twilio error.</p> <p>Lead: ${
-              lead?.contact || "(Unknown)"
-            }</p>`;
-            try {
-              await sendMail({ to: emailTo, subject, html });
-            } catch (mailErr) {
-              console.error(
-                "Gagal kirim email fallback notifikasi agent:",
-                mailErr
-              );
-            }
-          }
-        } else {
-          // Fallback: kirim email jika nomor WhatsApp agent tidak ada
-          const emailTo = "devranmalik82@gmail.com";
-          const subject = `Gagal Notifikasi WhatsApp Lead Baru untuk Agent ${
-            agentUser?.name || "(Unknown)"
-          }`;
-          const html = `<p>Ada lead baru dari WhatsApp, tapi gagal kirim notifikasi ke agent <b>${
-            agentUser?.name || "(Unknown)"
-          }</b> karena nomor WhatsApp tidak ditemukan.</p> <p>Lead: ${
-            lead?.contact || "(Unknown)"
-          }</p>`;
-          try {
-            await sendMail({ to: emailTo, subject, html });
-          } catch (mailErr) {
-            console.error(
-              "Gagal kirim email fallback notifikasi agent:",
-              mailErr
-            );
+            const subject = `Gagal Notifikasi WhatsApp Lead Baru untuk Agent ${agentUser?.name || "(Unknown)"}`;
+            const html = `<p>Ada lead baru dari WhatsApp untuk ${project ? `proyek <b>${project.name}</b>` : "(tanpa proyek)"}, tapi gagal kirim notifikasi ke agent <b>${agentUser?.name || "(Unknown)"}</b>.</p><p>Lead: ${lead?.contact || "(Unknown)"}</p>`;
+            try { await sendMail({ to: emailTo, subject, html }); } catch (mailErr) { console.error("Gagal kirim email fallback notifikasi agent:", mailErr); }
           }
         }
       }
