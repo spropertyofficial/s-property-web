@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan Distribusi Lead WhatsApp</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #e0f7fa, #fff);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            max-width: 800px;
+            width: 100%;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1 {
+            color: #2d3748;
+            font-size: 28px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .section {
+            margin-bottom: 25px;
+        }
+        .label {
+            display: block;
+            color: #4a5568;
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        .input-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        select, input[type="number"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #edf2f7;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fafafa;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        select:focus, input[type="number"]:focus {
+            border-color: #63b3ed;
+            box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.2);
+            outline: none;
+        }
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .btn-primary { background: #4299e1; color: white; }
+        .btn-primary:hover { background: #3182ce; transform: scale(1.05); }
+        .btn-success { background: #48bb78; color: white; }
+        .btn-success:hover { background: #38a169; transform: scale(1.05); }
+        .btn-warning { background: #ecc94b; color: #744210; }
+        .btn-warning:hover { background: #d69e2e; transform: scale(1.05); }
+        .btn-danger { background: #f56565; color: white; }
+        .btn-danger:hover { background: #e53e3e; transform: scale(1.05); }
+        .current-turn {
+            padding: 12px;
+            background: #edf2f7;
+            border-radius: 8px;
+            color: #718096;
+            font-size: 14px;
+            text-align: center;
+        }
+        .table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            margin-top: 20px;
+        }
+        .table th {
+            background: #edf2f7;
+            padding: 12px;
+            text-align: left;
+            font-size: 14px;
+            color: #4a5568;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .table td {
+            background: white;
+            padding: 12px;
+            font-size: 14px;
+            color: #2d3748;
+        }
+        .table td input[type="number"] {
+            width: 70px;
+            padding: 8px;
+        }
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: #48bb78;
+        }
+        .add-agent {
+            display: flex;
+            gap: 15px;
+        }
+        .add-agent select {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pengaturan Distribusi Lead WhatsApp</h1>
+        
+        <div class="section">
+            <div class="label">Proyek:</div>
+            <div class="input-group">
+                <select>
+                    <option>Rumah Griya Harmoni (+6289666000506)</option>
+                </select>
+                <button class="btn btn-success">Tambah Proyek</button>
+                <button class="btn btn-warning">Edit Proyek</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="label">Giliran agent saat ini:</div>
+            <div class="current-turn">Belum ada agent aktif atau giliran tidak valid</div>
+        </div>
+        
+        <div class="section">
+            <div class="label">Ubah giliran ke agent:</div>
+            <select>
+                <option>Imam Supriyadi (imamspry@gmail.com)</option>
+            </select>
+        </div>
+        
+        <div class="section">
+            <div class="label">Durasi waktu eskalasi (menit):</div>
+            <input type="number" value="5">
+        </div>
+        
+        <div class="section">
+            <div class="label">Pilih agent untuk ditambahkan:</div>
+            <div class="add-agent">
+                <select>
+                    <option>Imam Supriyadi (imamspry@gmail.com)</option>
+                </select>
+                <button class="btn btn-success">Tambah Agent</button>
+            </div>
+        </div>
+        
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Order</th>
+                    <th>Active</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Imam Supriyadi</td>
+                    <td><input type="number" value="1"></td>
+                    <td><input type="checkbox" class="checkbox" checked></td>
+                    <td><button class="btn btn-danger">Hapus</button></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <button class="btn btn-primary" style="width: 100%; margin-top: 20px;">Simpan Perubahan</button>
+    </div>
+</body>
+</html>
