@@ -11,9 +11,9 @@ export async function GET(req) {
   const projectId = searchParams.get("projectId");
   const filter = projectId ? { projectId } : {};
   const queue = await AgentQueue.findOne(filter);
-  if (!queue) return NextResponse.json({ agents: [], lastAssignedIndex: -1, escalationMinutes: 5 });
+  if (!queue) return NextResponse.json({ agents: [], lastAssignedIndex: -1, escalationMinutes: 5, _id: null });
   await queue.populate("agents.user");
-  return NextResponse.json({ agents: queue.agents, lastAssignedIndex: queue.lastAssignedIndex, escalationMinutes: queue.escalationMinutes ?? 5 });
+  return NextResponse.json({ agents: queue.agents, lastAssignedIndex: queue.lastAssignedIndex, escalationMinutes: queue.escalationMinutes ?? 5, _id: queue._id });
 }
 
 // POST: Update agent queue per proyek

@@ -28,6 +28,7 @@ export default function AgentQueuePage() {
   const [projectFormOpen, setProjectFormOpen] = useState(false);
   const [editProject, setEditProject] = useState(null);
   const [agents, setAgents] = useState([]);
+  const [queueId, setQueueId] = useState("");
   const [lastAssignedIndex, setLastAssignedIndex] = useState(-1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -63,9 +64,11 @@ export default function AgentQueuePage() {
       setEditAgents(res.data.agents);
       setLastAssignedIndex(res.data.lastAssignedIndex);
       setEscalationMinutes(res.data.escalationMinutes);
+      setQueueId(res.data._id || "");
       setError("");
     } catch (err) {
       setError("Gagal mengambil data agent queue");
+      setQueueId("");
     }
     setLoading(false);
   }
@@ -123,6 +126,7 @@ export default function AgentQueuePage() {
         lastAssignedIndex,
         escalationMinutes,
         projectId: selectedProjectId,
+        _id: queueId,
       });
       await fetchQueue(selectedProjectId);
       Swal.fire({ icon: "success", title: "Perubahan berhasil disimpan" });
