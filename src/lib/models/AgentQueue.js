@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 
+
 const AgentQueueSchema = new mongoose.Schema({
+  projectId: { type: mongoose.Schema.Types.ObjectId, ref: "Project", required: false }, // relasi ke proyek
   agents: [
     {
       user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
