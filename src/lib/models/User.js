@@ -26,7 +26,7 @@ const UserSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["agent", "user", "semi-agent", "sales-inhouse"],
+      enum: ["agent", "user", "semi-agent", "sales-inhouse", "karyawan"],
       default: "user",
     },
   // For sales-inhouse: list of allowed Property IDs they can sell
