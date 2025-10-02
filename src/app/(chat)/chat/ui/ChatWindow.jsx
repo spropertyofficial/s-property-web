@@ -1,5 +1,6 @@
 "use client";
 import { ArrowDownCircle, ArrowLeft, Files, Images, Video } from "lucide-react";
+import AdMessageBubble from "./AdMessageBubble";
 import { CgSpinner } from "react-icons/cg";
 import { BsExclamationSquare } from "react-icons/bs";
 import Image from "next/image";
@@ -533,21 +534,34 @@ export default function ChatWindow({
                     {date}
                   </span>
                 </div>
-                {msgs.map((m) => (
-                  <MessageBubble
-                    key={
-                      m._id
-                        ? m._id
-                        : m.twilioSid
-                        ? `pending-${m.twilioSid}`
-                        : `pending-${Math.random()}`
-                    }
-                    {...m}
-                    mine={m.direction === "outbound"}
-                    text={m.body}
-                    onPreviewImg={handlePreviewImg}
-                  />
-                ))}
+                        {msgs.map((m) => {
+                          const isAdMsg = m.ReferralHeadline || m.ReferralBody || m.ReferralSourceUrl || m.referralHeadline || m.referralBody || m.referralSourceUrl;
+                          if (isAdMsg) {
+                            return (
+                              <AdMessageBubble
+                                key={m._id ? m._id : m.twilioSid ? `pending-${m.twilioSid}` : `pending-${Math.random()}`}
+                                message={m}
+                                mine={m.direction === "outbound"}
+                                onPreviewImg={handlePreviewImg}
+                              />
+                            );
+                          }
+                          return (
+                            <MessageBubble
+                              key={
+                                m._id
+                                  ? m._id
+                                  : m.twilioSid
+                                  ? `pending-${m.twilioSid}`
+                                  : `pending-${Math.random()}`
+                              }
+                              {...m}
+                              mine={m.direction === "outbound"}
+                              text={m.body}
+                              onPreviewImg={handlePreviewImg}
+                            />
+                          );
+                        })}
               </div>
             ));
           })()
@@ -838,12 +852,12 @@ function MessageBubble({
 }) {
   // Pilih waktu pesan yang valid
   const time = ts || sentAt || createdAt || receivedAt;
-  // Ambil fungsi preview dari props jika ada
   const { onPreviewImg } = payload;
-  // Pastikan bubble tetap dirender meski text kosong jika ada media
   const hasMedia = mediaUrls && mediaUrls.length > 0;
   const hasText = text && text.trim().length > 0;
   if (!hasMedia && !hasText) return null;
+  // Ambil ProfileName jika ada, hanya tampilkan untuk pesan inbound
+  const sender = payload.ProfileName || payload.profileName || "Unknown";
   return (
     <div className={`flex ${mine ? "justify-end" : "justify-start"} mb-2`}>
       <div
@@ -853,6 +867,12 @@ function MessageBubble({
             : "bg-white text-slate-800 border-slate-200"
         }`}
       >
+        {/* Tampilkan sender di atas bubble jika inbound dan ada ProfileName */}
+        {!mine && sender && (
+          <div className="flex justify-between text-xs mb-1 px-1 opacity-80">
+            <span className="font-medium text-slate-500">{sender}</span>
+          </div>
+        )}
         {/* Tampilkan media jika ada */}
         {hasMedia &&
           mediaUrls.map((url, idx) => {
