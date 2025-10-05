@@ -376,9 +376,15 @@ function EscalationTimer({ leadInAt, escalationMinutes = 5 }) {
 }
 
 function formatTime(ts) {
+  // Untuk waktu pesan (jam:menit)
   if (!ts) return "";
   const d = new Date(ts);
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
 }
 
 function getInitials(name) {
