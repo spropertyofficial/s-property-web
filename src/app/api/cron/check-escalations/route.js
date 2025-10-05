@@ -80,7 +80,7 @@ export async function GET(req) {
           await twilioClient.messages.create({
             to: `whatsapp:${formatPhone(agentUser.phone)}`,
             from: `${process.env.TWILIO_WHATSAPP_NUMBER}`,
-            contentSid: "HX0cdba500c0c9c3157678dd100cde6257",
+            contentSid: "HXac572d863eabf9a13616d5348ccc6a42",
           });
         }
       } catch (err) {
