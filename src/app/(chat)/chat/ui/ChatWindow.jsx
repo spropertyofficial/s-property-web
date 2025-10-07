@@ -5,12 +5,7 @@ import { CgSpinner } from "react-icons/cg";
 import { BsExclamationSquare } from "react-icons/bs";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import {
-  FaPlay,
-  FaPause,
-  FaPaperclip,
-  FaSpinner,
-} from "react-icons/fa";
+import { FaPlay, FaPause, FaPaperclip, FaSpinner } from "react-icons/fa";
 import Swal from "sweetalert2";
 import axios from "axios";
 
@@ -212,9 +207,10 @@ export default function ChatWindow({
       setIsSending(true);
       try {
         // Kirim template message via endpoint
-        const res = await axios.post("/api/conversations/send-template", {
-          contact: conversation.lead?.contact,
+        const res = await axios.post("/api/conver sations/send-template", {
           leadId: conversation.lead?._id,
+          contact: conversation.lead?.contact,
+          propertyName: conversation.lead?.propertyName,
           templateKey: "followup",
         });
 
@@ -325,6 +321,8 @@ export default function ChatWindow({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         leadId: conversation.lead._id,
+        contact: conversation.lead.contact,
+        propertyName: conversation.lead.propertyName,
         message: text || "",
         mediaFile: base64,
         mediaType: type,
@@ -454,9 +452,11 @@ export default function ChatWindow({
             <div className="font-bold text-slate-800">
               {getDisplayName(conversation.lead)}
             </div>
-            <div className="text-xs text-slate-500">
-              {conversation.lead.property?.name || conversation.lead.contact}
-            </div>
+            {conversation.lead.propertyName && (
+              <div className="inline-block px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-semibold mb-1 shadow-sm border border-teal-100">
+                {conversation.lead.propertyName}
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -534,34 +534,46 @@ export default function ChatWindow({
                     {date}
                   </span>
                 </div>
-                        {msgs.map((m) => {
-                          const isAdMsg = m.ReferralHeadline || m.ReferralBody || m.ReferralSourceUrl || m.referralHeadline || m.referralBody || m.referralSourceUrl;
-                          if (isAdMsg) {
-                            return (
-                              <AdMessageBubble
-                                key={m._id ? m._id : m.twilioSid ? `pending-${m.twilioSid}` : `pending-${Math.random()}`}
-                                message={m}
-                                mine={m.direction === "outbound"}
-                                onPreviewImg={handlePreviewImg}
-                              />
-                            );
-                          }
-                          return (
-                            <MessageBubble
-                              key={
-                                m._id
-                                  ? m._id
-                                  : m.twilioSid
-                                  ? `pending-${m.twilioSid}`
-                                  : `pending-${Math.random()}`
-                              }
-                              {...m}
-                              mine={m.direction === "outbound"}
-                              text={m.body}
-                              onPreviewImg={handlePreviewImg}
-                            />
-                          );
-                        })}
+                {msgs.map((m) => {
+                  const isAdMsg =
+                    m.ReferralHeadline ||
+                    m.ReferralBody ||
+                    m.ReferralSourceUrl ||
+                    m.referralHeadline ||
+                    m.referralBody ||
+                    m.referralSourceUrl;
+                  if (isAdMsg) {
+                    return (
+                      <AdMessageBubble
+                        key={
+                          m._id
+                            ? m._id
+                            : m.twilioSid
+                            ? `pending-${m.twilioSid}`
+                            : `pending-${Math.random()}`
+                        }
+                        message={m}
+                        mine={m.direction === "outbound"}
+                        onPreviewImg={handlePreviewImg}
+                      />
+                    );
+                  }
+                  return (
+                    <MessageBubble
+                      key={
+                        m._id
+                          ? m._id
+                          : m.twilioSid
+                          ? `pending-${m.twilioSid}`
+                          : `pending-${Math.random()}`
+                      }
+                      {...m}
+                      mine={m.direction === "outbound"}
+                      text={m.body}
+                      onPreviewImg={handlePreviewImg}
+                    />
+                  );
+                })}
               </div>
             ));
           })()
