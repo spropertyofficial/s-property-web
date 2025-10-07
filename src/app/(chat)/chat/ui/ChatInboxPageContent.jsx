@@ -42,7 +42,8 @@ export default function ChatInboxPageContent({ currentUser }) {
 
   // Sync selectedId dengan conversations setiap kali conversations berubah
   useEffect(() => {
-    const isDesktop = typeof window !== 'undefined' && window.innerWidth >= 1024;
+    const isDesktop =
+      typeof window !== "undefined" && window.innerWidth >= 1024;
     if (isDesktop) {
       if (!selectedId && conversations.length > 0) {
         const firstId =
@@ -50,7 +51,10 @@ export default function ChatInboxPageContent({ currentUser }) {
           conversations[0]?.lead?._id ||
           null;
         setSelectedId(firstId);
-        console.log("[DEBUG] Auto-select first conversation (desktop):", firstId);
+        console.log(
+          "[DEBUG] Auto-select first conversation (desktop):",
+          firstId
+        );
       } else if (
         selectedId &&
         !conversations.some((c) => c.lead?._id === selectedId)
@@ -61,11 +65,17 @@ export default function ChatInboxPageContent({ currentUser }) {
           conversations[0]?.lead?._id ||
           null;
         setSelectedId(firstId);
-        console.log("[DEBUG] Reset selectedId, not found. New (desktop):", firstId);
+        console.log(
+          "[DEBUG] Reset selectedId, not found. New (desktop):",
+          firstId
+        );
       }
     } else {
       // On mobile, do not auto-select
-      if (selectedId && !conversations.some((c) => c.lead?._id === selectedId)) {
+      if (
+        selectedId &&
+        !conversations.some((c) => c.lead?._id === selectedId)
+      ) {
         setSelectedId(null);
       }
     }
@@ -192,7 +202,12 @@ export default function ChatInboxPageContent({ currentUser }) {
       const res = await fetch("/api/conversations/reply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leadId: selected.lead._id, message: text }),
+        body: JSON.stringify({
+          contact: selected.lead.contact,
+          leadId: selected.lead._id,
+          propertyName: selected.lead.propertyName,
+          message: text,
+        }),
       });
       const result = await res.json();
       if (!res.ok) {

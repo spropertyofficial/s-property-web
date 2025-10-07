@@ -63,15 +63,13 @@ export async function GET(req) {
       $project: {
         lead: {
           _id: "$_id",
-          leadInAt: "$leadInAt",
           name: "$name",
           contact: "$contact",
           agent: "$agent",
           source: "$source",
           status: "$status",
-          attachments: "$attachments",
-          createdAt: "$createdAt",
-          updatedAt: "$updatedAt",
+          property: "$property",
+          propertyName: "$propertyName",
           isClaimed: "$isClaimed",
           assignedAt: "$assignedAt",
           unread: "$unread",
