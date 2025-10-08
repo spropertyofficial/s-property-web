@@ -13,7 +13,7 @@ export async function GET(req) {
     const adminAuth = await verifyAdmin(req);
     if (adminAuth.success) {
       // Admin interface - show all activities with populated agent data
-      if (adminAuth.admin.role === "superadmin") {
+      if (adminAuth.admin.role === "superadmin" || adminAuth.admin.role === "editor") {
         const logs = await ActivityLog.find({})
           .populate("agent", "name agentCode email type") // Populate with user data
           .sort({ createdAt: -1, date: -1 }); // Sort by creation date, then activity date
