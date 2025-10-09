@@ -207,7 +207,7 @@ export default function ChatWindow({
       setIsSending(true);
       try {
         // Kirim template message via endpoint
-        const res = await axios.post("/api/conver sations/send-template", {
+        const res = await axios.post("/api/conversations/send-template", {
           leadId: conversation.lead?._id,
           contact: conversation.lead?.contact,
           propertyName: conversation.lead?.propertyName,

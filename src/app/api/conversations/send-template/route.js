@@ -3,6 +3,7 @@ import twilioClient from "@/lib/twilioClient";
 import dbConnect from "@/lib/mongodb";
 import ChatMessage from "@/lib/models/ChatMessage";
 import Lead from "@/lib/models/Lead";
+import Project from "@/lib/models/Project";
 
 // Mapping templateKey ke contentSid dan body
 const TEMPLATE_MAP = {
@@ -21,9 +22,9 @@ export async function POST(req) {
   await dbConnect();
   const body = await req.json();
   const { contact, leadId, propertyName, templateKey } = body;
-  if (!contact || !propertyName || (!message && !mediaFile)) {
+  if (!contact || !propertyName) {
     return Response.json(
-      { error: "contact, propertyName, dan pesan/media wajib diisi" },
+      { error: "contact, propertyName" },
       { status: 400 }
     );
   }
