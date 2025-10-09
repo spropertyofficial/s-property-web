@@ -26,6 +26,7 @@ export default function AdminLeadsPage() {
   const [status, setStatus] = useState("");
   const [agent, setAgent] = useState(""); // Mitra (agent)
   const [source, setSource] = useState("");
+  const [propertyName, setPropertyName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [sortDate, setSortDate] = useState("desc"); // 'desc' = terbaru, 'asc' = terlama
@@ -45,6 +46,7 @@ export default function AdminLeadsPage() {
       if (status) params.set("status", status);
       if (agent) params.set("agent", agent); // requires ObjectId
       if (source) params.set("source", source);
+      if (propertyName) params.set("propertyName", propertyName);
       if (startDate) params.set("startDate", startDate);
       if (endDate) params.set("endDate", endDate);
       params.set("sortDate", sortDate);
@@ -59,7 +61,7 @@ export default function AdminLeadsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, limit, q, status, agent, source, sortDate]);
+  }, [page, limit, q, status, agent, source, propertyName, sortDate]);
 
   useEffect(() => {
     fetchLeads();
@@ -84,10 +86,11 @@ export default function AdminLeadsPage() {
     if (status) p.set("status", status);
     if (agent) p.set("agent", agent);
     if (source) p.set("source", source);
+    if (propertyName) p.set("propertyName", propertyName);
     if (startDate) p.set("startDate", startDate);
     if (endDate) p.set("endDate", endDate);
     return `/api/admin/leads/export?${p.toString()}`;
-  }, [q, status, agent, source, startDate, endDate]);
+  }, [q, status, agent, source, propertyName, startDate, endDate]);
 
   return (
     <div className="p-4 sm:p-6 space-y-4">
@@ -133,8 +136,9 @@ export default function AdminLeadsPage() {
         </div>
       </header>
 
+      {/* Filters */}
       <section className="bg-white rounded-lg border p-3 sm:p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 sm:gap-3">
           <input
             value={q}
             onChange={(e) => {
@@ -142,6 +146,15 @@ export default function AdminLeadsPage() {
               setQ(e.target.value);
             }}
             placeholder="Cari nama/kontak/email"
+            className="rounded border border-slate-300 px-3 py-2 text-sm"
+          />
+          <input
+            value={propertyName}
+            onChange={e => {
+              setPage(1);
+              setPropertyName(e.target.value);
+            }}
+            placeholder="Cari nama properti"
             className="rounded border border-slate-300 px-3 py-2 text-sm"
           />
           <select
