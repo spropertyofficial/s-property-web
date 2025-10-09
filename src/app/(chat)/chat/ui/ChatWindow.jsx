@@ -229,18 +229,12 @@ export default function ChatWindow({
           if (typeof refetchConversations === "function") {
             setTimeout(() => refetchConversations(), 500);
           }
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Gagal kirim template",
-            text: data.error || "Terjadi kesalahan.",
-          });
         }
-      } catch (err) {
+      } catch (error) {
         Swal.fire({
           icon: "error",
-          title: "Gagal kirim template",
-          text: err.message || "Terjadi kesalahan.",
+          title: error.response.data.error,
+          text: "Tambahkan Property lebih dulu" || "Terjadi kesalahan.",
         });
       }
       setIsSending(false);

@@ -22,16 +22,22 @@ export async function POST(req) {
   await dbConnect();
   const body = await req.json();
   const { contact, leadId, propertyName, templateKey } = body;
-  if (!contact || !propertyName) {
-    return Response.json(
-      { error: "contact, propertyName" },
+  if (!contact) {
+    return NextResponse.json(
+      { error: "Nomor tidak ada" },
+      { status: 400 }
+    );
+  }
+  if (!propertyName) {
+    return NextResponse.json(
+      { error: "Property tidak ditemukan" },
       { status: 400 }
     );
   }
   // Cari nomor WhatsApp dari Project
   const project = await Project.findOne({ name: propertyName });
   if (!project || !project.whatsappNumber) {
-    return Response.json(
+    return NextResponse.json(
       { error: "Project atau nomor WhatsApp tidak ditemukan" },
       { status: 404 }
     );
