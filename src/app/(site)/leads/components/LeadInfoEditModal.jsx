@@ -1,11 +1,23 @@
 "use client";
 import { useEffect, useRef, useState } from 'react';
+import PropertyTypeahead from "./PropertyTypeahead";
 import LeadStatusBadge from './LeadStatusBadge';
 import Swal from 'sweetalert2';
 
 const STATUSES = ["Baru","Hot","Warm","Cold","Reservasi","Booking","Closing","No Respond"];
 export default function LeadInfoEditModal({ lead, onClose, onSaved }) {
-  const [form, setForm] = useState({ name: lead.name||'', contact: lead.contact||'', email: lead.email||'', status: lead.status, unit: lead.unit||'', source: lead.source||'' });
+  const [form, setForm] = useState({
+    name: lead.name || '',
+    contact: lead.contact || '',
+    email: lead.email || '',
+    status: lead.status,
+    unit: lead.unit || '',
+    source: lead.source || '',
+    propertyName: lead.propertyName || '',
+    property: lead.property || null,
+  });
+  const [sourceOpen, setSourceOpen] = useState(false);
+  const sourceRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [openStatus, setOpenStatus] = useState(false);
   const statusBtnRef = useRef(null);
@@ -40,6 +52,8 @@ export default function LeadInfoEditModal({ lead, onClose, onSaved }) {
         email: form.email,
         unit: form.unit,
         source: form.source,
+        property: form.property,
+        propertyName: form.property ? undefined : form.propertyName,
       };
 
       let latestDoc = lead;
@@ -47,7 +61,7 @@ export default function LeadInfoEditModal({ lead, onClose, onSaved }) {
       const res = await fetch(`/api/leads/${lead._id}`, {
         method:'PATCH',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(payload)
+  body: JSON.stringify(payload)
       });
       const json = await res.json();
       if(!json.success) throw new Error(json.error || 'Gagal menyimpan perubahan');
@@ -87,8 +101,30 @@ export default function LeadInfoEditModal({ lead, onClose, onSaved }) {
           <Field label="Nama" required value={form.name} onChange={v=> setForm(f=> ({...f, name:v}))} />
           <Field label="Kontak" value={form.contact} onChange={v=> setForm(f=> ({...f, contact:v}))} />
           <Field label="Email" type="email" value={form.email} onChange={v=> setForm(f=> ({...f, email:v}))} />
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium">Proyek</label>
+            <PropertyTypeahead
+              value={form.propertyName}
+              onInput={val => setForm(f => ({ ...f, propertyName: val, property: null }))}
+              onSelect={it => setForm(f => ({ ...f, propertyName: it.name, property: it._id }))}
+            />
+            {form.property && <p className="text-[10px] text-green-600">Terpilih dari master</p>}
+          </div>
           <Field label="Unit" value={form.unit} onChange={v=> setForm(f=> ({...f, unit:v}))} />
-          <Field label="Sumber" value={form.source} onChange={v=> setForm(f=> ({...f, source:v}))} />
+          <div className="flex flex-col gap-1 relative" ref={sourceRef}>
+            <label className="text-xs font-medium">Sumber</label>
+            <button type="button" onClick={()=> setSourceOpen(o=> !o)} className="relative rounded border border-slate-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-400 outline-none flex justify-between items-center">
+              <span className="truncate text-left">{form.source || 'Pilih sumber'}</span>
+              <span className={`transition text-[10px] ${sourceOpen? 'rotate-180':''}`}>▲</span>
+            </button>
+            {sourceOpen && (
+              <div className="absolute bottom-full mb-1 left-0 right-0 bg-white border border-slate-200 rounded-md shadow-lg max-h-56 overflow-auto z-30 text-sm animate-slide-up">
+                {["Baru", "Hot", "Warm", "Cold", "Reservasi", "Booking", "Closing", "No Respond"].map(s=> (
+                  <button type="button" key={s} onClick={()=> { setForm(f=>({...f, source:s})); setSourceOpen(false); }} className={`w-full text-left px-3 py-2 hover:bg-blue-50 ${form.source===s? 'bg-blue-100':''}`}>{s}</button>
+                ))}
+              </div>
+            )}
+          </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-medium">Status</label>
             <div className="relative">
