@@ -42,6 +42,7 @@ ChatMessageSchema.statics.getLastInboundMessage = async function(leadId) {
     .sort({ sentAt: -1 });
 };
 
+ ChatMessageSchema.index({ lead: 1, sentAt: -1 });
 /**
  * Static method untuk mengambil pesan outbound terakhir per lead.
  * Digunakan untuk identifikasi window 24 jam WhatsApp (Twilio: window dibuka setelah outbound).
