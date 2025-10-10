@@ -21,6 +21,7 @@ export async function GET(req) {
     const status = (searchParams.get("status") || "").trim();
     const source = (searchParams.get("source") || "").trim();
     const agent = (searchParams.get("agent") || "").trim();
+  const propertyName = (searchParams.get("propertyName") || "").trim();
     const page = Math.max(parseInt(searchParams.get("page") || "1", 10), 1);
     const limit = Math.min(
       Math.max(parseInt(searchParams.get("limit") || "10", 10), 1),
@@ -34,6 +35,14 @@ export async function GET(req) {
     if (status) filter.status = status;
     if (source) filter.source = source;
     if (agent) filter.agent = agent;
+    if (propertyName) {
+      // Case-insensitive filter for propertyName (match propertyName or property.name)
+      const regex = new RegExp(`^${propertyName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
+      filter.$or = [
+        { propertyName: regex },
+        { "property.name": regex }
+      ];
+    }
     if (q) {
       const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
       filter.$or = [{ name: regex }, { contact: regex }, { email: regex }];

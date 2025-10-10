@@ -258,6 +258,11 @@ export default function ConversationsList({
                             : "")}
                       </p>
                     </div>
+                    {item.lead.propertyName && (
+                      <div className="inline-block px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-semibold mb-1 shadow-sm border border-teal-100">
+                        {item.lead.propertyName || item.lead.property?.name}
+                      </div>
+                    )}
                     {/* Notif pesan belum dibaca di pojok kanan bawah */}
                     {(item.unread || 0) > 0 && (
                       <div className="absolute bottom-2 right-2 w-5 h-5 bg-teal-500 text-white text-xs rounded-full flex items-center justify-center flex-shrink-0 shadow">

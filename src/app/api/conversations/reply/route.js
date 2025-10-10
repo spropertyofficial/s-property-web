@@ -1,6 +1,8 @@
+
 import dbConnect from "@/lib/mongodb";
 import ChatMessage from "@/lib/models/ChatMessage";
 import Lead from "@/lib/models/Lead";
+import Project from "@/lib/models/Project";
 import twilio from "twilio";
 import cloudinary from "@/lib/cloudinary";
 import streamifier from "streamifier";
@@ -8,14 +10,14 @@ import streamifier from "streamifier";
 export async function POST(req) {
   await dbConnect();
   const body = await req.json();
-  const { leadId, message, mediaFile, mediaType } = body;
-  if (!leadId || (!message && !mediaFile)) {
-    return Response.json({ error: "leadId dan pesan/media wajib diisi" }, { status: 400 });
+  const { leadId, contact, propertyName, message, mediaFile, mediaType } = body;
+  if (!contact || !propertyName || (!message && !mediaFile)) {
+    return Response.json({ error: "contact, propertyName, dan pesan/media wajib diisi" }, { status: 400 });
   }
-  // Ambil data lead
-  const lead = await Lead.findById(leadId);
-  if (!lead) {
-    return Response.json({ error: "Lead tidak ditemukan" }, { status: 404 });
+  // Cari nomor WhatsApp dari Project
+  const project = await Project.findOne({ name: propertyName });
+  if (!project || !project.whatsappNumber) {
+    return Response.json({ error: "Project atau nomor WhatsApp tidak ditemukan" }, { status: 404 });
   }
   // Upload media ke Cloudinary jika ada
   let mediaUrl = null;
@@ -43,12 +45,10 @@ export async function POST(req) {
   // Kirim pesan ke WhatsApp via Twilio
   const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
   try {
-    const toNumber = lead.contact;
-    if (!toNumber) {
-      return Response.json({ error: "Nomor WhatsApp (contact) tidak ditemukan pada lead." }, { status: 400 });
-    }
+    const toNumber = contact;
+    const fromNumber = `whatsapp:${project.whatsappNumber}`;
     const twilioPayload = {
-      from: process.env.TWILIO_WHATSAPP_NUMBER,
+      from: fromNumber,
       to: `whatsapp:${toNumber}`,
       statusCallback: `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.sproperty.co.id"}/api/whatsapp/webhook`,
     };
@@ -60,12 +60,12 @@ export async function POST(req) {
     } catch (twilioErr) {
       // Jika gagal kirim ke Twilio, jangan simpan ChatMessage, kembalikan error
       console.error("Error kirim pesan via Twilio:", twilioErr);
-      return Response.json({ error: "Gagal kirim pesan WhatsApp: "}, { status: 500 });
+      return Response.json({ error: "Gagal kirim pesan WhatsApp:"}, { status: 500 });
     }
-    // Jika berhasil, simpan ChatMessage
+    // Simpan ChatMessage (tanpa relasi lead, karena leadId tidak dikirim)
     const chatMsg = await ChatMessage.create({
-      lead: lead._id,
-      from: process.env.TWILIO_WHATSAPP_NUMBER,
+      lead: leadId,
+      from: fromNumber,
       to: toNumber,
       body: message,
       direction: "outbound",
@@ -73,6 +73,7 @@ export async function POST(req) {
       twilioSid: twilioRes.sid,
       mediaUrls: mediaUrl ? [mediaUrl] : [],
       mediaTypes: mediaTypeFinal ? [mediaTypeFinal] : [],
+      propertyName,
     });
     return Response.json({ success: true, chatMsg });
   } catch (err) {

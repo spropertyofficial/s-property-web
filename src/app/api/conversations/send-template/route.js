@@ -1,9 +1,9 @@
-
 import { NextResponse } from "next/server";
 import twilioClient from "@/lib/twilioClient";
 import dbConnect from "@/lib/mongodb";
 import ChatMessage from "@/lib/models/ChatMessage";
 import Lead from "@/lib/models/Lead";
+import Project from "@/lib/models/Project";
 
 // Mapping templateKey ke contentSid dan body
 const TEMPLATE_MAP = {
@@ -21,26 +21,45 @@ const TEMPLATE_MAP = {
 export async function POST(req) {
   await dbConnect();
   const body = await req.json();
-  const { contact, leadId, templateKey } = body;
+  const { contact, leadId, propertyName, templateKey } = body;
+  if (!contact) {
+    return NextResponse.json(
+      { error: "Nomor tidak ada" },
+      { status: 400 }
+    );
+  }
+  if (!propertyName) {
+    return NextResponse.json(
+      { error: "Property tidak ditemukan" },
+      { status: 400 }
+    );
+  }
+  // Cari nomor WhatsApp dari Project
+  const project = await Project.findOne({ name: propertyName });
+  if (!project || !project.whatsappNumber) {
+    return NextResponse.json(
+      { error: "Project atau nomor WhatsApp tidak ditemukan" },
+      { status: 404 }
+    );
+  }
   try {
-    // Cari lead
-    const lead = leadId ? await Lead.findById(leadId) : await Lead.findOne({ contact });
-    if (!lead) {
-      return NextResponse.json({ success: false, error: "Lead tidak ditemukan" }, { status: 404 });
-    }
     const toNumber = contact;
+    const fromNumber = `whatsapp:${project.whatsappNumber}`;
     const template = TEMPLATE_MAP[templateKey];
     if (!template) {
-      return NextResponse.json({ success: false, error: "Template tidak ditemukan" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Template tidak ditemukan" },
+        { status: 400 }
+      );
     }
     const twilioRes = await twilioClient.messages.create({
-      from: process.env.TWILIO_WHATSAPP_NUMBER,
+      from: fromNumber,
       to: `whatsapp:${toNumber}`,
       contentSid: template.sid,
     });
     // Simpan ChatMessage outbound dengan isi template
     const chatMsg = await ChatMessage.create({
-      lead: lead._id,
+      lead: leadId,
       from: process.env.TWILIO_WHATSAPP_NUMBER,
       to: toNumber,
       body: template.body,
@@ -53,6 +72,9 @@ export async function POST(req) {
     });
     return NextResponse.json({ success: true, sid: twilioRes.sid, chatMsg });
   } catch (err) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: err.message },
+      { status: 500 }
+    );
   }
 }

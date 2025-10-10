@@ -15,6 +15,7 @@ export async function GET(req) {
     const status = (searchParams.get("status") || "").trim();
     const agent = (searchParams.get("agent") || "").trim();
     const source = (searchParams.get("source") || "").trim();
+    const propertyName = (searchParams.get("propertyName") || "").trim();
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
 
@@ -22,6 +23,15 @@ export async function GET(req) {
     if (status) filter.status = status;
     if (agent) filter.agent = agent;
     if (source) filter.source = source;
+    if (propertyName) {
+      // Case-insensitive filter for propertyName (match propertyName or property.name)
+      const regex = new RegExp(`^${propertyName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
+      filter.$or = [
+        { propertyName: regex },
+        { "property.name": regex }
+      ];
+    }
+
     if (q) {
       const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
       filter.$or = [{ name: regex }, { contact: regex }, { email: regex }];

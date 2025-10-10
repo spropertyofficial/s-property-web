@@ -86,7 +86,7 @@ export default function LeadInfoPanel({ conversation, onToggleAssign }) {
               }
             />
             <Field
-              label="Properti"
+              label="Proyek"
               value={lead?.property?.name ?? lead?.propertyName ?? "-"}
             />
             <Field label="Unit" value={lead?.unit ?? "-"} />

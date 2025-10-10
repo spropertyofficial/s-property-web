@@ -23,7 +23,7 @@ export async function POST(req) {
     const user = await User.findOne({ email, isActive: true });
     if (!user) {
       return NextResponse.json(
-        { message: "Invalid credentials" },
+        { message: "Email atau Password salah" },
         { status: 401 }
       );
     }
@@ -32,7 +32,7 @@ export async function POST(req) {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return NextResponse.json(
-        { message: "Invalid credentials" },
+        { message: "Email atau Password salah" },
         { status: 401 }
       );
     }
