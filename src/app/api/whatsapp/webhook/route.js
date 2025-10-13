@@ -62,80 +62,90 @@ export async function POST(req) {
   }
 
   let lead;
+  let project = null;
   if (Body && !Body.toLowerCase().includes("notifikasi")) {
-    // Cari lead existing by contact
-    lead = await Lead.findOne({ contact: From.replace("whatsapp:", "") });
+    // 1. Identifikasi proyek dari nomor tujuan (To)
+    let normalizedTo = (To || "").replace("whatsapp:", "").trim();
+    project = await Project.findOne({ whatsappNumber: normalizedTo }).populate("agentQueue");
+    // logging proyek
+    console.log("exist agentQueue check:", project ? project : "tidak ada");
+
+    // 2. Cari lead existing by contact DAN project
+    const contactVal = From.replace("whatsapp:", "");
+    lead = await Lead.findOne({ contact: contactVal, propertyName: project ? project.name : undefined });
+
     if (!lead) {
-      // 1. Identifikasi proyek dari nomor tujuan (To)
-      let normalizedTo = (To || "").replace("whatsapp:", "").trim();
-      const project = await Project.findOne({ whatsappNumber: normalizedTo }).populate("agentQueue");
-      // logging proyek
-      console.log("exist agentQueue check:", project ? project : "tidak ada");
-
-
-      // 2. Ambil queue proyek jika ada, else fallback ke queue umum (tanpa projectId)
-      let queue = null;
-      if (project && project.agentQueue) {
-        queue = await AgentQueue.findById(project.agentQueue);
-      }
-      if (!queue) {
-        // fallback queue umum (legacy)
-        queue = await AgentQueue.findOne({ projectId: { $exists: false } });
-        if (!queue) queue = await AgentQueue.findOne({ projectId: null });
-      }
-      // logging queue
-      console.log("Queue untuk lead baru:", queue ? queue : "tidak ada");
-
-      // 3. Round-robin di queue yang ditemukan
-      let assignedAgent = null;
-      let nextIndex = -1;
-      if (queue && queue.agents && queue.agents.length > 0) {
-        const activeAgents = queue.agents.filter((a) => a.active);
-        if (activeAgents.length > 0) {
-          nextIndex = (queue.lastAssignedIndex + 1) % activeAgents.length;
-          assignedAgent = activeAgents[nextIndex].user;
-          queue.lastAssignedIndex = nextIndex;
-          queue.updatedAt = Date.now();
-          await queue.save();
+      // Cek: apakah ada lead lain dengan contact ini (tapi project berbeda)?
+      const leadAnyProject = await Lead.findOne({ contact: contactVal });
+      if (!leadAnyProject || (leadAnyProject && (leadAnyProject.propertyName !== (project ? project.name : undefined)))) {
+        // 2. Ambil queue proyek jika ada, else fallback ke queue umum (tanpa projectId)
+        let queue = null;
+        if (project && project.agentQueue) {
+          queue = await AgentQueue.findById(project.agentQueue);
         }
-      }
+        if (!queue) {
+          // fallback queue umum (legacy)
+          queue = await AgentQueue.findOne({ projectId: { $exists: false } });
+          if (!queue) queue = await AgentQueue.findOne({ projectId: null });
+        }
+        // logging queue
+        console.log("Queue untuk lead baru:", queue ? queue : "tidak ada");
 
-      // 4. Create lead baru
-      lead = await Lead.create({
-        name: "-",
-        contact: From.replace("whatsapp:", ""),
-        source: "WhatsApp",
-        status: "Baru",
-        agent: assignedAgent || null,
-        isClaimed: false,
-        leadInAt: Date.now(),
-        assignedAt: Date.now(),
-        propertyName: project ? project.name : undefined,
-      });
-      console.log("Lead baru dibuat:", lead.contact, project ? `(project=${project.name})` : "(no project)");
-
-      // 5. Notifikasi ke agent yang ditugaskan (jika ada)
-      if (assignedAgent) {
-        const agentUser = await User.findById(assignedAgent);
-        if (agentUser && agentUser.phone) {
-          try {
-            await twilioClient.messages.create({
-              to: `whatsapp:${formatPhone(agentUser.phone)}`,
-              from: `${process.env.TWILIO_WHATSAPP_NUMBER}`,
-              contentSid: "HX0cdba500c0c9c3157678dd100cde6257",
-            });
-            console.log(`Notifikasi dikirim ke agent ${agentUser.phone}`);
-          } catch (err) {
-            console.error("Gagal kirim notifikasi ke agent:", err);
-            const emailTo = "devranmalik82@gmail.com";
-            const subject = `Gagal Notifikasi WhatsApp Lead Baru untuk Agent ${agentUser?.name || "(Unknown)"}`;
-            const html = `<p>Ada lead baru dari WhatsApp untuk ${project ? `proyek <b>${project.name}</b>` : "(tanpa proyek)"}, tapi gagal kirim notifikasi ke agent <b>${agentUser?.name || "(Unknown)"}</b>.</p><p>Lead: ${lead?.contact || "(Unknown)"}</p>`;
-            try { await sendMail({ to: emailTo, subject, html }); } catch (mailErr) { console.error("Gagal kirim email fallback notifikasi agent:", mailErr); }
+        // 3. Round-robin di queue yang ditemukan
+        let assignedAgent = null;
+        let nextIndex = -1;
+        if (queue && queue.agents && queue.agents.length > 0) {
+          const activeAgents = queue.agents.filter((a) => a.active);
+          if (activeAgents.length > 0) {
+            nextIndex = (queue.lastAssignedIndex + 1) % activeAgents.length;
+            assignedAgent = activeAgents[nextIndex].user;
+            queue.lastAssignedIndex = nextIndex;
+            queue.updatedAt = Date.now();
+            await queue.save();
           }
         }
+
+        // 4. Create lead baru
+        lead = await Lead.create({
+          name: "-",
+          contact: contactVal,
+          source: "WhatsApp",
+          status: "Baru",
+          agent: assignedAgent || null,
+          isClaimed: false,
+          leadInAt: Date.now(),
+          assignedAt: Date.now(),
+          propertyName: project ? project.name : undefined,
+        });
+        console.log("Lead baru dibuat:", lead.contact, project ? `(project=${project.name})` : "(no project)");
+
+        // 5. Notifikasi ke agent yang ditugaskan (jika ada)
+        if (assignedAgent) {
+          const agentUser = await User.findById(assignedAgent);
+          if (agentUser && agentUser.phone) {
+            try {
+              await twilioClient.messages.create({
+                to: `whatsapp:${formatPhone(agentUser.phone)}`,
+                from: `${process.env.TWILIO_WHATSAPP_NUMBER}`,
+                contentSid: "HX0cdba500c0c9c3157678dd100cde6257",
+              });
+              console.log(`Notifikasi dikirim ke agent ${agentUser.phone}`);
+            } catch (err) {
+              console.error("Gagal kirim notifikasi ke agent:", err);
+              const emailTo = "devranmalik82@gmail.com";
+              const subject = `Gagal Notifikasi WhatsApp Lead Baru untuk Agent ${agentUser?.name || "(Unknown)"}`;
+              const html = `<p>Ada lead baru dari WhatsApp untuk ${project ? `proyek <b>${project.name}</b>` : "(tanpa proyek)"}, tapi gagal kirim notifikasi ke agent <b>${agentUser?.name || "(Unknown)"}</b>.</p><p>Lead: ${lead?.contact || "(Unknown)"}</p>`;
+              try { await sendMail({ to: emailTo, subject, html }); } catch (mailErr) { console.error("Gagal kirim email fallback notifikasi agent:", mailErr); }
+            }
+          }
+        }
+      } else {
+        // Sudah ada lead untuk contact ini (project lain), tidak buat baru, gunakan leadAnyProject
+        lead = leadAnyProject;
+        console.log("Lead sudah ada untuk contact (project lain):", lead.contact);
       }
     } else {
-      console.log("Lead sudah ada:", lead.contact);
+      console.log("Lead sudah ada untuk contact+project:", lead.contact, project ? `(project=${project.name})` : "(no project)");
     }
   }
 
