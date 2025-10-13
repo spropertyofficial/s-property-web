@@ -7,6 +7,14 @@ const ProjectSchema = new mongoose.Schema({
   description: { type: String }, // Opsional, deskripsi proyek
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+  teams: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Team",
+      default: [],
+    },
+  ],
 });
 
-export default mongoose.models.Project || mongoose.model("Project", ProjectSchema);
+export default mongoose.models.Project ||
+  mongoose.model("Project", ProjectSchema);

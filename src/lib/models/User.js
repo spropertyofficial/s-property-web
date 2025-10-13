@@ -29,8 +29,10 @@ const UserSchema = new mongoose.Schema(
       enum: ["agent", "user", "semi-agent", "sales-inhouse", "karyawan"],
       default: "user",
     },
-  // For sales-inhouse: list of allowed Property IDs they can sell
-  allowedProperties: [{ type: mongoose.Schema.Types.ObjectId, ref: "Property" }],
+    // For sales-inhouse: list of allowed Property IDs they can sell
+    allowedProperties: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "Property" },
+    ],
     isActive: {
       type: Boolean,
       default: true,
