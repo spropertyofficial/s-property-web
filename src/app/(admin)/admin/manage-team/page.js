@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRef } from "react";
 import { IoIosArrowDroprightCircle } from "react-icons/io";
+import { FaPerson } from "react-icons/fa6";
 
 // Helper modal component
 function Modal({ open, onClose, children }) {
@@ -37,6 +38,7 @@ export default function ManageTeamPage() {
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
   const formRef = useRef();
+  console.log("projects", projects);
 
   useEffect(() => {
     fetchAll();
@@ -180,7 +182,7 @@ export default function ManageTeamPage() {
     setError(null);
     try {
       let url = "";
-      if (modal.team) url = `/api/manage-team/teams/${modal.team._id}`;
+      if (modal.team) url = `/api/admin/manage-team/teams/${modal.team._id}`;
       else url = `/api/project/${modal.project._id}`;
       const res = await fetch(url, { method: "DELETE" });
       const json = await res.json();
@@ -203,7 +205,7 @@ export default function ManageTeamPage() {
       <div className="p-6 border-b border-slate-200 bg-white flex justify-between items-center flex-shrink-0">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
-            Manajemen Proyek dan Tim
+            Manajemen Tim
           </h1>
           <p className="text-slate-500 mt-1">
             Buka setiap proyek untuk melihat dan mengelola tim sales.
@@ -262,34 +264,14 @@ export default function ManageTeamPage() {
                 </div>
                 <div className="actions flex items-center gap-2">
                   <button
-                    className="add-team-btn p-2 text-slate-500 hover:text-green-600 hover:bg-green-100 rounded-md"
+                    className="add-team-btn px-3 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition"
                     title="Tambah Tim"
                     onClick={(e) => {
                       e.stopPropagation();
                       openTeamModal(project);
                     }}
                   >
-                    <span>👥</span>
-                  </button>
-                  <button
-                    className="edit-project-btn p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-100 rounded-md"
-                    title="Edit Proyek"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openProjectModal(project);
-                    }}
-                  >
-                    <span>✏️</span>
-                  </button>
-                  <button
-                    className="delete-project-btn p-2 text-slate-500 hover:text-red-600 hover:bg-red-100 rounded-md"
-                    title="Hapus Proyek"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openDeleteModal("project", project);
-                    }}
-                  >
-                    <span>🗑️</span>
+                    Tambah Tim
                   </button>
                 </div>
               </div>
@@ -335,7 +317,7 @@ export default function ManageTeamPage() {
                                 </p>
                                 <div className="flex items-center gap-3">
                                   <div className="w-12 h-12 flex items-center justify-center bg-slate-100 rounded-full text-slate-500">
-                                    <span>🛡️</span>
+                                    <FaPerson className="text-2xl" />
                                   </div>
                                   <div>
                                     <p className="leader-name font-semibold text-slate-700">
@@ -350,14 +332,21 @@ export default function ManageTeamPage() {
                                 </p>
                                 <div className="member-names-list space-y-1">
                                   {team.members && team.members.length > 0 ? (
-                                    team.members.map((m) => (
-                                      <p
-                                        key={m._id}
-                                        className="text-sm text-slate-600"
-                                      >
-                                        {m.name}
-                                      </p>
-                                    ))
+                                    <>
+                                      {team.members.slice(0, 3).map((m) => (
+                                        <p
+                                          key={m._id}
+                                          className="text-sm text-slate-600"
+                                        >
+                                          {m.name}
+                                        </p>
+                                      ))}
+                                      {team.members.length > 3 && (
+                                        <p className="text-xs text-slate-400 italic">
+                                          +{team.members.length - 3} lainnya
+                                        </p>
+                                      )}
+                                    </>
                                   ) : (
                                     <p className="text-sm text-slate-400 italic">
                                       Belum ada anggota
@@ -510,11 +499,14 @@ function TeamFormWithSearch({
   // Handler: assign user to role if selectingRole is set
   function handleUserClick(u) {
     if (selectingRole === "leader") {
-      setForm(f => ({ ...f, leader: u._id }));
+      setForm((f) => ({ ...f, leader: u._id }));
       setSelectingRole(null);
     } else if (selectingRole === "member") {
       // Multi-select: add user to members, keep mode
-      setForm(f => ({ ...f, members: f.members.includes(u._id) ? f.members : [...f.members, u._id] }));
+      setForm((f) => ({
+        ...f,
+        members: f.members.includes(u._id) ? f.members : [...f.members, u._id],
+      }));
     }
   }
 
@@ -529,47 +521,73 @@ function TeamFormWithSearch({
         {modal?.team ? "Edit Tim" : "Tambah Tim Baru"}
       </h3>
       <div className="mb-4">
-        <label className="block text-sm font-medium text-slate-700 mb-1">Nama Tim</label>
+        <label className="block text-sm font-medium text-slate-700 mb-1">
+          Nama Tim
+        </label>
         <input
           type="text"
           name="name"
           className="w-full px-3 py-2 border border-slate-300 rounded-lg"
           value={form.name}
-          onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
           required
         />
       </div>
       <div className="flex flex-col md:flex-row gap-4">
         {/* Left: All users */}
         <div className="w-full md:w-1/2">
-          <label className="block text-sm font-medium text-slate-700 mb-2">Daftar User</label>
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            Daftar User
+          </label>
           <div className="flex gap-2 mb-2 sticky top-0 bg-white z-10">
             <input
               type="text"
               placeholder="Cari nama/email..."
               className="w-full px-3 py-2 border border-slate-300 rounded-lg"
               value={userQuery}
-              onChange={e => setUserQuery(e.target.value)}
+              onChange={(e) => setUserQuery(e.target.value)}
             />
             {userQuery && (
-              <button type="button" className="text-xs px-2 py-1 bg-slate-100 rounded" onClick={() => setUserQuery("")}>Clear</button>
+              <button
+                type="button"
+                className="text-xs px-2 py-1 bg-slate-100 rounded"
+                onClick={() => setUserQuery("")}
+              >
+                Clear
+              </button>
             )}
           </div>
-          <div className={`max-h-64 overflow-y-auto border rounded-lg divide-y bg-slate-50 ${selectingRole ? 'ring-2 ring-sky-400' : ''}`}>
-            {availableUsers?.length === 0 && <div className="p-2 text-slate-400 text-sm">Tidak ada user ditemukan</div>}
-            {availableUsers?.map(u => (
+          <div
+            className={`max-h-64 overflow-y-auto border rounded-lg divide-y bg-slate-50 ${
+              selectingRole ? "ring-2 ring-sky-400" : ""
+            }`}
+          >
+            {availableUsers?.length === 0 && (
+              <div className="p-2 text-slate-400 text-sm">
+                Tidak ada user ditemukan
+              </div>
+            )}
+            {availableUsers?.map((u) => (
               <div
                 key={u._id}
-                className={`flex items-center justify-between px-3 py-2 gap-2 hover:bg-sky-50 cursor-pointer ${selectingRole ? 'hover:bg-sky-100' : 'opacity-60 pointer-events-none'}`}
+                className={`flex items-center justify-between px-3 py-2 gap-2 hover:bg-sky-50 cursor-pointer ${
+                  selectingRole
+                    ? "hover:bg-sky-100"
+                    : "opacity-60 pointer-events-none"
+                }`}
                 onClick={() => selectingRole && handleUserClick(u)}
                 tabIndex={selectingRole ? 0 : -1}
                 aria-disabled={!selectingRole}
               >
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-slate-800 truncate">{u.name}</div>
-                  <div className="text-xs text-slate-500 truncate">{u.email}</div>
+                  <div className="font-medium text-slate-800 truncate">
+                    {u.name}
+                  </div>
+                  <div className="text-xs text-slate-500 truncate">
+                    {u.email}
+                  </div>
                 </div>
-                {selectingRole === 'member' && (
+                {selectingRole === "member" && (
                   <input
                     type="checkbox"
                     checked={form.members.includes(u._id)}
@@ -581,15 +599,27 @@ function TeamFormWithSearch({
             ))}
           </div>
           {selectingRole === null && (
-            <div className="text-xs text-slate-400 mt-2">Klik kolom Leader/Anggota di kanan untuk memilih user</div>
+            <div className="text-xs text-slate-400 mt-2">
+              Klik kolom Leader/Anggota di kanan untuk memilih user
+            </div>
           )}
-          {selectingRole === 'leader' && (
-            <div className="text-xs text-sky-600 mt-2">Klik user untuk dijadikan Leader</div>
+          {selectingRole === "leader" && (
+            <div className="text-xs text-sky-600 mt-2">
+              Klik user untuk dijadikan Leader
+            </div>
           )}
-          {selectingRole === 'member' && (
+          {selectingRole === "member" && (
             <div className="flex items-center gap-2 mt-2">
-              <span className="text-xs text-green-600">Klik user untuk tambah ke Anggota. Centang = sudah dipilih.</span>
-              <button type="button" className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200" onClick={handleSelesaiMember}>Selesai</button>
+              <span className="text-xs text-green-600">
+                Klik user untuk tambah ke Anggota. Centang = sudah dipilih.
+              </span>
+              <button
+                type="button"
+                className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
+                onClick={handleSelesaiMember}
+              >
+                Selesai
+              </button>
             </div>
           )}
         </div>
@@ -597,51 +627,82 @@ function TeamFormWithSearch({
         <div className="w-full md:w-1/2 flex flex-col gap-6">
           {/* Leader */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Leader</label>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Leader
+            </label>
             <div
-              className={`p-3 rounded-lg border mb-2 cursor-pointer transition-colors ${selectingRole === 'leader' ? 'ring-2 ring-sky-400 bg-sky-50' : 'hover:bg-sky-50'}`}
-              onClick={() => setSelectingRole('leader')}
+              className={`p-3 rounded-lg border mb-2 cursor-pointer transition-colors ${
+                selectingRole === "leader"
+                  ? "ring-2 ring-sky-400 bg-sky-50"
+                  : "hover:bg-sky-50"
+              }`}
+              onClick={() => setSelectingRole("leader")}
               tabIndex={0}
             >
               {form.leader ? (
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-medium text-slate-800">{getUserById(form.leader)?.name}</div>
-                    <div className="text-xs text-slate-500">{getUserById(form.leader)?.email}</div>
+                    <div className="font-medium text-slate-800">
+                      {getUserById(form.leader)?.name}
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      {getUserById(form.leader)?.email}
+                    </div>
                   </div>
                   <button
                     type="button"
                     className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 ml-2"
-                    onClick={e => { e.stopPropagation(); setForm(f => ({ ...f, leader: "" })); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setForm((f) => ({ ...f, leader: "" }));
+                    }}
                   >
                     Hapus
                   </button>
                 </div>
               ) : (
-                <div className="text-slate-400 text-sm italic">Klik di sini lalu pilih user</div>
+                <div className="text-slate-400 text-sm italic">
+                  Klik di sini lalu pilih user
+                </div>
               )}
             </div>
           </div>
           {/* Members */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Anggota Tim</label>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Anggota Tim
+            </label>
             <div
-              className={`rounded border p-2 min-h-[48px] cursor-pointer transition-colors ${selectingRole === 'member' ? 'ring-2 ring-green-400 bg-green-50' : 'hover:bg-green-50'}`}
-              onClick={() => setSelectingRole('member')}
+              className={`rounded border p-2 min-h-[48px] cursor-pointer transition-colors ${
+                selectingRole === "member"
+                  ? "ring-2 ring-green-400 bg-green-50"
+                  : "hover:bg-green-50"
+              }`}
+              onClick={() => setSelectingRole("member")}
               tabIndex={0}
             >
               {form.members.length > 0 ? (
                 <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                  {form.members.map(id => (
+                  {form.members.map((id) => (
                     <div key={id} className="flex items-center justify-between">
                       <div>
-                        <div className="font-medium text-slate-800">{getUserById(id)?.name}</div>
-                        <div className="text-xs text-slate-500">{getUserById(id)?.email}</div>
+                        <div className="font-medium text-slate-800">
+                          {getUserById(id)?.name}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {getUserById(id)?.email}
+                        </div>
                       </div>
                       <button
                         type="button"
                         className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 ml-2"
-                        onClick={e => { e.stopPropagation(); setForm(f => ({ ...f, members: f.members.filter(mid => mid !== id) })); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setForm((f) => ({
+                            ...f,
+                            members: f.members.filter((mid) => mid !== id),
+                          }));
+                        }}
                       >
                         Hapus
                       </button>
@@ -649,7 +710,9 @@ function TeamFormWithSearch({
                   ))}
                 </div>
               ) : (
-                <div className="text-slate-400 text-sm italic">Klik di sini lalu pilih user</div>
+                <div className="text-slate-400 text-sm italic">
+                  Klik di sini lalu pilih user
+                </div>
               )}
             </div>
           </div>

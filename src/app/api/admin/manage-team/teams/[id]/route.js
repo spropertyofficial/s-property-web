@@ -1,12 +1,12 @@
-import dbConnect from '@/lib/dbConnect';
 import Team from '@/lib/models/Team';
 import User from '@/lib/models/User';
 import Project from '@/lib/models/Project';
+import dbConnect from '@/lib/mongodb';
 
 export async function PUT(req, { params }) {
   await dbConnect();
   try {
-    const { id } = params;
+    const { id } = await params;
     const { name, leader, members } = await req.json();
     if (!name || !leader) {
       return Response.json({ success: false, error: 'Nama dan leader wajib diisi' }, { status: 400 });
@@ -33,7 +33,7 @@ export async function PUT(req, { params }) {
 export async function DELETE(req, { params }) {
   await dbConnect();
   try {
-    const { id } = params;
+    const { id } = await params;
     const team = await Team.findByIdAndDelete(id);
     if (!team) return Response.json({ success: false, error: 'Tim tidak ditemukan' }, { status: 404 });
     // Hapus referensi tim dari project

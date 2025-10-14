@@ -1,7 +1,7 @@
-import dbConnect from '@/lib/dbConnect';
 import Team from '@/lib/models/Team';
 import User from '@/lib/models/User';
 import Project from '@/lib/models/Project';
+import dbConnect from '@/lib/mongodb';
 
 export async function POST(req) {
   await dbConnect();
@@ -23,9 +23,9 @@ export async function POST(req) {
     });
     // Tambahkan tim ke project
     await Project.findByIdAndUpdate(project, { $addToSet: { teams: team._id } });
-    // Populate untuk response
-    await team.populate('leader').populate('members');
-    return Response.json({ success: true, data: team });
+  // Populate untuk response
+  const populatedTeam = await Team.findById(team._id).populate('leader').populate('members');
+  return Response.json({ success: true, data: populatedTeam });
   } catch (e) {
     return Response.json({ success: false, error: e.message }, { status: 500 });
   }
