@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Project from "@/lib/models/Project";
 import AgentQueue from "@/lib/models/AgentQueue";
+import Team from "@/lib/models/Team";
 
 // GET: Ambil semua proyek
 export async function GET() {
