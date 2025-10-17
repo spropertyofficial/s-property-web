@@ -2,36 +2,26 @@
 import { useState, useEffect } from "react";
 import LeadInfoEditModal from "@/app/(site)/leads/components/LeadInfoEditModal";
 import LeadProfileEditModal from "@/app/(site)/leads/components/LeadProfileEditModal";
-import LeadAssignmentPanel from "./components/LeadAssignmentPanel";
+import { FaSpinner} from "react-icons/fa";
 
 export default function LeadInfoPanel({ leadDetail, isLoading }) {
   // State for modal edit
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [lead, setLead] = useState(leadDetail || null); // Ensure lead is not null
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     setLead(leadDetail || null);
   }, [leadDetail]);
+  useEffect(() => {
+    setLoading(isLoading);
+  }, [isLoading]);
   console.log("LeadInfoPanel:", lead);
 
-  if (!leadDetail) {
+  if (!leadDetail || loading) {
     return (
-      <div className="h-full grid place-items-center text-slate-400 p-4 text-center">
-        <div>
-          <div className="text-4xl mb-4">👤</div>
-          <div className="font-bold">Informasi Lead</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!leadDetail || isLoading  ) {
-    return (
-      <div className="h-full grid place-items-center text-slate-400 p-4 text-center">
-        <div>
-          <div className="text-4xl mb-4">👤</div>
-          <div className="font-bold">Informasi Lead</div>
-        </div>
+      <div className="h-full place-items-center text-slate-500 p-4 text-center" aria-live="polite">
+        Mengambil data lead <FaSpinner className="inline-block animate-spin ml-2" />
       </div>
     );
   }
