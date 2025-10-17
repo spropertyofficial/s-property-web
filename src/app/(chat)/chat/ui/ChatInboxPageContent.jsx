@@ -92,16 +92,36 @@ export default function ChatInboxPageContent({ currentUser }) {
     const sel = conversations.find((c) => c.lead?._id === selectedId) || null;
     return sel;
   }, [conversations, selectedId]);
-  console.log("[DEBUG] conversations:", conversations);
+
+  // Lead detail state for LeadInfoPanel
+  const [leadDetail, setLeadDetail] = useState(null);
+  const [isLeadDetailLoading, setIsLeadDetailLoading] = useState(false);
+  useEffect(() => {
+    if (!selectedId) {
+      setLeadDetail(null);
+      return;
+    }
+    setIsLeadDetailLoading(true);
+    setLeadDetail(null);
+    (async () => {
+      try {
+        const res = await fetch(`/api/leads/${selectedId}`);
+        const data = await res.json();
+        console.log("[DEBUG] fetched lead detail:", data);
+        setLeadDetail(data.data || null);
+      } catch (err) {
+        setLeadDetail(null);
+      } finally {
+        setIsLeadDetailLoading(false);
+      }
+    })();
+  }, [selectedId]);
   // State untuk pesan yang di-fetch dari backend
   const [messages, setMessages] = useState([]);
   const [isMessagesLoading, setIsMessagesLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [paginationCursor, setPaginationCursor] = useState(null); // timestamp pesan tertua
   const beforeId = messages[0]?._id; // Ambil _id pesan paling awal
-
-  console.log("[DEBUG] selected:", selected);
-  console.log("[DEBUG] messages:", messages);
 
   // Polling messages hanya aktif jika user di bawah chat
   useEffect(() => {
@@ -334,7 +354,8 @@ export default function ChatInboxPageContent({ currentUser }) {
           {/* Right: Lead info */}
           <div className="col-span-3 bg-white border border-slate-200 overflow-hidden h-full min-h-0">
             <LeadInfoPanel
-              conversation={selected}
+              leadDetail={leadDetail}
+              isLoading={isLeadDetailLoading}
               // TODO: implementasi assign ke backend jika diperlukan
             />
           </div>
@@ -354,7 +375,8 @@ export default function ChatInboxPageContent({ currentUser }) {
               </div>
               <div className="flex-1 overflow-hidden">
                 <LeadInfoPanel
-                  conversation={selected}
+                  leadDetail={leadDetail}
+                  isLoading={isLeadDetailLoading}
                   // TODO: implementasi assign ke backend jika diperlukan
                 />
               </div>
