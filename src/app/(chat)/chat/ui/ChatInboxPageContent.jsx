@@ -30,15 +30,6 @@ export default function ChatInboxPageContent({ currentUser }) {
   const conversations = data?.conversations || [];
   const isLeader = data?.isLeader || false;
   const agentIdsInScope = data?.agentIdsInScope || [];
-  // Logging conversations setelah data tersedia
-  useEffect(() => {
-    if (data?.conversations) {
-      console.log(
-        "[FRONTEND] conversations:",
-        data.conversations.map((c) => ({ id: c.lead?._id, unread: c.unread }))
-      );
-    }
-  }, [data]);
   // Pilih percakapan pertama yang punya pesan
   const [selectedId, setSelectedId] = useState(null);
 
@@ -66,11 +57,7 @@ export default function ChatInboxPageContent({ currentUser }) {
           conversations.find((c) => c.lastMessage)?.lead?._id ||
           conversations[0]?.lead?._id ||
           null;
-        setSelectedId(firstId);
-        console.log(
-          "[DEBUG] Reset selectedId, not found. New (desktop):",
-          firstId
-        );
+        setSelectedId(null);
       }
     } else {
       // On mobile, do not auto-select
@@ -103,7 +90,6 @@ export default function ChatInboxPageContent({ currentUser }) {
   // Derived: selected conversation (ringkasan saja)
   const selected = useMemo(() => {
     const sel = conversations.find((c) => c.lead?._id === selectedId) || null;
-    console.log("[DEBUG] selectedId:", selectedId, "selected:", sel);
     return sel;
   }, [conversations, selectedId]);
   console.log("[DEBUG] conversations:", conversations);
