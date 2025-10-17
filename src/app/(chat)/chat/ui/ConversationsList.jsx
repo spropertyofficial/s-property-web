@@ -18,6 +18,8 @@ export default function ConversationsList({
   currentUser,
   escalationMinutes = 5,
   refetchConversations,
+  isLeader = false,
+  agentIdsInScope = [],
 }) {
   const [loadingClaimId, setLoadingClaimId] = useState(null);
   const [now, setNow] = useState(Date.now());
@@ -30,12 +32,18 @@ export default function ConversationsList({
 
   // Filter: tampilkan hanya lead yang sedang dieskalasi (belum diklaim, sudah di-assign ke agent giliran, WhatsApp), atau milik agent
   const filteredItems = items.filter((item) => {
-    const isAssignedToMe = item.lead?.agent === currentUser?._id;
+    // Untuk leader: tampilkan semua percakapan milik sendiri dan anggota tim
+    if (isLeader && agentIdsInScope.length > 0) {
+      const agentId = item.lead?.agent?._id || item.lead?.agent;
+      return agentIdsInScope.includes(agentId);
+    }
+    // Untuk agent biasa: hanya milik sendiri
+    const isAssignedToMe = item.lead?.agent?._id === currentUser?._id || item.lead?.agent === currentUser?._id;
     // Lead WhatsApp yang belum diklaim, sudah di-assign ke agent giliran, dan sedang dalam masa eskalasi
     const isEscalating =
       item.lead?.isClaimed === false &&
       item.lead?.source === "WhatsApp" &&
-      item.lead?.agent === currentUser?._id;
+      (item.lead?.agent?._id === currentUser?._id || item.lead?.agent === currentUser?._id);
     if (isAssignedToMe || isEscalating) {
       return item;
     }
@@ -147,6 +155,11 @@ export default function ConversationsList({
     <div className="flex flex-col h-full">
       <div className="p-4 border-b border-slate-200 flex-shrink-0 bg-white">
         <h2 className="text-lg font-bold text-slate-800">Kotak Masuk</h2>
+        {isLeader && (
+          <div className="mt-2 mb-2 p-2 bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs rounded">
+            Anda adalah <b>Leader</b>. Percakapan milik anda dan anggota tim ditampilkan.
+          </div>
+        )}
         <div className="mt-3 flex items-center gap-2">
           <input
             value={search}
@@ -188,13 +201,18 @@ export default function ConversationsList({
           </div>
         ) : (
           sortedItems.map((item) => {
-            const isAssignedToMe = item.lead?.agent === currentUser?._id;
+            const isAssignedToMe = item.lead?.agent._id === currentUser?._id;
             const isAdmin = currentUser?.role;
             const isNotClaimed = item.lead?.isClaimed === false;
             // Helper: tampilkan nama/nomor hanya jika sudah di-assign atau admin
             const displayName =
-              isAdmin || (isAssignedToMe && item.lead?.isClaimed === true)
-                ? getDisplayName(item.lead)
+              isAdmin ||
+              (
+                (isLeader && agentIdsInScope.includes(item.lead?.agent?._id || item.lead?.agent) && item.lead?.isClaimed === true)
+              ) ||
+              (
+                (!isLeader && isAssignedToMe && item.lead?.isClaimed === true)
+              )                ? getDisplayName(item.lead)
                 : "(Belum diklaim)";
             // Disabled jika giliran saya, belum diklaim, dan bukan admin
             const isDisabled = isAssignedToMe && isNotClaimed && !isAdmin;
@@ -263,6 +281,13 @@ export default function ConversationsList({
                         {item.lead.propertyName || item.lead.property?.name}
                       </div>
                     )}
+                    {/* Badge nama agent pemilik lead */}
+                    {(isAdmin || isLeader) && (
+                      <div className="inline-block px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-normal mb-1 ml-1 border border-slate-200 align-middle">
+                        {item.lead?.agent?._id === currentUser?._id ? "Saya" : item.lead?.agent?.name || "-"}
+                      </div>
+                    )}
+                    
                     {/* Notif pesan belum dibaca di pojok kanan bawah */}
                     {(item.unread || 0) > 0 && (
                       <div className="absolute bottom-2 right-2 w-5 h-5 bg-teal-500 text-white text-xs rounded-full flex items-center justify-center flex-shrink-0 shadow">
