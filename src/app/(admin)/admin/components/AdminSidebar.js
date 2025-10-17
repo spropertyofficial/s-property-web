@@ -108,8 +108,13 @@ export default function AdminSidebar({ isOpen, onToggle, onLogout }) {
     },
     {
       name: "Manajemen User",
-  path: "/admin/manage-users",
+      path: "/admin/manage-users",
       icon: <FaUsers />,
+    },
+    {
+      name: "Manajemen Team",
+      path: "/admin/manage-team",
+      icon: <FaUsersCog />,
     },
     {
       name: "Distribusi Agent",

@@ -28,6 +28,8 @@ export default function ChatInboxPageContent({ currentUser }) {
     refetchInterval: 1500,
   });
   const conversations = data?.conversations || [];
+  const isLeader = data?.isLeader || false;
+  const agentIdsInScope = data?.agentIdsInScope || [];
   // Logging conversations setelah data tersedia
   useEffect(() => {
     if (data?.conversations) {
@@ -303,6 +305,8 @@ export default function ChatInboxPageContent({ currentUser }) {
               currentUser={currentUser}
               escalationMinutes={escalationMinutes}
               refetchConversations={refetchConversations}
+              isLeader={isLeader}
+              agentIdsInScope={agentIdsInScope}
             />
           )}
         </div>
@@ -322,6 +326,8 @@ export default function ChatInboxPageContent({ currentUser }) {
               currentUser={currentUser}
               escalationMinutes={escalationMinutes}
               refetchConversations={refetchConversations}
+              isLeader={isLeader}
+              agentIdsInScope={agentIdsInScope}
             />
           </div>
           <div className="col-span-6 bg-white border border-slate-200 overflow-hidden flex-col h-full min-h-0">

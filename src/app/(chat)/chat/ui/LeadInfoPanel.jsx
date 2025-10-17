@@ -9,6 +9,7 @@ export default function LeadInfoPanel({ conversation, onToggleAssign }) {
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [lead, setLead] = useState(conversation?.lead || null); // Ensure lead is not null
+  console.log("LeadInfoPanel:", lead);
   // Sync lead state with conversation prop
   useEffect(() => {
     setLead(conversation?.lead || null);
