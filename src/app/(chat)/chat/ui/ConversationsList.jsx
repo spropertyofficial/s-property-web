@@ -202,7 +202,7 @@ export default function ConversationsList({
         ) : (
           sortedItems.map((item) => {
             const isAssignedToMe = item.lead?.agent._id === currentUser?._id;
-            const isAdmin = currentUser?.role;
+            const isAdmin = currentUser?.role === "superadmin" || currentUser?.role === "editor";
             const isNotClaimed = item.lead?.isClaimed === false;
             // Helper: tampilkan nama/nomor hanya jika sudah di-assign atau admin
             const displayName =
@@ -215,14 +215,14 @@ export default function ConversationsList({
               )                ? getDisplayName(item.lead)
                 : "(Belum diklaim)";
             // Disabled jika giliran saya, belum diklaim, dan bukan admin
-            const isDisabled = isAssignedToMe && isNotClaimed && !isAdmin;
+            const isDisabled = isAssignedToMe && isNotClaimed &&( !isAdmin || isLeader === true);
 
             return (
               <div key={item.lead?._id || item.id} className="relative">
                 <button
                   disabled={isDisabled}
                   onClick={() => {
-                    if (isAssignedToMe && isNotClaimed && !isAdmin) {
+                    if (isNotClaimed && (!isAdmin && isLeader===true)) {
                       Swal.fire({
                         icon: "info",
                         title: "Klaim dulu lead ini untuk membuka percakapan!",
