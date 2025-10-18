@@ -2,37 +2,26 @@
 import { useState, useEffect } from "react";
 import LeadInfoEditModal from "@/app/(site)/leads/components/LeadInfoEditModal";
 import LeadProfileEditModal from "@/app/(site)/leads/components/LeadProfileEditModal";
-import LeadAssignmentPanel from "./components/LeadAssignmentPanel";
+import { FaSpinner} from "react-icons/fa";
 
-export default function LeadInfoPanel({ conversation, onToggleAssign }) {
+export default function LeadInfoPanel({ leadDetail, isLoading }) {
   // State for modal edit
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [lead, setLead] = useState(conversation?.lead || null); // Ensure lead is not null
-  console.log("LeadInfoPanel:", lead);
-  // Sync lead state with conversation prop
+  const [lead, setLead] = useState(leadDetail || null); // Ensure lead is not null
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
-    setLead(conversation?.lead || null);
-  }, [conversation]);
+    setLead(leadDetail || null);
+  }, [leadDetail]);
+  useEffect(() => {
+    setLoading(isLoading);
+  }, [isLoading]);
+  console.log("LeadInfoPanel:", lead);
 
-  if (!conversation) {
+  if (!leadDetail || loading) {
     return (
-      <div className="h-full grid place-items-center text-slate-400 p-4 text-center">
-        <div>
-          <div className="text-4xl mb-4">👤</div>
-          <div className="font-bold">Informasi Lead</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!conversation.lead) {
-    return (
-      <div className="h-full grid place-items-center text-slate-400 p-4 text-center">
-        <div>
-          <div className="text-4xl mb-4">👤</div>
-          <div className="font-bold">Informasi Lead</div>
-        </div>
+      <div className="h-full place-items-center text-slate-500 p-4 text-center" aria-live="polite">
+        Mengambil data lead <FaSpinner className="inline-block animate-spin ml-2" />
       </div>
     );
   }
@@ -53,7 +42,7 @@ export default function LeadInfoPanel({ conversation, onToggleAssign }) {
         </div>
         <div>
           <p className="font-bold text-lg">{lead?.name ?? "-"}</p>
-          <p className="text-sm text-slate-500">{lead?.phone ?? "-"}</p>
+          <p className="text-sm text-slate-500">{lead?.contact ?? "-"}</p>
         </div>
       </div>
 
@@ -76,48 +65,24 @@ export default function LeadInfoPanel({ conversation, onToggleAssign }) {
             <Field label="Kontak" value={lead?.contact ?? "-"} />
             <Field label="Email" value={lead?.email ?? "-"} />
             <Field label="Status" value={lead?.status ?? "-"} />
-            <Field
-              label="Sudah Diklaim"
-              value={lead?.isClaimed ? "Ya" : "Belum"}
-            />
-            <Field
-              label="Agent"
-              value={
-                lead?.agent ? lead.agent.name || lead.agent.email || "-" : "-"
-              }
-            />
-            <Field
-              label="Proyek"
-              value={lead?.property?.name ?? lead?.propertyName ?? "-"}
-            />
-            <Field label="Unit" value={lead?.unit ?? "-"} />
+            <Field label="Sudah Diklaim" value={lead?.isClaimed ? "Ya" : "Belum"} />
+            <Field label="Agent" value={lead?.agent ? `${lead.agent.name ?? "-"}${lead.agent.agentCode ? ` (${lead.agent.agentCode})` : ""}` : "-"} />
             <Field label="Sumber" value={lead?.source ?? "-"} />
-            <Field
-              label="Tanggal Lead Masuk"
-              value={
-                lead?.leadInAt
-                  ? new Date(lead.leadInAt).toLocaleDateString()
-                  : lead?.createdAt
-                  ? new Date(lead.createdAt).toLocaleDateString()
-                  : "-"
-              }
-            />
-            <Field
-              label="Tanggal Ditambahkan"
-              value={
-                lead?.createdAt
-                  ? new Date(lead.createdAt).toLocaleDateString()
-                  : "-"
-              }
-            />
-            <Field
-              label="Diperbarui"
-              value={
-                lead?.updatedAt
-                  ? new Date(lead.updatedAt).toLocaleString()
-                  : "-"
-              }
-            />
+            <Field label="Proyek" value={lead?.property?.name ?? lead?.propertyName ?? "-"} />
+            <Field label="Unit" value={lead?.unit ?? "-"} />
+            <Field label="Tanggal Lead Masuk" value={lead?.leadInAt ? new Date(lead.leadInAt).toLocaleDateString() : lead?.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "-"} />
+            <Field label="Tanggal Ditambahkan" value={lead?.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "-"} />
+            <Field label="Diperbarui" value={lead?.updatedAt ? new Date(lead.updatedAt).toLocaleString() : "-"} />
+            {/* Kerabat */}
+            {lead?.kerabat && (
+              <div className="mt-2">
+                <span className="text-[11px] font-medium text-slate-500 uppercase">Kerabat Tidak Serumah</span>
+                <div className="ml-2">
+                  <Field label="Nama Kerabat" value={lead.kerabat.nama ?? "-"} />
+                  <Field label="Kontak Kerabat" value={lead.kerabat.kontak ?? "-"} />
+                </div>
+              </div>
+            )}
           </div>
         </section>
 
@@ -137,29 +102,13 @@ export default function LeadInfoPanel({ conversation, onToggleAssign }) {
           <div className="bg-white rounded-lg border p-4 grid gap-2 text-sm">
             <Field label="Umur" value={lead?.umur ?? "-"} />
             <Field label="Pekerjaan" value={lead?.pekerjaan ?? "-"} />
-            <Field
-              label="Status Pernikahan"
-              value={lead?.statusPernikahan ?? "-"}
-            />
-            <Field
-              label="Anggaran"
-              value={lead?.anggaran?.toLocaleString() ?? "-"}
-            />
+            <Field label="Status Pernikahan" value={lead?.statusPernikahan ?? "-"} />
+            <Field label="Anggaran" value={lead?.anggaran ? formatIDR(lead.anggaran) : "-"} />
             <Field label="Tujuan Membeli" value={lead?.tujuanMembeli ?? "-"} />
-            <Field
-              label="Cara Pembayaran"
-              value={lead?.caraPembayaran ?? "-"}
-            />
+            <Field label="Cara Pembayaran" value={lead?.caraPembayaran ?? "-"} />
             <Field label="Lokasi Klien" value={lead?.lokasiKlien ?? "-"} />
-            <Field
-              label="Lokasi Diinginkan"
-              value={lead?.lokasiDiinginkan ?? "-"}
-            />
-            <Field
-              label="Minat Klien"
-              value={lead?.minatKlien ?? "-"}
-              multiline
-            />
+            <Field label="Lokasi Diinginkan" value={lead?.lokasiDiinginkan ?? "-"} />
+            <Field label="Minat Klien" value={lead?.minatKlien ?? "-"} multiline />
             <Field label="Catatan" value={lead?.catatan ?? "-"} multiline />
           </div>
         </section>

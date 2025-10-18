@@ -29,12 +29,14 @@ export async function GET(req) {
     }
 
     if (agentFilterIds.length > 0) {
-  // Jika ada ID agent yang perlu difilter
-  matchFilter["agent"] = { $in: agentFilterIds.map(id => new mongoose.Types.ObjectId(id)) }; // Filter berdasarkan agent IDs yang ditentukan, pastikan ObjectId
+      // Jika ada ID agent yang perlu difilter
+      matchFilter["agent"] = {
+        $in: agentFilterIds.map((id) => new mongoose.Types.ObjectId(id)),
+      }; // Filter berdasarkan agent IDs yang ditentukan, pastikan ObjectId
     }
 
     // Ambil ringkasan percakapan dengan aggregation pipeline
-  const conversations = await Lead.aggregate([
+    const conversations = await Lead.aggregate([
       // Tahap 1: Saring leads yang relevan
       { $match: matchFilter },
 
@@ -57,13 +59,13 @@ export async function GET(req) {
           from: "users",
           localField: "agent",
           foreignField: "_id",
-          as: "agentObj"
-        }
+          as: "agentObj",
+        },
       },
       {
         $addFields: {
-          agent: { $arrayElemAt: ["$agentObj", 0] }
-        }
+          agent: { $arrayElemAt: ["$agentObj", 0] },
+        },
       },
       // Tahap 4: Hitung SEMUA yang kita butuhkan dalam satu tahap
       {
@@ -134,22 +136,22 @@ export async function GET(req) {
       // Tahap 7: Proyeksikan hanya field yang diperlukan
       {
         $project: {
-           lead: {
-             _id: "$_id",
-             name: "$name",
-             contact: "$contact",
-             agent: {
-               _id: "$agent._id",
-               name: "$agent.name"
-             },
-             source: "$source",
-             status: "$status",
-             property: "$property",
-             propertyName: "$propertyName",
-             isClaimed: "$isClaimed",
-             assignedAt: "$assignedAt",
-             unread: "$unread",
-           },
+          lead: {
+            _id: "$_id",
+            name: "$name",
+            contact: "$contact",
+            agent: {
+              _id: "$agent._id",
+              name: "$agent.name",
+            },
+            source: "$source",
+            propertyName: "$propertyName",
+            property: "$property",
+            isClaimed: "$isClaimed",
+            assignedAt: "$assignedAt",
+            leadInAt: "$leadInAt",
+            unread: "$unread",
+          },
           lastMessage: 1,
           lastMessageText: "$lastMessage.body",
           lastMessageAt: "$lastMessage.sentAt",
@@ -158,9 +160,13 @@ export async function GET(req) {
         },
       },
     ]);
-  // Tambahkan flag isLeader dan agentIdsInScope jika user adalah leader (agentFilterIds.length > 1 dan !currentUser.role)
-  const isLeader = !currentUser.role && agentFilterIds.length > 1;
-  return NextResponse.json({ conversations, isLeader, agentIdsInScope: agentFilterIds });
+    // Tambahkan flag isLeader dan agentIdsInScope jika user adalah leader (agentFilterIds.length > 1 dan !currentUser.role)
+    const isLeader = !currentUser.role && agentFilterIds.length > 1;
+    return NextResponse.json({
+      conversations,
+      isLeader,
+      agentIdsInScope: agentFilterIds,
+    });
   } catch (error) {
     console.error("GET conversations error:", error);
     return NextResponse.json(
