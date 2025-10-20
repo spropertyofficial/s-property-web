@@ -85,7 +85,7 @@ export async function PATCH(req, { params }) {
 export async function DELETE(req, { params }) {
   try {
     await dbConnect();
-    const { id } = params;
+    const { id } = await params;
     const adminAuth = await verifyAdmin(req);
     let userAuth = null;
     let filter = { _id: id };
