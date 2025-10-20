@@ -66,7 +66,7 @@ export default function LeadInfoPanel({ leadDetail, isLoading }) {
             <Field label="Email" value={lead?.email ?? "-"} />
             <Field label="Status" value={lead?.status ?? "-"} />
             <Field label="Sudah Diklaim" value={lead?.isClaimed ? "Ya" : "Belum"} />
-            <Field label="Agent" value={lead?.agent ? `${lead.agent.name ?? "-"}${lead.agent.agentCode ? ` (${lead.agent.agentCode})` : ""}` : "-"} />
+            <Field label="Agent" value={getAgentDisplay(lead?.agent)} />
             <Field label="Sumber" value={lead?.source ?? "-"} />
             <Field label="Proyek" value={lead?.property?.name ?? lead?.propertyName ?? "-"} />
             <Field label="Unit" value={lead?.unit ?? "-"} />
@@ -162,6 +162,13 @@ function formatIDR(n) {
   } catch {
     return `${n}`;
   }
+}
+
+function getAgentDisplay(agent) {
+  if (!agent) return "-";
+  const name = agent.name ?? "-";
+  const code = agent.agentCode ? ` (${agent.agentCode})` : "";
+  return `${name}${code}`;
 }
 
 function Field({ label, value, multiline }) {
