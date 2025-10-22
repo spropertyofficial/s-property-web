@@ -40,18 +40,8 @@ export async function GET(req) {
       // Tahap 1: Saring leads yang relevan
       { $match: matchFilter },
 
-      // Tahap 2: "Join" dengan koleksi ChatMessage
-      {
-        $lookup: {
-          from: "chatmessages",
-          localField: "_id",
-          foreignField: "lead",
-          as: "messages",
-        },
-      },
-
-      // Tahap 3: Hanya proses leads yang memiliki setidaknya satu pesan
-      { $match: { "messages.0": { $exists: true } } },
+      // Tahap 2: Hanya proses leads yang memiliki lastMessageAt (sudah ada percakapan)
+      { $match: { lastMessageAt: { $ne: null } } },
 
       // Populate agent (user)
       {
@@ -67,22 +57,32 @@ export async function GET(req) {
           agent: { $arrayElemAt: ["$agentObj", 0] },
         },
       },
-      // Tahap 4: Hitung SEMUA yang kita butuhkan dalam satu tahap
+
+      // Lookup untuk unread dan windowOpen
+      {
+        $lookup: {
+          from: "chatmessages",
+          let: { leadId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$lead", "$$leadId"] } } },
+            { $sort: { sentAt: -1, createdAt: -1 } },
+          ],
+          as: "messages",
+        },
+      },
       {
         $addFields: {
-          lastMessage: { $arrayElemAt: ["$messages", -1] },
-          // Cari pesan inbound terakhir
+          lastMessage: { $arrayElemAt: ["$messages", 0] },
           lastInboundMessage: {
-            $last: {
+            $first: {
               $filter: {
                 input: "$messages",
                 cond: { $eq: ["$$this.direction", "inbound"] },
               },
             },
           },
-          // Cari pesan template terakhir (asumsi ada field `isTemplate` di model ChatMessage)
           lastTemplateMessage: {
-            $last: {
+            $first: {
               $filter: {
                 input: "$messages",
                 cond: { $eq: ["$$this.isTemplate", true] },
@@ -104,8 +104,6 @@ export async function GET(req) {
           },
         },
       },
-
-      // Tahap 5: Hitung status 'windowOpen'
       {
         $addFields: {
           windowOpen: {
@@ -129,11 +127,9 @@ export async function GET(req) {
           },
         },
       },
-
-      // Tahap 6: Urutkan berdasarkan pesan terakhir
-      // { $sort: { "lastMessage.createdAt": -1 } },
-
-      // Tahap 7: Proyeksikan hanya field yang diperlukan
+      // Urutkan berdasarkan lastMessageAt
+      { $sort: { lastMessageAt: -1 } },
+      // Proyeksikan hanya field yang diperlukan
       {
         $project: {
           lead: {
@@ -154,7 +150,7 @@ export async function GET(req) {
           },
           lastMessage: 1,
           lastMessageText: "$lastMessage.body",
-          lastMessageAt: "$lastMessage.sentAt",
+          lastMessageAt: "$lastMessageAt",
           unread: "$unread",
           windowOpen: "$windowOpen",
         },

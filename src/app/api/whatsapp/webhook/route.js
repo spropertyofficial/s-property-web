@@ -190,7 +190,7 @@ export async function POST(req) {
     (Body || numMedia > 0) &&
     !(Body && Body.toLowerCase().includes("notifikasi"))
   ) {
-    await ChatMessage.create({
+    const chatMsg = await ChatMessage.create({
       lead: lead._id,
       from: From.replace("whatsapp:", ""),
       to: To.replace("whatsapp:", ""),
@@ -202,6 +202,8 @@ export async function POST(req) {
       mediaTypes,
       ...body,
     });
+    // Update lastMessageAt pada Lead
+    await Lead.findByIdAndUpdate(lead._id, { lastMessageAt: chatMsg.sentAt || new Date() });
   }
 
   console.log("Pesan berhasil disimpan untuk lead:", lead.contact);
