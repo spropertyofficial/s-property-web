@@ -35,15 +35,36 @@ export async function GET(req) {
       }; // Filter berdasarkan agent IDs yang ditentukan, pastikan ObjectId
     }
 
+    // Ambil parameter cursor dan limit dari query
+    const { searchParams } = new URL(req.url);
+    const cursorLastMessageAt = searchParams.get("cursorLastMessageAt");
+    const cursorId = searchParams.get("cursorId");
+    const limit = parseInt(searchParams.get("limit") || "20", 10);
+
+    // Build cursor filter
+    let cursorFilter = {};
+    if (cursorLastMessageAt && cursorId) {
+      cursorFilter = {
+        $or: [
+          { lastMessageAt: { $lt: new Date(cursorLastMessageAt) } },
+          {
+            lastMessageAt: new Date(cursorLastMessageAt),
+            _id: { $lt: new mongoose.Types.ObjectId(cursorId) },
+          },
+        ],
+      };
+    }
+
+    // Gabungkan filter
+    const finalMatch = {
+      ...matchFilter,
+      lastMessageAt: { $ne: null },
+      ...(Object.keys(cursorFilter).length ? cursorFilter : {}),
+    };
+
     // Ambil ringkasan percakapan dengan aggregation pipeline
     const conversations = await Lead.aggregate([
-      // Tahap 1: Saring leads yang relevan
-      { $match: matchFilter },
-
-      // Tahap 2: Hanya proses leads yang memiliki lastMessageAt (sudah ada percakapan)
-      { $match: { lastMessageAt: { $ne: null } } },
-
-      // Populate agent (user)
+      { $match: finalMatch },
       {
         $lookup: {
           from: "users",
@@ -57,8 +78,6 @@ export async function GET(req) {
           agent: { $arrayElemAt: ["$agentObj", 0] },
         },
       },
-
-      // Lookup untuk unread dan windowOpen
       {
         $lookup: {
           from: "chatmessages",
@@ -127,9 +146,8 @@ export async function GET(req) {
           },
         },
       },
-      // Urutkan berdasarkan lastMessageAt
-      { $sort: { lastMessageAt: -1 } },
-      // Proyeksikan hanya field yang diperlukan
+      { $sort: { lastMessageAt: -1, _id: -1 } },
+      { $limit: limit + 1 },
       {
         $project: {
           lead: {
@@ -156,6 +174,20 @@ export async function GET(req) {
         },
       },
     ]);
+
+    // Pagination info
+    let hasNextPage = false;
+    let nextCursor = null;
+    let conversationsPage = conversations;
+    if (conversations.length > limit) {
+      hasNextPage = true;
+      const last = conversations[limit - 1];
+      nextCursor = {
+        lastMessageAt: last.lastMessageAt,
+        id: last.lead._id,
+      };
+      conversationsPage = conversations.slice(0, limit);
+    }
     // Tambahkan flag isLeader dan agentIdsInScope jika user adalah leader (agentFilterIds.length > 1 dan !currentUser.role)
     const isLeader = !currentUser.role && agentFilterIds.length > 1;
     return NextResponse.json({
