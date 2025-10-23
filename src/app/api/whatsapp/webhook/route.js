@@ -109,7 +109,7 @@ export async function POST(req) {
         lead = await Lead.create({
           name: "-",
           contact: contactVal,
-          source: "WhatsApp",
+          source: "Leads Kantor",
           status: "Baru",
           agent: assignedAgent || null,
           isClaimed: false,
