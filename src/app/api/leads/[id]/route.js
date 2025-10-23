@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Lead from "@/lib/models/Lead";
 import { verifyUser, verifyAdmin } from "@/lib/auth";
+import { getUserConversationalScope } from "@/lib/team-helpers";
 
 async function findAccessibleLead(id, req) {
   const adminAuth = await verifyAdmin(req);
@@ -10,6 +11,15 @@ async function findAccessibleLead(id, req) {
   }
   const userAuth = await verifyUser(req);
   if (!userAuth.success) return { doc: null, admin: false, userId: null };
+
+  // Cek apakah user adalah leader (punya scope lebih dari 1 agent)
+  const agentScope = await getUserConversationalScope(userAuth.user._id);
+  if (agentScope.length > 1) {
+    // Leader: bisa akses semua lead dalam scope
+    const doc = await Lead.findOne({ _id: id, agent: { $in: agentScope } });
+    return { doc, admin: false, userId: userAuth.user._id };
+  }
+  // Agent biasa: hanya lead milik sendiri
   const doc = await Lead.findOne({ _id: id, agent: userAuth.user._id });
   return { doc, admin: false, userId: userAuth.user._id };
 }
