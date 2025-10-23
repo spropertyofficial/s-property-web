@@ -42,7 +42,7 @@ export default function ConversationsList({
     // Lead WhatsApp yang belum diklaim, sudah di-assign ke agent giliran, dan sedang dalam masa eskalasi
     const isEscalating =
       item.lead?.isClaimed === false &&
-      item.lead?.source === "WhatsApp" &&
+      item.lead?.source === "Leads Kantor" &&
       (item.lead?.agent?._id === currentUser?._id || item.lead?.agent === currentUser?._id);
     if (isAssignedToMe || isEscalating) {
       return item;
@@ -303,7 +303,7 @@ export default function ConversationsList({
                 </button>
                 {/* Tombol klaim lead di luar button utama agar tetap bisa diakses */}
                 {isNotClaimed &&
-                  item.lead?.source === "WhatsApp" &&
+                  item.lead?.source === "Leads Kantor" &&
                   isAssignedToMe &&
                   !isAdmin &&
                   (() => {

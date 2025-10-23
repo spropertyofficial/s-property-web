@@ -29,7 +29,7 @@ export async function GET(req) {
   const threshold = Date.now() - fallbackEscalationMinutes * 60 * 1000;
   const unclaimedLeads = await Lead.find({
     isClaimed: false,
-    source: "WhatsApp",
+    source: "Leads Kantor",
     assignedAt: { $lte: new Date(threshold) },
   });
 
