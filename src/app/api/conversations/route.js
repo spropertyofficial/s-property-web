@@ -119,11 +119,7 @@ export async function GET(req) {
                 lastTemplateTime: "$lastTemplateMessage.sentAt",
               },
               in: {
-                $cond: {
-                  if: { $gt: ["$$lastInboundTime", "$$lastTemplateTime"] },
-                  then: { $gt: ["$$lastInboundTime", "$$twentyFourHoursAgo"] },
-                  else: { $gt: ["$$lastTemplateTime", "$$twentyFourHoursAgo"] },
-                },
+                $gt: ["$$lastInboundTime", "$$twentyFourHoursAgo"],
               },
             },
           },
@@ -157,6 +153,20 @@ export async function GET(req) {
           lastMessageAt: "$lastMessage.sentAt",
           unread: "$unread",
           windowOpen: "$windowOpen",
+          hasSentTemplate: {
+            $cond: [
+              {
+                $and: [
+                  { $gt: ["$lastTemplateMessage.sentAt", null] },
+                  { $gt: ["$lastTemplateMessage.sentAt", {
+                    $subtract: [new Date(), 24 * 60 * 60 * 1000]
+                  }] }
+                ]
+              },
+              true,
+              false
+            ]
+          },
         },
       },
     ]);
