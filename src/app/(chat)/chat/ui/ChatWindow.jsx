@@ -52,7 +52,6 @@ export default function ChatWindow({
     }
   }
   // Untuk auto-resize textarea maksimal 6 baris
-  console.log("[ChatWindow] conversation prop:", conversation);
   function getDisplayName(lead) {
     if (!lead) return "?";
     if (
@@ -678,8 +677,8 @@ export default function ChatWindow({
               onChange={handleInputChange}
               placeholder={
                 conversation && !conversation.windowOpen
-                  ? "Chat ditutup, tekan tombol kirim untuk follow up"
-                  : "Tulis pesan..."
+                  ? "Chat ditutup, alihkan ke whatsapp anda untuk follow up"
+                  : "Tulis pesan Anda..."
               }
               className="flex-1 resize-none rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
               style={{
@@ -770,7 +769,7 @@ export default function ChatWindow({
             disabled={
               isSending ||
               (conversation &&
-                conversation.windowOpen !== false &&
+                conversation.windowOpen == false &&
                 !text.trim() &&
                 attachmentPreviews.length === 0)
             }
