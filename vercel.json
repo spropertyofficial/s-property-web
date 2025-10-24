@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/cron/check-escalations",
-      "schedule": "*/3 23,0-16 * * *"
+      "schedule": "*/1 23,0-16 * * *"
     }
   ],
   "functions": {
