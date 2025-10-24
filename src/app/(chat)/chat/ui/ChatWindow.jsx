@@ -574,9 +574,11 @@ export default function ChatWindow({
         {isMobile && <div style={{ height: composerH }} />}
       </div>
 
-      {/* Peringatan jika window tutup dan sudah kirim template message */}
-      {conversation && conversation.hasSentTemplate === true && (
-        <div className="px-4 py-2 bg-yellow-100 text-yellow-800 text-sm text-center border-b border-yellow-200">
+         {conversation && conversation.hasSentTemplate === true && (
+        <div
+          className="fixed left-0 right-0 bottom-[60px] z-40 px-4 py-2 bg-yellow-100 text-yellow-800 text-sm text-center border-b border-yellow-200"
+          style={{ maxWidth: "100vw" }}
+        >
           <b>Tunggu pesan masuk untuk melanjutkan mengirim pesan.</b>
         </div>
       )}
@@ -682,7 +684,7 @@ export default function ChatWindow({
               onChange={handleInputChange}
               placeholder={
                 conversation && !conversation.windowOpen
-                  ? "Chat ditutup, alihkan ke whatsapp anda untuk follow up"
+                  ? "Chat ditutup, tekan tombol kirim untuk follow up"
                   : "Tulis pesan Anda..."
               }
               className="flex-1 resize-none rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
