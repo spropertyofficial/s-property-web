@@ -103,7 +103,6 @@ export default function ChatWindow({
   const [activePreviewIdx, setActivePreviewIdx] = useState(0);
   const [isSending, setIsSending] = useState(false);
   const [localMessages, setLocalMessages] = useState([]);
-
   useEffect(() => {
     // Scroll to bottom on new messages
     if (scrollerRef.current) {
@@ -575,6 +574,12 @@ export default function ChatWindow({
         {isMobile && <div style={{ height: composerH }} />}
       </div>
 
+      {/* Peringatan jika window tutup dan sudah kirim template message */}
+      {conversation && conversation.hasSentTemplate === true && (
+        <div className="px-4 py-2 bg-yellow-100 text-yellow-800 text-sm text-center border-b border-yellow-200">
+          <b>Tunggu pesan masuk untuk melanjutkan mengirim pesan.</b>
+        </div>
+      )}
       {/* Tampilkan preview di composer sebelum kirim */}
       <form
         ref={composerRef}
@@ -767,9 +772,9 @@ export default function ChatWindow({
             type="submit"
             className="px-5 py-2 rounded-lg bg-teal-600 text-white text-sm font-bold hover:bg-teal-700 disabled:opacity-50 active:scale-95 flex items-center justify-center"
             disabled={
-              isSending ||
+              isSending || convsersation.hasSentTemplate === true ||
               (conversation &&
-                conversation.windowOpen == false &&
+                conversation.windowOpen !== false &&
                 !text.trim() &&
                 attachmentPreviews.length === 0)
             }
