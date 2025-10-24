@@ -153,7 +153,20 @@ export async function GET(req) {
           lastMessageAt: "$lastMessage.sentAt",
           unread: "$unread",
           windowOpen: "$windowOpen",
-          hasSentTemplate: { $gt: ["$lastTemplateMessage.sentAt", null] },
+          hasSentTemplate: {
+            $cond: [
+              {
+                $and: [
+                  { $gt: ["$lastTemplateMessage.sentAt", null] },
+                  { $gt: ["$lastTemplateMessage.sentAt", {
+                    $subtract: [new Date(), 24 * 60 * 60 * 1000]
+                  }] }
+                ]
+              },
+              true,
+              false
+            ]
+          },
         },
       },
     ]);
