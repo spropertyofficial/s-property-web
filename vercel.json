@@ -1,4 +1,11 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/cron/check-escalations",
+      "schedule": "*/3 23,0-16 * * *"
+    }
+  ],
   "functions": {
     "app/api/submit-form/route.js": {
       "maxDuration": 30,
@@ -57,22 +64,5 @@
         }
       ]
     }
-  ],
-  "env": {
-    "NEXT_PUBLIC_GOOGLE_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbz9kATRtho_rf8FThLTC8VBSgWp4_ROMFBULIGBkvEcmgrQpfI5mUPnwuzoHDKCS8-7dA/exec"
-  },
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_GOOGLE_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbz9kATRtho_rf8FThLTC8VBSgWp4_ROMFBULIGBkvEcmgrQpfI5mUPnwuzoHDKCS8-7dA/exec"
-    }
-  }
-  ,
-  "cron": {
-    "jobs": [
-      {
-        "path": "/api/cron/check-escalations",
-        "schedule": "*/1 23,0-16 * * *"
-      }
-    ]
-  }
+  ]
 }
