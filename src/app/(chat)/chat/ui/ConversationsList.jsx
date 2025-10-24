@@ -406,25 +406,40 @@ function EscalationTimer({ leadInAt, escalationMinutes = 5 }) {
 }
 
 function formatTime(ts) {
-  // Untuk waktu pesan (jam:menit)
   if (!ts) return "";
   const d = new Date(ts);
   if (isNaN(d.getTime())) return "";
-  return d.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
+  const now = new Date();
+  // Cek apakah hari ini
+  if (
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate()
+  ) {
+    // Hari ini: jam:menit
+    return d.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  }
+  // Cek apakah dalam 7 hari terakhir
+  const msInDay = 24 * 60 * 60 * 1000;
+  const diffDays = Math.floor((now - d) / msInDay);
+  if (diffDays < 7) {
+    // Dalam seminggu: tampilkan hari
+    // Senin = 1, Minggu = 7
+    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+    // Ubah agar Senin jadi hari pertama
+    const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
+    return days[dayIdx];
+  }
+  // Lebih dari seminggu: tampilkan tanggal
+  return d.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
   });
-}
-
-function getInitials(name) {
-  if (!name) return "?";
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
 }
 
 function getDisplayName(lead) {
