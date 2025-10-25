@@ -576,7 +576,7 @@ export default function ChatWindow({
 
          {conversation && conversation.hasSentTemplate === true && (
         <div
-          className="fixed left-0 right-0 bottom-[60px] z-40 px-4 py-2 text-yellow-800 text-sm text-center border-b border-yellow-200"
+          className="fixed left-0 right-0 bottom-[60px] z-40 px-4 py-2 text-yellow-800 text-sm text-center"
           style={{ maxWidth: "100vw" }}
         >
           <b className="w-full p-2 bg-yellow-300 rounded-md">Tunggu pesan masuk untuk melanjutkan.</b>
