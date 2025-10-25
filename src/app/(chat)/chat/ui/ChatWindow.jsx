@@ -576,10 +576,10 @@ export default function ChatWindow({
 
          {conversation && conversation.hasSentTemplate === true && (
         <div
-          className="fixed left-0 right-0 bottom-[60px] z-40 px-4 py-2 bg-yellow-100 text-yellow-800 text-sm text-center border-b border-yellow-200"
+          className="fixed left-0 right-0 bottom-[60px] z-40 px-4 py-2 text-yellow-800 text-sm text-center"
           style={{ maxWidth: "100vw" }}
         >
-          <b>Tunggu pesan masuk untuk melanjutkan mengirim pesan.</b>
+          <b className="w-full p-2 bg-yellow-300 rounded-md">Tunggu pesan masuk untuk melanjutkan.</b>
         </div>
       )}
       {/* Tampilkan preview di composer sebelum kirim */}
@@ -870,6 +870,13 @@ function MessageBubble({
   if (!hasMedia && !hasText) return null;
   // Ambil ProfileName jika ada, hanya tampilkan untuk pesan inbound
   const sender = payload.ProfileName || payload.profileName || "Unknown";
+  // Custom status text for outbound messages
+  function getStatusText(status) {
+    if (status === "delivered") return "Terkirim";
+    if (status === "undelivered") return "Gagal dikirim";
+    if (status === "read") return "Dibaca";
+    return status;
+  }
   return (
     <div className={`flex ${mine ? "justify-end" : "justify-start"} mb-2`}>
       <div
@@ -952,7 +959,7 @@ function MessageBubble({
           }`}
         >
           {formatTime(time)}
-          {mine ? ` • ${status}` : ""}
+          {mine ? ` • ${getStatusText(status)}` : ""}
         </div>
       </div>
     </div>
