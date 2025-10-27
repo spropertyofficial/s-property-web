@@ -52,7 +52,6 @@ export default function ChatWindow({
     }
   }
   // Untuk auto-resize textarea maksimal 6 baris
-  console.log("[ChatWindow] conversation prop:", conversation);
   function getDisplayName(lead) {
     if (!lead) return "?";
     if (
@@ -104,7 +103,6 @@ export default function ChatWindow({
   const [activePreviewIdx, setActivePreviewIdx] = useState(0);
   const [isSending, setIsSending] = useState(false);
   const [localMessages, setLocalMessages] = useState([]);
-
   useEffect(() => {
     // Scroll to bottom on new messages
     if (scrollerRef.current) {
@@ -576,6 +574,14 @@ export default function ChatWindow({
         {isMobile && <div style={{ height: composerH }} />}
       </div>
 
+         {conversation && conversation.hasSentTemplate === true && (
+        <div
+          className="fixed left-0 right-0 bottom-[60px] z-40 px-4 py-2 text-yellow-800 text-sm text-center"
+          style={{ maxWidth: "100vw" }}
+        >
+          <b className="w-full p-2 bg-yellow-300 rounded-md">Tunggu pesan masuk untuk melanjutkan.</b>
+        </div>
+      )}
       {/* Tampilkan preview di composer sebelum kirim */}
       <form
         ref={composerRef}
@@ -679,7 +685,7 @@ export default function ChatWindow({
               placeholder={
                 conversation && !conversation.windowOpen
                   ? "Chat ditutup, tekan tombol kirim untuk follow up"
-                  : "Tulis pesan..."
+                  : "Tulis pesan Anda..."
               }
               className="flex-1 resize-none rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
               style={{
@@ -768,7 +774,7 @@ export default function ChatWindow({
             type="submit"
             className="px-5 py-2 rounded-lg bg-teal-600 text-white text-sm font-bold hover:bg-teal-700 disabled:opacity-50 active:scale-95 flex items-center justify-center"
             disabled={
-              isSending ||
+              isSending || conversation.hasSentTemplate === true ||
               (conversation &&
                 conversation.windowOpen !== false &&
                 !text.trim() &&
@@ -864,6 +870,13 @@ function MessageBubble({
   if (!hasMedia && !hasText) return null;
   // Ambil ProfileName jika ada, hanya tampilkan untuk pesan inbound
   const sender = payload.ProfileName || payload.profileName || "Unknown";
+  // Custom status text for outbound messages
+  function getStatusText(status) {
+    if (status === "delivered") return "Terkirim";
+    if (status === "undelivered") return "Gagal dikirim";
+    if (status === "read") return "Dibaca";
+    return status;
+  }
   return (
     <div className={`flex ${mine ? "justify-end" : "justify-start"} mb-2`}>
       <div
@@ -946,7 +959,7 @@ function MessageBubble({
           }`}
         >
           {formatTime(time)}
-          {mine ? ` • ${status}` : ""}
+          {mine ? ` • ${getStatusText(status)}` : ""}
         </div>
       </div>
     </div>
