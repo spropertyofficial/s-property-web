@@ -574,14 +574,14 @@ export default function ChatWindow({
         {isMobile && <div style={{ height: composerH }} />}
       </div>
 
-         {conversation && conversation.hasSentTemplate === true && (
-        <div
-          className="fixed left-0 right-0 bottom-[60px] z-40 px-4 py-2 text-yellow-800 text-sm text-center"
-          style={{ maxWidth: "100vw" }}
-        >
-          <b className="w-full p-2 bg-yellow-300 rounded-md">Tunggu pesan masuk untuk melanjutkan.</b>
-        </div>
-      )}
+        {conversation && conversation.hasSentTemplate === true && conversation.windowOpen !== true && (
+                <div
+                  className="fixed left-0 right-0 bottom-[60px] z-40 px-4 py-2 text-yellow-800 text-sm text-center"
+                  style={{ maxWidth: "100vw" }}
+                >
+                  <b className="w-full p-2 bg-yellow-300 rounded-md">Tunggu pesan masuk untuk melanjutkan.</b>
+                </div>
+              )}
       {/* Tampilkan preview di composer sebelum kirim */}
       <form
         ref={composerRef}
@@ -774,7 +774,7 @@ export default function ChatWindow({
             type="submit"
             className="px-5 py-2 rounded-lg bg-teal-600 text-white text-sm font-bold hover:bg-teal-700 disabled:opacity-50 active:scale-95 flex items-center justify-center"
             disabled={
-              isSending || conversation.hasSentTemplate === true ||
+              isSending ||
               (conversation &&
                 conversation.windowOpen !== false &&
                 !text.trim() &&
