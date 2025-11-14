@@ -4,7 +4,7 @@ import Lead from "@/lib/models/Lead";
 import AgentQueue from "@/lib/models/AgentQueue";
 import Project from "@/lib/models/Project";
 import querystring from "querystring";
-import twilioClient from "@/lib/twilioClient";
+import { sendPushToUser } from "@/lib/push";
 import User from "@/lib/models/User";
 import axios from "axios";
 
@@ -22,7 +22,7 @@ export async function GET(req) {
   // Cari leads yang belum diklaim (isClaimed == false, source WhatsApp) dan assignedAt sudah lewat threshold eskalasi
   let escalated = [];
   // Ambil threshold waktu eskalasi default (fallback)
-  const fallbackQueue =
+  const fallbackQueue = 
     (await AgentQueue.findOne({ projectId: { $exists: false } })) ||
     (await AgentQueue.findOne({ projectId: null }));
   const fallbackEscalationMinutes = fallbackQueue?.escalationMinutes ?? 5;
@@ -75,16 +75,27 @@ export async function GET(req) {
         await queue.save();
       }
       try {
-        const agentUser = await User.findById(nextAgentId);
-        if (agentUser && agentUser.phone) {
-          await twilioClient.messages.create({
-            to: `whatsapp:${formatPhone(agentUser.phone)}`,
-            from: `${process.env.TWILIO_WHATSAPP_NUMBER}`,
-            contentSid: "HXac572d863eabf9a13616d5348ccc6a42",
-          });
+        const agentUser = await User.findById(nextAgentId).select("name pushSubscriptions");
+        if (agentUser) {
+          const payload = {
+            title: "Lead dialihkan ke Anda",
+            body: "Lead baru telah dialihkan ke Anda. Mohon segera diklaim.",
+            url: "/chat",
+            tag: "lead-alert",
+            icon: "/android/android-launchericon-192-192.png",
+            badge: "/android/android-launchericon-192-192.png",
+            requireInteraction: true,
+            renotify: true,
+            timestamp: Date.now(),
+            vibrate: [120, 60, 120],
+          };
+          const res = await sendPushToUser(agentUser, payload);
+          if (!res || res.sent === 0) {
+            console.warn("Web Push not sent for escalation (no subs or disabled)");
+          }
         }
       } catch (err) {
-        console.error("Gagal kirim notifikasi ke agent:", err);
+        console.error("Gagal kirim notifikasi push ke agent:", err);
       }
       escalated.push({
         leadId: lead._id,
@@ -93,21 +104,7 @@ export async function GET(req) {
       });
     }
   }
-  // Helper untuk format nomor telepon ke +62
-  function formatPhone(phone) {
-    if (!phone) return "";
-    let p = phone.trim();
-    // Hilangkan spasi, strip, titik
-    p = p.replace(/[-.\s]/g, "");
-    // Jika sudah +62, return
-    if (p.startsWith("+62")) return p;
-    // Jika 62 tanpa +, tambahkan +
-    if (p.startsWith("62")) return "+" + p;
-    // Jika 08, ubah ke +628
-    if (p.startsWith("08")) return "+62" + p.slice(1);
-    // Default: return apa adanya
-    return p;
-  }
+  // Note: phone formatting helper removed since Twilio fallback is no longer used here
   //  Logging hasil eskalasi
   console.log("Leads yang di-escalate:", escalated);
   return NextResponse.json({

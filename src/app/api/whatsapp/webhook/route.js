@@ -9,7 +9,7 @@ import AgentQueue from "@/lib/models/AgentQueue";
 import Project from "@/lib/models/Project";
 import User from "@/lib/models/User";
 import { sendMail } from "@/lib/email/sendMail";
-import twilioClient from "@/lib/twilioClient";
+import { sendPushToUser } from "@/lib/push";
 
 export async function POST(req) {
   await dbConnect();
@@ -63,6 +63,7 @@ export async function POST(req) {
 
   let lead;
   let project = null;
+  let isNewLeadCreated = false;
   if (Body && !Body.toLowerCase().includes("notifikasi")) {
     // 1. Identifikasi proyek dari nomor tujuan (To)
     let normalizedTo = (To || "").replace("whatsapp:", "").trim();
@@ -117,24 +118,40 @@ export async function POST(req) {
           assignedAt: Date.now(),
           propertyName: project ? project.name : undefined,
         });
+        isNewLeadCreated = true;
         console.log("Lead baru dibuat:", lead.contact, project ? `(project=${project.name})` : "(no project)");
 
-        // 5. Notifikasi ke agent yang ditugaskan (jika ada)
+        // 5. Notifikasi ke agent yang ditugaskan (jika ada) via Web Push
         if (assignedAgent) {
-          const agentUser = await User.findById(assignedAgent);
-          if (agentUser && agentUser.phone) {
-            try {
-              await twilioClient.messages.create({
-                to: `whatsapp:${formatPhone(agentUser.phone)}`,
-                from: `${process.env.TWILIO_WHATSAPP_NUMBER}`,
-                contentSid: "HX0cdba500c0c9c3157678dd100cde6257",
-              });
-              console.log(`Notifikasi dikirim ke agent ${agentUser.phone}`);
-            } catch (err) {
-              console.error("Gagal kirim notifikasi ke agent:", err);
+          const agentUser = await User.findById(assignedAgent).select("name pushSubscriptions");
+          if (agentUser) {
+            const subsCount = Array.isArray(agentUser.pushSubscriptions) ? agentUser.pushSubscriptions.length : 0;
+            console.log("Assigned agent for push:", {
+              agentId: assignedAgent?.toString?.(),
+              name: agentUser?.name,
+              subsCount,
+            });
+            const payload = {
+              title: project ? `Lead baru (${project.name})` : "Lead baru masuk",
+              body: `Anda memiliki 5 menit untuk merespons.`,
+              url: "/chat",
+              tag: "lead-alert",
+              icon: "/android/android-launchericon-192-192.png",
+              badge: "/android/android-launchericon-192-192.png",
+              requireInteraction: true,
+              renotify: true,
+              timestamp: Date.now(),
+              vibrate: [120, 60, 120],
+            };
+            const res = await sendPushToUser(agentUser, payload);
+            if (!res || res.sent === 0) {
+              console.warn("Web Push not sent (no subs or disabled). Consider adding a fallback.");
+              if (res?.disabled) {
+                console.warn("Reason: Web Push disabled (missing VAPID envs)");
+              }
               const emailTo = "devranmalik82@gmail.com";
-              const subject = `Gagal Notifikasi WhatsApp Lead Baru untuk Agent ${agentUser?.name || "(Unknown)"}`;
-              const html = `<p>Ada lead baru dari WhatsApp untuk ${project ? `proyek <b>${project.name}</b>` : "(tanpa proyek)"}, tapi gagal kirim notifikasi ke agent <b>${agentUser?.name || "(Unknown)"}</b>.</p><p>Lead: ${lead?.contact || "(Unknown)"}</p>`;
+              const subject = `Lead Baru Masuk${project ? ` (${project.name})` : ""}`;
+              const html = `<p>Ada lead baru dari WhatsApp${project ? ` untuk proyek <b>${project.name}</b>` : ""}.</p><p>Lead: ${lead?.contact || "(Unknown)"}</p>`;
               try { await sendMail({ to: emailTo, subject, html }); } catch (mailErr) { console.error("Gagal kirim email fallback notifikasi agent:", mailErr); }
             }
           }
@@ -204,6 +221,41 @@ export async function POST(req) {
     });
     // Update lastMessageAt pada Lead
     await Lead.findByIdAndUpdate(lead._id, { lastMessageAt: chatMsg.sentAt || new Date() });
+
+    // Kirim push juga untuk pesan inbound pada lead yang sudah ada (hindari duplikasi saat lead baru dibuat)
+    try {
+      if (!isNewLeadCreated && lead?.agent) {
+        const agentUser = await User.findById(lead.agent).select("name pushSubscriptions");
+        if (agentUser) {
+          const subsCount = Array.isArray(agentUser.pushSubscriptions) ? agentUser.pushSubscriptions.length : 0;
+          console.log("Inbound push to assigned agent:", {
+            agentId: lead.agent?.toString?.(),
+            name: agentUser?.name,
+            subsCount,
+            leadId: lead?._id?.toString?.(),
+          });
+          const payload = {
+            title: project ? `Pesan baru (${project.name})` : "Pesan baru masuk",
+            body: `Anda memiliki pesan baru dari ${lead?.contact || "(Unknown)"}.`,
+            url: "/chat",
+            tag: `lead-inbound:${lead?._id}`,
+            icon: "/android/android-launchericon-192-192.png",
+            badge: "/android/android-launchericon-192-192.png",
+            renotify: true,
+            timestamp: Date.now(),
+            silent: false,
+            vibrate: [120, 60, 120],
+
+          };
+          const resInbound = await sendPushToUser(agentUser, payload);
+          if (!resInbound || resInbound.sent === 0) {
+            console.warn("Inbound Web Push not sent (no subs or disabled)", resInbound);
+          }
+        }
+      }
+    } catch (pushErr) {
+      console.error("Failed to send inbound push:", pushErr);
+    }
   }
 
   console.log("Pesan berhasil disimpan untuk lead:", lead.contact);
