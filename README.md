@@ -159,6 +159,10 @@ We follow mobile-first responsive design using Tailwind breakpoints:
 - Use proper caching strategies
 - Monitor bundle size
 
+## Notifications (PWA Web Push)
+
+Agent alerts (new WhatsApp leads, escalations) use Web Push via a dedicated service worker. See `docs/NOTIFICATIONS.md` for setup, environment variables (VAPID keys), and testing instructions.
+
 ## Contributing
 1. Fork the repository
 2. Create feature branch
