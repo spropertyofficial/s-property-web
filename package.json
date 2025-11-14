@@ -54,6 +54,7 @@
     "sweetalert2": "^11.6.13",
     "swiper": "^11.2.4",
     "twilio": "^5.9.0",
+    "web-push": "^3.6.7",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

@@ -1,0 +1,26 @@
+{
+  "name": "S-Property",
+  "short_name": "S-Property",
+  "description": "Temukan Hunian Impian Anda di S-Property – platform property terdepan yang menghubungkan Anda dengan rumah idaman.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#63c3c5",
+  "lang": "id-ID",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/android/android-launchericon-192-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/android/android-launchericon-512-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
