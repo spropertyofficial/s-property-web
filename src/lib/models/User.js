@@ -58,6 +58,22 @@ const UserSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+
+    // Web Push: Multiple device subscriptions per user
+    pushSubscriptions: [
+      new mongoose.Schema(
+        {
+          endpoint: { type: String, required: true },
+          expirationTime: { type: Number, default: null },
+          keys: {
+            p256dh: { type: String, required: true },
+            auth: { type: String, required: true },
+          },
+          addedAt: { type: Date, default: Date.now },
+        },
+        { _id: false }
+      ),
+    ],
   },
   {
     timestamps: true,
@@ -71,5 +87,8 @@ UserSchema.pre("save", function (next) {
   }
   next();
 });
+
+// Index on subscription endpoint for faster lookups/removals
+UserSchema.index({ "pushSubscriptions.endpoint": 1 });
 
 export default mongoose.models.User || mongoose.model("User", UserSchema);

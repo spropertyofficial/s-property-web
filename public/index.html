@@ -62,9 +62,13 @@ PropertyHome – Bukan Sekadar Mencari Rumah, Tapi Menemukan Tempat Untuk Pulang
             if ("serviceWorker" in navigator) {
                 window.addEventListener("load", function () {
                     navigator.serviceWorker
-                        .register("/serviceWorker.js")
-                        .then((registration) => {
-                            console.log("SW registration successful");
+                        .register("/notifications-sw.js")
+                        .then(() => {
+                            console.log("Notifications SW registration successful");
+                        })
+                        .catch(() => {
+                            // Fallback to existing SWs if needed
+                            return navigator.serviceWorker.register("/sw.js").catch(() => navigator.serviceWorker.register("/serviceWorker.js"));
                         });
                 });
             }

@@ -75,6 +75,11 @@ export async function POST(req) {
       mediaTypes: mediaTypeFinal ? [mediaTypeFinal] : [],
       propertyName,
     });
+
+    // Update lastMessageAt pada Lead jika leadId ada
+    if (leadId) {
+      await Lead.findByIdAndUpdate(leadId, { lastMessageAt: new Date() });
+    }
     return Response.json({ success: true, chatMsg });
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });
